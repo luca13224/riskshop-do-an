@@ -65,3 +65,23 @@ def test_dashboard_permissions_and_validation(shop, db, client):
     r = analyst.get("/api/console/dashboard", params={"days": 30})
     assert r.status_code == 200, r.text
     assert r.json()["days"] == 30
+
+
+def test_risk_patterns_are_consistent(shop, db):
+    # Vài lượt chấm điểm: 1 đơn COD giá trị cao bị giữ + 1 đơn thường
+    c = customer("mau@example.com", "device-mau-0001")
+    browse(c, "man-hinh")
+    c.post("/api/cart/items", json={"product_id": 3, "quantity": 1})
+    assert checkout(c).status_code == 201
+    body = staff(db, "an@riskshop.test", ANALYST).get("/api/console/dashboard").json()
+    decisions = body["current"]["decisions"]
+    assert decisions > 0
+    assert len(body["hourly"]) == 24
+    assert sum(sum(h[k] for k in ("ALLOW", "ALLOW_WITH_RESTRICTION", "REVIEW", "BLOCK")) for h in body["hourly"]) == decisions
+    hist = body["score_histogram"]
+    assert len(hist) == 10
+    assert sum(sum(b[k] for k in ("ALLOW", "ALLOW_WITH_RESTRICTION", "REVIEW", "BLOCK")) for b in hist) == decisions
+    assert hist[7]["REVIEW"] == 1  # đơn bị giữ có điểm 70 -> khoảng 70–79
+    assert len(body["heatmap"]) == 7 and all(len(r) == 24 for r in body["heatmap"])
+    assert sum(map(sum, body["heatmap"])) == body["current"]["intervened"]
+    assert sum(x["total"] for x in body["by_context"]) == decisions
