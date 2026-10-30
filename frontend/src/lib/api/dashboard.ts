@@ -36,6 +36,11 @@ export interface Dashboard {
     failed_jobs: number
     risk_errors: number
   }
+  // Phân tích (cùng nguồn risk_decisions nên khớp nhau)
+  hourly: ({ date: string } & Record<Decision, number>)[] // 24 giờ gần nhất, date = "YYYY-MM-DDTHH"
+  score_histogram: ({ date: string } & Record<Decision, number>)[] // 10 khoảng điểm, date = "0","10",...,"90"
+  heatmap: number[][] // 7 hàng (T2..CN) x 24 giờ, số lượt can thiệp
+  by_context: { context: RiskContext; total: number; intervened: number }[]
   recent_interventions: {
     public_id: string
     created_at: string

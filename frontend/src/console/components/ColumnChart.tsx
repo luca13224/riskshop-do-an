@@ -21,6 +21,8 @@ interface Props {
   height?: number
   format?: (v: number) => string
   emptyText?: string
+  xLabel?: (key: string) => string // nhãn trục x; mặc định coi key là ngày "YYYY-MM-DD"
+  xTitle?: string // tên cột đầu của bảng thay thế
 }
 
 const M = { top: 10, right: 18, bottom: 22, left: 44 } // lề phải đủ cho nửa nhãn ngày cuối
@@ -32,6 +34,8 @@ export function ColumnChart({
   height = 220,
   format = (v) => v.toLocaleString("vi-VN"),
   emptyText = "Chưa có dữ liệu trong khoảng này",
+  xLabel = shortDate,
+  xTitle = "Ngày",
 }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(600)
@@ -120,6 +124,9 @@ export function ColumnChart({
               <g
                 key={d.date}
                 opacity={hover === null || hover === i ? 1 : 0.45}
+                // Cột mọc lên lần lượt khi biểu đồ xuất hiện (tắt nếu người dùng chọn giảm chuyển động)
+                className="bar-grow transition-opacity"
+                style={{ animationDelay: `${Math.min(i * 25, 500)}ms` }}
               >
                 {series.map((s, k) => {
                   const v = values[k]
@@ -157,7 +164,7 @@ export function ColumnChart({
                 textAnchor="middle"
                 className="fill-muted-foreground text-[11px]"
               >
-                {shortDate(d.date)}
+                {xLabel(d.date)}
               </text>
             ) : null
           )}
@@ -169,7 +176,7 @@ export function ColumnChart({
             key={d.date}
             type="button"
             tabIndex={0}
-            aria-label={`${shortDate(d.date)}: ${series
+            aria-label={`${xLabel(d.date)}: ${series
               .map((s) => `${s.label} ${format(Number(d[s.key] ?? 0))}`)
               .join(", ")}`}
             className="absolute cursor-default rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -198,7 +205,7 @@ export function ColumnChart({
             }}
           >
             <p className="mb-1 text-muted-foreground">
-              {shortDate(data[hover].date)}
+              {xLabel(data[hover].date)}
             </p>
             {series.map((s) => (
               <p key={s.key} className="flex items-center gap-2">
@@ -231,7 +238,7 @@ export function ColumnChart({
           <table className="w-full text-left tabular-nums">
             <thead className="sticky top-0 bg-muted">
               <tr>
-                <th className="px-2 py-1 font-medium">Ngày</th>
+                <th className="px-2 py-1 font-medium">{xTitle}</th>
                 {series.map((s) => (
                   <th key={s.key} className="px-2 py-1 text-right font-medium">
                     {s.label}
@@ -242,7 +249,7 @@ export function ColumnChart({
             <tbody>
               {data.map((d) => (
                 <tr key={d.date} className={cn("border-t")}>
-                  <td className="px-2 py-1">{shortDate(d.date)}</td>
+                  <td className="px-2 py-1">{xLabel(d.date)}</td>
                   {series.map((s) => (
                     <td key={s.key} className="px-2 py-1 text-right">
                       {format(Number(d[s.key] ?? 0))}

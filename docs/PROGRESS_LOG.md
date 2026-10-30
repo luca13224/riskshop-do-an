@@ -2,6 +2,21 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-31 — Thiết kế lại Risk Console và Dashboard
+**Đã hoàn thành**
+- Design tokens cho toàn bộ Console (lớp `.console`): nền dark navy, điểm nhấn cyan, thẻ kính mờ có viền mảnh, hover sáng viền. Màu trạng thái rủi ro cố định (xanh/vàng/cam/đỏ) và luôn kèm chữ.
+- Khung Console mới:
+  - Sidebar chia nhóm Giám sát / Xử lý / Cấu hình / Kiểm soát, có icon, vạch đánh dấu trang đang mở, số việc tồn trên mục Case và Khiếu nại.
+  - Topbar có ô mở nhanh theo mã case (CS…) hoặc mã khiếu nại (AP…), đèn trạng thái hệ thống.
+- Dashboard theo bố cục bento:
+  1. Tình trạng hệ thống (Bình thường / Cần chú ý / Cảnh báo, suy ra từ dữ liệu thật, kèm lý do) và biểu đồ quyết định theo giờ trong 24h; hàng việc ưu tiên xếp theo mức khẩn cấp.
+  2. 8 thẻ KPI có số đếm động, so sánh kỳ trước và sparkline.
+  3. Phân bố điểm rủi ro (10 khoảng, tô theo quyết định) và heatmap thứ × giờ của các lượt can thiệp.
+  4. Đơn hàng/GMV theo ngày, can thiệp theo ngày kèm tỷ lệ, nguyên nhân rủi ro (top luật, điểm kiểm soát).
+  5. Hàng đợi cảnh báo: lọc, tìm, sắp xếp, phân trang, mở chi tiết luật đã khớp ngay trong bảng.
+- API dashboard bổ sung `hourly`, `score_histogram`, `heatmap`, `by_context`. Test kiểm tra các con số khớp nhau (tổng phân bố = tổng lượt chấm điểm, tổng heatmap = số lượt can thiệp). Tổng 151 test qua.
+- Hiệu ứng chỉ dùng transform/opacity (cột mọc lên, số chạy, viền sáng khi hover); tắt khi người dùng bật giảm chuyển động. Đã kiểm tra ở 1440 px và 375 px.
+
 ## 2026-10-31 — Ảnh sản phẩm
 **Đã hoàn thành**
 - Tìm ảnh trên Unsplash (loại ảnh Unsplash+ trả phí), làm trang xem trước để Luca duyệt; Luca chọn theo đề xuất.

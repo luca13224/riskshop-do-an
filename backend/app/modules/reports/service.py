@@ -5,7 +5,7 @@ và chỉ phản ánh dữ liệu trong hệ thống (kể cả dữ liệu do A
 """
 
 import math
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from sqlalchemy import bindparam, text
 from sqlalchemy.orm import Session
@@ -249,4 +249,55 @@ def dashboard(db: Session, days: int) -> dict:
         "top_rules": top_rules,
         "attention": attention,
         "recent_interventions": recent,
+        **_risk_patterns(db, since, now),
     }
+
+
+DECISIONS = ("ALLOW", "ALLOW_WITH_RESTRICTION", "REVIEW", "BLOCK")
+
+
+def _risk_patterns(db: Session, since, now) -> dict:
+    """Số liệu cho các biểu đồ phân tích của dashboard. Mọi con số đều đếm từ risk_decisions
+    nên khớp với nhau: tổng phân bố điểm = tổng lượt chấm điểm trong kỳ; tổng heatmap = số lượt can thiệp.
+    """
+    local = f"DATE_ADD(created_at, INTERVAL {VN_OFFSET_HOURS} HOUR)"
+
+    # 1) 24 giờ gần nhất theo từng giờ (giờ Việt Nam), điền đủ 24 mốc
+    start = (now - timedelta(hours=23)).replace(minute=0, second=0, microsecond=0)
+    hours = [start + timedelta(hours=i) for i in range(24)]
+    hourly = {h: {"date": (h + timedelta(hours=VN_OFFSET_HOURS)).strftime("%Y-%m-%dT%H"), **dict.fromkeys(DECISIONS, 0)}
+              for h in hours}
+    for bucket, decision, n in db.execute(text("""
+        SELECT DATE_FORMAT(created_at, '%Y-%m-%d %H:00:00'), decision, COUNT(*) FROM risk_decisions
+        WHERE created_at >= :start GROUP BY 1, 2
+    """), {"start": start}):
+        key = datetime.strptime(bucket, "%Y-%m-%d %H:%M:%S") if isinstance(bucket, str) else bucket
+        if key in hourly and decision in DECISIONS:
+            hourly[key][decision] = int(n)
+
+    # 2) Phân bố điểm rủi ro: 10 khoảng 0–9, 10–19, ..., 90–100, tách theo quyết định cuối cùng
+    bins = [{"date": f"{i * 10}", **dict.fromkeys(DECISIONS, 0)} for i in range(10)]
+    for b, decision, n in db.execute(text("""
+        SELECT LEAST(FLOOR(score / 10), 9), decision, COUNT(*) FROM risk_decisions
+        WHERE created_at >= :since GROUP BY 1, 2
+    """), {"since": since}):
+        if decision in DECISIONS:
+            bins[int(b)][decision] = int(n)
+
+    # 3) Heatmap thứ × giờ của các lượt can thiệp (khác ALLOW): lộ ra khung giờ bị tấn công
+    heat = [[0] * 24 for _ in range(7)]  # hàng 0 = Thứ Hai ... 6 = Chủ nhật
+    for weekday, hour, n in db.execute(text(f"""
+        SELECT WEEKDAY({local}), HOUR({local}), COUNT(*) FROM risk_decisions
+        WHERE created_at >= :since AND decision <> 'ALLOW' GROUP BY 1, 2
+    """), {"since": since}):
+        heat[int(weekday)][int(hour)] = int(n)
+
+    # 4) Theo điểm kiểm soát: bao nhiêu lượt chấm điểm và bao nhiêu lượt can thiệp ở mỗi điểm
+    contexts = [
+        {"context": ctx, "total": int(total), "intervened": int(intervened)}
+        for ctx, total, intervened in db.execute(text("""
+            SELECT context, COUNT(*), COALESCE(SUM(decision <> 'ALLOW'), 0) FROM risk_decisions
+            WHERE created_at >= :since GROUP BY context ORDER BY 2 DESC
+        """), {"since": since})
+    ]
+    return {"hourly": list(hourly.values()), "score_histogram": bins, "heatmap": heat, "by_context": contexts}
