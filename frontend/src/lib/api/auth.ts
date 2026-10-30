@@ -89,3 +89,25 @@ export function useLogout() {
     },
   })
 }
+
+// ---------- Xem liên hệ đầy đủ (chỉ Risk Manager/Admin, có ghi audit) ----------
+
+export interface Contact {
+  user_id: number
+  full_name: string
+  email: string
+  phone: string | null
+}
+
+export const CONTACT_ROLES: Role[] = ["risk_manager", "admin"]
+
+// Cố ý KHÔNG lưu kết quả vào cache: tải lại trang là thông tin bị che lại như cũ
+export function useRevealContact() {
+  return useMutation({
+    mutationFn: ({ userId, reason }: { userId: number; reason: string }) =>
+      apiFetch<Contact>(`/api/console/users/${userId}/reveal-contact`, {
+        method: "POST",
+        body: JSON.stringify({ reason }),
+      }),
+  })
+}

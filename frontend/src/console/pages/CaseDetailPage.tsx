@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CaseStatusBadge } from "@/console/components/CaseStatusBadge"
+import { ContactPanel } from "@/console/components/ContactPanel"
 import { DecisionBadge, ScoreBar } from "@/console/components/DecisionBadge"
 import { DecisionDetail } from "@/console/components/DecisionDetail"
 import { useMe } from "@/lib/api/auth"
@@ -153,6 +154,11 @@ export function CaseDetailPage() {
 
         <div className="grid content-start gap-6">
           <ActionPanel kase={c} />
+          <ContactPanel
+            key={c.case_code}
+            userId={c.primary_user_id}
+            maskedEmail={c.primary_user_email}
+          />
           <Card>
             <CardHeader>
               <CardTitle>Lịch sử xử lý</CardTitle>

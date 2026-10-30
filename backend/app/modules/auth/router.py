@@ -6,11 +6,12 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.core.db import get_db
 from app.modules.auth import service
-from app.modules.auth.deps import get_client_context, get_current_user
-from app.modules.auth.models import User
-from app.modules.auth.schemas import LoginIn, RegisterIn, UserOut
+from app.modules.auth.deps import get_client_context, get_current_user, require_roles
+from app.modules.auth.models import ADMIN, RISK_MANAGER, User
+from app.modules.auth.schemas import ContactOut, LoginIn, RegisterIn, RevealContactIn, UserOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+console_router = APIRouter(prefix="/console/users", tags=["auth"])
 
 
 def _set_session_cookie(response: Response, token: str) -> None:
@@ -62,3 +63,13 @@ def logout(request: Request, response: Response, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(get_current_user)):
     return user
+
+
+@console_router.post("/{user_id}/reveal-contact", response_model=ContactOut)
+def reveal_contact(
+    user_id: int,
+    data: RevealContactIn,
+    actor: User = Depends(require_roles(RISK_MANAGER, ADMIN)),  # analyst không cần liên hệ khách (least privilege)
+    db: Session = Depends(get_db),
+):
+    return service.reveal_contact(db, actor, user_id, data.reason)

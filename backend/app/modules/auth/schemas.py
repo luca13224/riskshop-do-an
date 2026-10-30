@@ -57,3 +57,22 @@ class UserOut(BaseModel):
     role: str
 
     model_config = {"from_attributes": True}
+
+
+class RevealContactIn(BaseModel):
+    reason: str = Field(max_length=500)
+
+    @field_validator("reason")
+    @classmethod
+    def _reason_required(cls, v: str) -> str:
+        v = v.strip()
+        if len(v) < 10:
+            raise ValueError("Cần ghi lý do xem thông tin liên hệ (tối thiểu 10 ký tự)")
+        return v
+
+
+class ContactOut(BaseModel):
+    user_id: int
+    full_name: str
+    email: str
+    phone: str | None

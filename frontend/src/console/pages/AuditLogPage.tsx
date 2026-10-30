@@ -11,6 +11,7 @@ const FILTERS = [
   { value: "case", label: "Case" },
   { value: "rule", label: "Luật" },
   { value: "lab_run", label: "Attack Lab" },
+  { value: "user", label: "Khách hàng" },
 ]
 
 const ACTION_LABELS: Record<string, string> = {
@@ -18,6 +19,7 @@ const ACTION_LABELS: Record<string, string> = {
   "case.resolve": "Kết luận case",
   "rule.new_version": "Tạo phiên bản luật",
   "lab.start": "Chạy kịch bản Attack Lab",
+  "user.reveal_contact": "Xem thông tin liên hệ khách",
 }
 
 function describe(

@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.core.privacy import MaskedEmail
+
 
 class HitOut(BaseModel):
     rule_code: str
@@ -21,7 +23,8 @@ class DecisionOut(BaseModel):
     actions: dict[str, bool]
     latency_ms: float
     error: str | None
-    user_email: str
+    user_id: int
+    user_email: MaskedEmail
     user_name: str
     order_code: str | None
     hits: list[HitOut]

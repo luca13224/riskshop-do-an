@@ -12,7 +12,8 @@ export interface CaseSummary {
   policy: "voucher" | "cod"
   status: CaseStatus
   cluster_label: string
-  primary_user_email: string
+  primary_user_id: number
+  primary_user_email: string // đã che sẵn ở backend
   decision_count: number
   max_score: number
   assigned_to_name: string | null

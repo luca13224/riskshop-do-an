@@ -233,5 +233,5 @@ def test_console_lists_decisions_with_reasons(shop, db):
     staff = TestClient(app)
     staff.post("/api/auth/login", json={"email": "an@riskshop.test", "password": "matkhau123"})
     items = staff.get("/api/console/risk/decisions").json()
-    assert items[0]["user_email"] == "minh@example.com"
+    assert items[0]["user_email"] == "mi***@example.com"  # Console chỉ thấy email đã che
     assert items[0]["hits"][0]["reason_text"].startswith("Tài khoản mới tạo")

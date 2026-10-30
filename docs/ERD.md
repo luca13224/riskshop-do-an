@@ -362,7 +362,9 @@ Mỗi luật cần đếm nhanh trong một cửa sổ thời gian, nên index �
 |---|---|---|
 | IP | `ip_hash` (SHA-256 có salt, để đếm) + `ip_masked` (để hiển thị). **Không lưu IP gốc** | Analyst thấy bản che |
 | Địa chỉ | Đầy đủ (cần để giao hàng) + `norm_hash` để so khớp | Analyst thấy phường/quận/tỉnh; địa chỉ chi tiết chỉ Admin |
-| Số điện thoại | Đầy đủ | Console hiện 3 số cuối |
+| Email | Đầy đủ (dùng để đăng nhập) | Mọi API Console trả bản che (`mi***@gmail.com`), che ở backend (`app/core/privacy.py`). Bản đầy đủ: Risk Manager/Admin bấm "Xem liên hệ", bắt buộc ghi lý do, ghi audit `user.reveal_contact` |
+| Số điện thoại | Đầy đủ | Console không hiển thị; chỉ trả qua "Xem liên hệ" (có lý do + audit) |
+| Lần thử đăng nhập (`login_attempts`) | Chỉ `email_hash` và `ip_hash` (HMAC), không lưu email/IP gốc | Không hiển thị; chỉ dùng để đếm số lần sai |
 | Mật khẩu | Băm (bcrypt hoặc argon2) | Không ai |
 | `device_uid` | ID ngẫu nhiên, **không phải fingerprint thật** | Analyst |
 

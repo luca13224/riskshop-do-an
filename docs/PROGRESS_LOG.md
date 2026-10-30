@@ -2,6 +2,19 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Giới hạn đăng nhập sai và che dữ liệu cá nhân
+**Đã hoàn thành**
+- Bảng `login_attempts` (chỉ lưu bản băm HMAC). Sai 5 lần/tài khoản hoặc 20 lần/IP trong 15 phút → 429 `LOGIN_RATE_LIMITED`, kiểm tra trước khi so mật khẩu, áp dụng cả với email không tồn tại (không lộ email nào có thật).
+- Chỉ đếm lần sai, và bộ đếm theo tài khoản về 0 khi đăng nhập đúng; nhờ vậy Attack Lab (đăng nhập đúng nhiều lần từ localhost) không bị chặn.
+- Mọi API Console trả email đã che, che ở backend bằng kiểu `MaskedEmail` trong schema. Khách vẫn thấy email đầy đủ của chính mình.
+- `POST /api/console/users/{id}/reveal-contact`: chỉ Risk Manager/Admin, lý do ≥ 10 ký tự, ghi audit (không chép PII vào log). Thẻ "Liên hệ khách hàng" ở trang chi tiết case; Audit Log có bộ lọc "Khách hàng".
+- `test_privacy.py`; tổng 138 test qua. Đã kiểm tra trên trình duyệt: email bị che, xem liên hệ có ghi audit, trang đăng nhập báo lỗi khi vượt giới hạn.
+
+**Giới hạn đã biết**
+- Chưa giới hạn đăng ký theo IP (sẽ làm hỏng kịch bản farm của Attack Lab; farm do Risk Engine xử lý).
+- `login_attempts` chưa có việc dọn dữ liệu cũ (Recommended: job xóa bản ghi quá 1 ngày).
+- Kẻ tấn công có thể cố tình nhập sai để khóa tài khoản người khác 15 phút (đánh đổi phổ biến của cơ chế này).
+
 ## 2026-10-30 — Simulator và thực nghiệm
 **Đã hoàn thành**
 - `backend/simulator`: persona hợp lệ / hard negative / lạm dụng, gọi đúng API qua `TestClient`, nhãn thật trong `sim_labels` (Risk không đọc). CSDL riêng `riskshop_sim`.

@@ -31,7 +31,7 @@
 - [x] Trang Luật rủi ro: xem luật dạng câu dễ đọc, số lần khớp 7 ngày, sửa con số tạo phiên bản mới (chỉ Risk Manager/Admin), lịch sử phiên bản, audit
 - [x] Báo cáo/KPI (tác động nghiệp vụ ước tính, phân bố quyết định, độ trễ p50/p95/p99, case, hiệu quả từng luật kèm giả định) và Audit Log
 - [x] Simulator cho thực nghiệm dev/test (Live Monitor đã có bản polling; SSE là Recommended)
-- [ ] (Recommended) Giới hạn số lần thử đăng nhập (rate limit)
+- [x] (Recommended) Giới hạn đăng nhập sai (5 lần/tài khoản, 20 lần/IP trong 15 phút) và che email trên Console; xem liên hệ đầy đủ cần lý do + audit (chỉ Risk Manager/Admin)
 - [ ] Hỏi hạn nộp và yêu cầu của GVHD; chốt 2 nhóm chính sách (voucher tân thủ + COD)
 
 - [x] Script `demo reset` (chỉ chạy khi DEMO_MODE, cần --yes; tạo lại nhân vật Minh, Khang, Lan và nhân viên)

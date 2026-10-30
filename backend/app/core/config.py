@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     session_ttl_hours: int = 24 * 7
     # True khi chạy HTTPS (cookie chỉ gửi qua kết nối mã hóa); local dùng HTTP nên để False
     cookie_secure: bool = False
+    # Giới hạn đăng nhập SAI trong một cửa sổ thời gian (chống dò mật khẩu)
+    login_window_minutes: int = 15
+    login_max_failures_per_account: int = 5
+    login_max_failures_per_ip: int = 20
 
     # Attack Lab: nút "tạo hàng loạt tài khoản giả" KHÔNG được tồn tại trên hệ thống thật,
     # nên mặc định tắt; chỉ bật bằng cấu hình ở môi trường demo.
