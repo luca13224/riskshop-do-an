@@ -28,6 +28,7 @@
 - [x] Module events + module risk: đặc trưng F01–F11, luật v1, ma trận quyết định, nối vào voucher_apply / payment_options / place_order; Live Monitor (polling)
 - [x] Case Queue, Case Detail: worker mở/gom case theo cụm, nhận xử lý, kết luận bắt buộc ghi lý do, duyệt/từ chối đơn chờ xác minh, audit log
 - [x] Attack Lab: 4 kịch bản demo (farm voucher, gia đình chung Wi-Fi, COD giá trị cao, lịch sử bùng hàng) chạy qua worker, gọi API thật, so sánh kỳ vọng/thực tế
-- [ ] Console: Rules (sửa tham số tạo phiên bản mới), Audit Log, Reports/KPI; script `demo reset`; Simulator cho thực nghiệm dev/test (Live Monitor đã có bản polling; SSE là Recommended)
+- [x] Trang Luật rủi ro: xem luật dạng câu dễ đọc, số lần khớp 7 ngày, sửa con số tạo phiên bản mới (chỉ Risk Manager/Admin), lịch sử phiên bản, audit
+- [ ] Console: Audit Log, Reports/KPI; script `demo reset`; Simulator cho thực nghiệm dev/test (Live Monitor đã có bản polling; SSE là Recommended)
 - [ ] (Recommended) Giới hạn số lần thử đăng nhập (rate limit)
 - [ ] Hỏi hạn nộp và yêu cầu của GVHD; chốt 2 nhóm chính sách (voucher tân thủ + COD)

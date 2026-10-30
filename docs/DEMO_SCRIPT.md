@@ -76,8 +76,8 @@
 ## Cảnh 6 — Quản lý luật (1:00)
 - **Thao tác:**
   - Đăng nhập vai **Risk Manager** → trang **Rules**.
-  - Mở luật "tài khoản mới trên cùng thiết bị", đổi ngưỡng từ 3 xuống 2 → hệ thống **tạo phiên bản mới**, phiên bản cũ vẫn giữ trong lịch sử.
-  - Chạy lại kịch bản farm (cảnh 2) → voucher bị gỡ sớm hơn.
+  - Mở luật R02 "tài khoản mới trên cùng thiết bị", đổi bậc thấp từ "≥3 tài khoản: +35" thành "≥2 tài khoản: +40" → hệ thống **tạo phiên bản mới**, phiên bản cũ vẫn giữ trong lịch sử.
+  - Chạy lại kịch bản farm (cảnh 2) → voucher bị gỡ từ tài khoản thứ 2 (10 + 40 = 50) thay vì thứ 3.
 - **Chứng minh phân quyền:** đăng nhập vai Analyst → không thấy nút sửa luật (tách bạch nhiệm vụ).
 - **Chứng minh:** luật cấu hình được, không hardcode; có phiên bản; có phân quyền; mỗi quyết định ghi lại phiên bản luật đã dùng.
 - **Cần có:** trang Rules (danh sách, sửa tham số, lịch sử phiên bản), RBAC.

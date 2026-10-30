@@ -2,6 +2,16 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Trang Luật rủi ro (cảnh 6 của kịch bản demo)
+**Đã hoàn thành**
+- Backend `risk/rules_admin.py`: danh sách luật kèm phiên bản đang dùng và số lần khớp 7 ngày; lịch sử phiên bản; tạo phiên bản mới khi sửa (chỉ Risk Manager/Admin, Analyst bị 403). Chỉ cho sửa con số và bật/tắt: đổi đặc trưng, phép so sánh, độ mạnh hay số bậc đều bị từ chối; điểm trong khoảng -100..100, ngưỡng không âm; bắt buộc lý do; ghi audit log. Phiên bản mới có hiệu lực ngay ở lần chấm điểm kế tiếp.
+- Giao diện: luật hiển thị thành câu ("Khi số tài khoản mới trên cùng thiết bị ≥ 3 thì cộng 35 điểm"), ô số chỉ hiện khi sửa, lịch sử phiên bản.
+- 118 test qua. Đã diễn lại cảnh 6 trên trình duyệt: R02 v2 (≥2: +40), rồi khôi phục bằng v3 (≥3: +35) để các kịch bản Attack Lab giữ kỳ vọng ban đầu.
+- Sửa DEMO_SCRIPT cảnh 6: phải đổi cả điểm (≥2 tài khoản: +40) thì tài khoản thứ 2 mới bị gỡ voucher (10 + 40 = 50); chỉ hạ ngưỡng thì mới được 45 điểm, chưa đủ.
+
+**Còn mở**
+- Ngưỡng của ma trận quyết định (decision_policies) chưa có giao diện sửa (hiện chỉ sửa qua seed, có phiên bản).
+
 ## 2026-10-30 — Attack Lab (cảnh 2, 4, 5 của kịch bản demo)
 **Đã hoàn thành**
 - Module `lab`: 4 kịch bản (farm voucher 6 tài khoản/1 thiết bị, gia đình 4 người chung Wi-Fi + địa chỉ, COD 5,49 triệu từ tài khoản mới, khách bùng 4/5 đơn COD). Mỗi bước ghi kỳ vọng và kết quả thực tế; chạy trong worker, gọi API thật qua HTTP (httpx chuyển sang requirements chính).

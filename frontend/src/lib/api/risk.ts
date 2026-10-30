@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { apiFetch } from "./client"
 
@@ -59,5 +59,65 @@ export function useRiskDecisions(live: boolean) {
     queryFn: () =>
       apiFetch<RiskDecision[]>("/api/console/risk/decisions?limit=100"),
     refetchInterval: live ? 2000 : false,
+  })
+}
+
+// ---------- Quản lý luật ----------
+
+export interface RuleVersion {
+  version: number
+  params: Record<string, unknown>
+  contexts: RiskContext[]
+  enabled: boolean
+  reason_template: string
+  change_note: string
+  created_by_name: string | null
+  created_at: string
+}
+
+export interface Rule {
+  code: string
+  name: string
+  rule_type: "count_threshold_tiers" | "rate_threshold_tiers" | "compound"
+  strength: RuleHit["strength"]
+  policies: ("voucher" | "cod")[]
+  hit_count_7d: number
+  active: RuleVersion
+}
+
+export function useRules() {
+  return useQuery({
+    queryKey: ["console", "rules"],
+    queryFn: () => apiFetch<Rule[]>("/api/console/risk/rules"),
+  })
+}
+
+export function useRuleVersions(code: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["console", "rules", code, "versions"],
+    queryFn: () =>
+      apiFetch<RuleVersion[]>(`/api/console/risk/rules/${code}/versions`),
+    enabled,
+  })
+}
+
+export function useCreateRuleVersion() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      code,
+      ...body
+    }: {
+      code: string
+      params: Record<string, unknown>
+      enabled: boolean
+      change_note: string
+    }) =>
+      apiFetch<Rule>(`/api/console/risk/rules/${code}/versions`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["console", "rules"] }),
   })
 }
