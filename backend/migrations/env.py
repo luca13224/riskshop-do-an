@@ -19,10 +19,10 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Chuỗi kết nối lấy từ .env, không ghi trong alembic.ini.
-# Chạy trên CSDL test: alembic -x target=test upgrade head
+# Chạy trên CSDL test/mô phỏng: alembic -x target=test upgrade head (hoặc target=sim)
 _settings = get_settings()
 _target = context.get_x_argument(as_dictionary=True).get("target", "main")
-_url = _settings.test_database_url if _target == "test" else _settings.database_url
+_url = {"test": _settings.test_database_url, "sim": _settings.sim_database_url}.get(_target, _settings.database_url)
 if not _url:
     raise RuntimeError(f"Chưa cấu hình chuỗi kết nối cho target={_target!r} trong .env")
 config.set_main_option("sqlalchemy.url", _url.replace("%", "%%"))

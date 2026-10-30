@@ -37,6 +37,15 @@ Vai trò: `analyst`, `risk_manager`, `admin`. Mật khẩu được hỏi khi ch
 
 Đăng nhập bằng tài khoản nhân viên sẽ vào được http://localhost:5173/console; khách hàng vào đó sẽ bị chặn.
 
+## Chạy thực nghiệm mô phỏng
+Cần `SIM_DATABASE_URL` trong `backend/.env` (CSDL riêng, sẽ bị xóa mỗi lần chạy):
+```
+cd backend
+.venv/Scripts/python -m alembic -x target=sim upgrade head
+.venv/Scripts/python -m simulator --dataset dev --seed 1
+```
+Báo cáo ghi vào `docs/experiments/`. Tập `test` chỉ chạy sau khi đã khóa luật (`--confirm-test`).
+
 ## Cấu trúc thư mục
 | Thư mục | Nội dung |
 |---|---|

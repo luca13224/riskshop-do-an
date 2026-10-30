@@ -47,7 +47,7 @@ frontend/src/shop/                 trang khách hàng
 frontend/src/console/              trang nhân viên rủi ro
 frontend/src/components/ui/        component shadcn
 frontend/src/lib/                  gọi API, tiện ích
-simulator/                         persona, kịch bản tấn công, đo kết quả
+backend/simulator/                 persona, chạy mô phỏng qua API, đo kết quả (CSDL riêng riskshop_sim)
 ```
 
 ## 5. Còn phải thiết kế

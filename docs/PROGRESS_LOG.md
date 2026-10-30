@@ -2,6 +2,20 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Simulator và thực nghiệm
+**Đã hoàn thành**
+- `backend/simulator`: persona hợp lệ / hard negative / lạm dụng, gọi đúng API qua `TestClient`, nhãn thật trong `sim_labels` (Risk không đọc). CSDL riêng `riskshop_sim`.
+- Báo cáo Markdown + JSON trong `docs/experiments/`: confusion, precision/recall/FPR kèm KTC Wilson 95%, theo persona, theo nhóm, tác động nghiệp vụ, độ trễ.
+- Sửa lỗi trong chính bộ mô phỏng: lambda trong vòng lặp đọc nhầm địa chỉ của nhóm cuối (late binding) làm gia đình bị gắn cờ oan 9/25 → sau sửa 0/25.
+- Chạy tập test một lần với bộ luật v1 đã khóa. Kết quả và cách đọc: xem TEST_PLAN mục 3.
+- `test_simulator.py`; tổng 126 test qua.
+
+**Phát hiện quan trọng**
+- Biến thể chưa biết: recall 0/33. Gia đình 5–6 người bị gỡ voucher. Bomber lịch sử ngắn lọt.
+
+**Bước tiếp theo**
+- Quyết định có làm bộ luật v2 cho các điểm yếu trên hay giữ làm "giới hạn và hướng phát triển" trong báo cáo.
+
 ## 2026-10-30 — Demo reset
 **Đã hoàn thành**
 - `python -m app.modules.lab.reset --yes`: xóa toàn bộ dữ liệu, seed lại 16 sản phẩm, voucher TANTHU/GIAM10, luật v1; tạo nhân viên (analyst, manager, admin) và nhân vật Minh (khách mới hợp lệ), Khang (1 đơn COD thành công, 4 thất bại trong quá khứ), Lan (30 đơn giao thành công); mật khẩu ngẫu nhiên ghi vào `backend/.env.accounts`.
