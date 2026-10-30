@@ -2,6 +2,16 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-31 — Ảnh sản phẩm
+**Đã hoàn thành**
+- Tìm ảnh trên Unsplash (loại ảnh Unsplash+ trả phí), làm trang xem trước để Luca duyệt; Luca chọn theo đề xuất.
+- Tải 30 ảnh (3,6 MB), cắt và nén WebP: sản phẩm 800×800, màn ảnh danh mục 600×900; mỗi ảnh 6–118 KB, tổng khoảng 1,1 MB trong `frontend/public`.
+- Seed gán `image_url` cho 24 sản phẩm. Ảnh hiển thị phủ kín ô (`object-cover`). Màn ảnh rạp phim dùng ảnh nền phủ lớp tối dần để chữ dễ đọc.
+- Sổ nguồn ảnh (tác giả, URL, giấy phép) ở `docs/assets/IMAGE_BRIEF.md` mục 4.
+
+**Lưu ý**
+- Vài ảnh có logo thương hiệu thật (điện thoại, webcam). Sản phẩm trong shop là tên tự đặt; ảnh chỉ để minh họa và đã ghi rõ trong sổ nguồn.
+
 ## 2026-10-31 — Tuần 3 (phần 2): Khiếu nại (ADR-006)
 **Đã hoàn thành**
 - Module `appeals`, bảng `appeals` và `risk_allowlist`.

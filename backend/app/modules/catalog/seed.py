@@ -3,7 +3,7 @@
     python -m app.modules.catalog.seed
 
 Tên và giá là dữ liệu tự đặt cho shop mô phỏng, không phải hàng của thương hiệu thật.
-Không dùng ảnh bên ngoài (để demo chạy offline): frontend tự vẽ ảnh minh họa theo danh mục.
+Ảnh sản phẩm nằm trong frontend/public/products (ảnh Unsplash đã tải về, demo vẫn chạy offline).
 """
 
 import re
@@ -104,6 +104,8 @@ def seed(session: Session | None = None) -> int:
             product.stock = stock
             product.description = description
             product.specs = [list(row) for row in SPECS.get(sku, [])]
+            # Ảnh do frontend phục vụ tĩnh (frontend/public/products), nguồn ghi trong docs/assets/IMAGE_BRIEF.md
+            product.image_url = f"/products/{sku}.webp"
             product.is_active = True
         # Sản phẩm cũ không còn trong danh sách thì ẩn đi (không xóa, vì đơn hàng cũ còn tham chiếu)
         skus = [row[0] for row in PRODUCTS]
