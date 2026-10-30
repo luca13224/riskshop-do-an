@@ -2,6 +2,25 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-31 — Tuần 3 (phần 1): Dashboard tổng quan của Risk Console
+**Đã hoàn thành**
+- `GET /api/console/dashboard?days=7|30` (module reports, SQL chỉ đọc). Một lần gọi trả về:
+  - số liệu shop và rủi ro của kỳ này và kỳ trước cùng độ dài;
+  - chuỗi theo ngày (giờ Việt Nam, điền đủ những ngày không có dữ liệu);
+  - 5 luật khớp nhiều nhất;
+  - các việc cần xử lý: case chờ nhận, case quá 24 giờ chưa ai nhận, đơn đang giữ, việc nền lỗi, lượt chấm điểm lỗi;
+  - 6 lượt can thiệp gần nhất (email đã che).
+- Trang "Tổng quan" của Console thay cho trang tạm, trả lời 3 câu hỏi theo thứ tự: cần xử lý gì, shop thế nào, hệ thống đang can thiệp gì. Thẻ KPI có so sánh với kỳ trước; mức tăng hay giảm của các chỉ số trung tính thì không tô màu tốt/xấu.
+- Biểu đồ cột vẽ bằng SVG tự viết (`ColumnChart`), theo skill dataviz:
+  - cột rộng tối đa 24 px, bo 4 px ở đầu cột, các đoạn chồng cách nhau 2 px, một trục y duy nhất;
+  - có chú thích khi từ 2 chuỗi trở lên, tooltip khi rê chuột hoặc focus bàn phím, bảng số liệu thay thế.
+  - Quyết định rủi ro dùng bảng màu trạng thái (hạn chế / chờ duyệt / chặn), luôn kèm chữ. Nhãn "Chờ duyệt" đổi sang màu cam cho khớp.
+- Tự làm mới mỗi 30 giây. `test_dashboard.py` có 4 test; tổng 144 test qua. Đã kiểm tra ở 1440 px và 375 px.
+
+**Bài học**
+- Tham số query luôn là chuỗi, nên `Literal[7, 30]` (số nguyên) không bao giờ khớp. Dùng `int` có `ge`/`le`.
+- SVG có bề rộng cố định nằm trong ô lưới `auto` sẽ đẩy ô rộng ra, ResizeObserver lại đo đúng bề rộng đó nên không bao giờ co lại. Phải dùng `minmax(0, 1fr)`.
+
 ## 2026-10-30 — Tuần 2: banner "rạp chiếu phim"
 **Đã hoàn thành** (`frontend/src/shop/components/CinemaHero.tsx`)
 - Vòng màn ảnh 3D: 24 thẻ (6 danh mục × 4) trên hình trụ R = 760 px, camera ở tâm, thẻ quá 38° thì ẩn. Vị trí tính bằng `requestAnimationFrame` và ghi thẳng vào style, không qua state của React.

@@ -21,7 +21,8 @@ const STYLES: Record<Decision, { icon: LucideIcon; tone: string }> = {
   },
   REVIEW: {
     icon: Eye,
-    tone: "bg-violet-500/15 text-violet-700 dark:text-violet-300",
+    // Cam = mức "nghiêm trọng" trong bảng màu trạng thái, khớp với biểu đồ ở Dashboard
+    tone: "bg-[#ec835a]/15 text-[#a3461f] dark:text-[#f3a283]",
   },
   BLOCK: { icon: Ban, tone: "bg-rose-500/15 text-rose-700 dark:text-rose-300" },
 }
