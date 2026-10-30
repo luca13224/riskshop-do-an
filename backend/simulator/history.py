@@ -27,7 +27,9 @@ from app.core.db import SessionLocal, get_db
 from app.core.time import utcnow
 from app.main import app
 from app.models import *  # noqa: F401,F403 - nạp đủ model
-from app.modules.auth.models import ADMIN, CUSTOMER, User
+from app.modules.auth.models import ADMIN, ANALYST, CUSTOMER, User
+from app.modules.cases import service as cases_service
+from app.modules.cases.models import RiskCase
 from app.modules.catalog import seed as catalog_seed
 from app.modules.catalog.models import Product
 from app.modules.lab.reset import add_history, make_user
@@ -60,8 +62,12 @@ def _shift_user(db: Session, user_id: int, seconds: int, marks: dict[str, int], 
     db.execute(text("UPDATE shipment_events se JOIN orders o ON o.id = se.order_id "
                     "SET se.occurred_at = DATE_ADD(se.occurred_at, INTERVAL :s SECOND) "
                     "WHERE o.user_id = :u AND se.id > :m"), {**p, "m": marks["shipment_events"]})
-    db.execute(text("UPDATE risk_cases SET opened_at = DATE_ADD(opened_at, INTERVAL :s SECOND) "
+    db.execute(text("UPDATE risk_cases SET opened_at = DATE_ADD(opened_at, INTERVAL :s SECOND), "
+                    "closed_at = DATE_ADD(closed_at, INTERVAL :s SECOND) "
                     "WHERE primary_user_id = :u AND id > :m"), {**p, "m": marks["risk_cases"]})
+    db.execute(text("UPDATE audit_logs a JOIN risk_cases c ON a.entity_type = 'case' AND a.entity_id = c.case_code "
+                    "SET a.created_at = DATE_ADD(a.created_at, INTERVAL :s SECOND) "
+                    "WHERE c.primary_user_id = :u AND a.id > :m"), {**p, "m": marks["audit_logs"]})
     db.execute(text("UPDATE case_actions ca JOIN risk_cases c ON c.id = ca.case_id "
                     "SET ca.created_at = DATE_ADD(ca.created_at, INTERVAL :s SECOND) "
                     "WHERE c.primary_user_id = :u AND ca.id > :m"), {**p, "m": marks["case_actions"]})
@@ -76,7 +82,8 @@ def run(days: int, seed: int, per_day: float, progress=print, session_factory=Se
     db.commit()
     skus = {p.sku: p for p in db.scalars(select(Product))}
     admin = db.scalar(select(User).where(User.role == ADMIN))
-    if admin is None:
+    analyst = db.scalar(select(User).where(User.role == ANALYST))
+    if admin is None or analyst is None:
         raise SystemExit("Chưa có tài khoản admin: chạy demo reset trước.")
 
     def _get_db():
@@ -95,7 +102,8 @@ def run(days: int, seed: int, per_day: float, progress=print, session_factory=Se
         for d in range(days, 0, -1):
             day_vn = today_vn - timedelta(days=d)
             marks = {t: _max_id(db, t) for t in
-                     ("orders", "risk_decisions", "events", "addresses", "shipment_events", "risk_cases", "case_actions")}
+                     ("orders", "risk_decisions", "events", "addresses", "shipment_events", "risk_cases", "case_actions",
+                      "audit_logs")}
             groups = build_population("dev", rng, per_day, actions)
             accounts = [a for g in groups for a in g.accounts]
             for a in accounts:  # khóa, thiết bị riêng cho từng ngày để không "dính" sang ngày khác
@@ -126,6 +134,22 @@ def run(days: int, seed: int, per_day: float, progress=print, session_factory=Se
                                               "DELIVERY_FAILED" if failed else "DELIVERED", "Mô phỏng")
             db.rollback()
 
+            # Case của các ngày cũ coi như đã được analyst xử lý (lạm dụng thật -> xác nhận, khách thật -> gỡ);
+            # chỉ để mở case của ngày gần nhất, giống một hàng đợi thực tế
+            resolved: list[int] = []
+            if d >= 2:
+                abusers = {a.user_id for a in accounts if a.is_abuse}
+                for case in db.scalars(select(RiskCase).where(RiskCase.id > marks["risk_cases"],
+                                                              RiskCase.status == "OPEN")).all():
+                    cases_service.claim(db, analyst, case.case_code)
+                    abuse = case.primary_user_id in abusers
+                    cases_service.resolve(db, analyst, case.case_code,
+                                          "CONFIRMED_ABUSE" if abuse else "CLEARED",
+                                          "Mô phỏng: " + ("xác nhận lạm dụng sau khi đối chiếu tài khoản liên kết"
+                                                          if abuse else "khách hợp lệ, đã xác minh"))
+                    resolved.append(case.id)
+            db.rollback()
+
             # Dời thời gian: mỗi khách một thời điểm ngẫu nhiên trong ngày (giờ VN, theo trọng số giờ)
             now = utcnow()
             for a in accounts:
@@ -134,6 +158,13 @@ def run(days: int, seed: int, per_day: float, progress=print, session_factory=Se
                 hour = rng.choices(list(HOUR_WEIGHTS), weights=list(HOUR_WEIGHTS.values()))[0]
                 target = datetime(day_vn.year, day_vn.month, day_vn.day, hour, rng.randrange(60), rng.randrange(60)) - VN
                 _shift_user(db, a.user_id, int((target - now).total_seconds()), marks, registered=a.age_days is None)
+            # Thời gian xử lý case: từ 20 phút đến 6 giờ sau khi mở (thay vì vài giây lúc chạy script)
+            for case_id in resolved:
+                delay = rng.randint(20 * 60, 6 * 3600)
+                q = {"c": case_id, "s": delay}
+                db.execute(text("UPDATE risk_cases SET closed_at = DATE_ADD(closed_at, INTERVAL :s SECOND) WHERE id = :c"), q)
+                db.execute(text("UPDATE case_actions SET created_at = DATE_ADD(created_at, INTERVAL :s SECOND) "
+                                "WHERE case_id = :c AND action IN ('claim', 'resolve')"), q)
             db.commit()
             n_orders = db.execute(text("SELECT COUNT(*) FROM orders WHERE id > :m"), {"m": marks["orders"]}).scalar()
             totals["accounts"] += len(accounts)

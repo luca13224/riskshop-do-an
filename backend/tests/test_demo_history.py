@@ -39,3 +39,17 @@ def test_demo_personas_still_correct_after_history(db):
     run(days=3, seed=7, per_day=0.07, progress=lambda _: None, session_factory=TestSession)
     db.rollback()
     assert_demo_personas(db, creds)
+
+
+def test_old_cases_are_resolved_recent_ones_stay_open(db):
+    from app.modules.cases.models import RiskCase
+
+    reset(db)
+    run(days=3, seed=7, per_day=0.07, progress=lambda _: None, session_factory=TestSession)
+    db.rollback()
+    cases = db.scalars(select(RiskCase)).all()
+    assert cases
+    old_open = [c for c in cases if c.status == "OPEN" and c.opened_at < utcnow() - timedelta(days=2)]
+    assert old_open == []  # case của các ngày cũ đã được xử lý
+    closed = [c for c in cases if c.closed_at]
+    assert closed and all(c.closed_at > c.opened_at for c in closed)
