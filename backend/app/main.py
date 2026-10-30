@@ -19,6 +19,7 @@ from app.modules.cases.router import router as cases_router
 from app.modules.catalog.router import router as catalog_router
 from app.modules.lab.router import router as lab_router
 from app.modules.order.router import router as order_router
+from app.modules.reports.router import router as reports_router
 from app.modules.risk.router import router as risk_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -47,6 +48,7 @@ def create_app() -> FastAPI:
     app.include_router(risk_router, prefix="/api")
     app.include_router(cases_router, prefix="/api")
     app.include_router(lab_router, prefix="/api")
+    app.include_router(reports_router, prefix="/api")
     return app
 
 

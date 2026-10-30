@@ -208,6 +208,7 @@ def _evaluate(db: Session, req: EvaluationRequest) -> RiskResult:
         ),
     )
 
+    features["voucher_code"] = req.voucher_code  # lưu lại để báo cáo ước tính giá trị voucher ngăn được
     active = _active_policies(req)
     hits: list[Hit] = []
     for rule, version in _load_rules(db, req.context):

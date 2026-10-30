@@ -2,6 +2,17 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Báo cáo/KPI và Audit Log (cảnh 7 của kịch bản demo)
+**Đã hoàn thành**
+- Module `reports` (chỉ đọc): KPI theo khoảng 24 giờ / 7 / 30 ngày gồm tác động nghiệp vụ ước tính (giá trị voucher ngăn được, chi phí COD tránh được, đơn bị giữ, khách hợp lệ bị giữ nhầm), phân bố quyết định và theo điểm kiểm soát, độ trễ p50/p95/p99 (nearest-rank, đo ở server), thống kê case, hiệu quả từng luật (số lần khớp, kết luận case, tỷ lệ chính xác); các giả định quy đổi tiền được trả kèm báo cáo.
+- Audit Log: chỉ Risk Manager/Admin xem (Analyst bị 403), lọc theo case/luật/Attack Lab.
+- Risk Engine lưu thêm `voucher_code` vào snapshot để báo cáo tính được giá trị voucher.
+- 121 test qua. Đã kiểm tra trên trình duyệt; số "6 tài khoản bị gỡ voucher" được truy ngược và xác nhận đúng: farm1–2 bị gỡ ở bước đặt hàng nhờ luật địa chỉ (địa chỉ farm đã bị các lần chạy trước dùng chung), farm3–6 bị gỡ ở bước áp mã.
+
+**Lưu ý cho thực nghiệm**
+- Các lần chạy Attack Lab tích lũy dữ liệu (cùng địa chỉ, cùng IP), nên kết quả lần chạy sau có thể nghiêm hơn lần đầu. Cần script `demo reset` để đưa dữ liệu về trạng thái chuẩn trước buổi demo và trước mỗi đợt đo.
+- Độ trễ hiện đo trên máy phát triển với vài chục lượt, chưa phải đo tải; không dùng làm kết luận.
+
 ## 2026-10-30 — Trang Luật rủi ro (cảnh 6 của kịch bản demo)
 **Đã hoàn thành**
 - Backend `risk/rules_admin.py`: danh sách luật kèm phiên bản đang dùng và số lần khớp 7 ngày; lịch sử phiên bản; tạo phiên bản mới khi sửa (chỉ Risk Manager/Admin, Analyst bị 403). Chỉ cho sửa con số và bật/tắt: đổi đặc trưng, phép so sánh, độ mạnh hay số bậc đều bị từ chối; điểm trong khoảng -100..100, ngưỡng không âm; bắt buộc lý do; ghi audit log. Phiên bản mới có hiệu lực ngay ở lần chấm điểm kế tiếp.

@@ -9,6 +9,8 @@ import { LiveMonitorPage } from "@/console/pages/LiveMonitorPage"
 import { CasesPage } from "@/console/pages/CasesPage"
 import { AttackLabPage } from "@/console/pages/AttackLabPage"
 import { RulesPage } from "@/console/pages/RulesPage"
+import { ReportsPage } from "@/console/pages/ReportsPage"
+import { AuditLogPage } from "@/console/pages/AuditLogPage"
 import { CaseDetailPage } from "@/console/pages/CaseDetailPage"
 import { ShopLayout } from "@/shop/ShopLayout"
 import { CartPage } from "@/shop/pages/CartPage"
@@ -46,6 +48,8 @@ export function App() {
             <Route path="cases/:code" element={<CaseDetailPage />} />
             <Route path="lab" element={<AttackLabPage />} />
             <Route path="rules" element={<RulesPage />} />
+            <Route path="reports" element={<ReportsPage />} />
+            <Route path="audit" element={<AuditLogPage />} />
           </Route>
         </Route>
 

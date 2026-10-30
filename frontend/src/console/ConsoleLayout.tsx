@@ -12,8 +12,8 @@ const NAV_ITEMS = [
   { to: "/console/cases", label: "Case", ready: true },
   { to: "/console/rules", label: "Luật rủi ro", ready: true },
   { to: "/console/lab", label: "Attack Lab", ready: true },
-  { to: "/console/reports", label: "Báo cáo", ready: false },
-  { to: "/console/audit", label: "Audit Log", ready: false },
+  { to: "/console/reports", label: "Báo cáo", ready: true },
+  { to: "/console/audit", label: "Audit Log", ready: true },
 ]
 
 export function ConsoleLayout() {
