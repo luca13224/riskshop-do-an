@@ -53,6 +53,35 @@ PRODUCTS = [
 ]
 
 
+# Thông số kỹ thuật hiển thị ở trang chi tiết (dữ liệu tự đặt cho shop mô phỏng)
+SPECS = {
+    "AU-001": [("Kết nối", "Bluetooth 5.3"), ("Thời lượng pin", "6 giờ, 24 giờ kèm hộp"), ("Chống nước", "IPX4"), ("Bảo hành", "12 tháng")],
+    "AU-002": [("Công suất", "10W"), ("Kết nối", "Bluetooth 5.2, 2 thiết bị"), ("Thời lượng pin", "12 giờ"), ("Bảo hành", "12 tháng")],
+    "AU-003": [("Chống ồn", "Chủ động (ANC)"), ("Kết nối", "Bluetooth 5.3, jack 3.5mm"), ("Thời lượng pin", "30 giờ"), ("Bảo hành", "12 tháng")],
+    "AU-004": [("Tổng công suất", "300W"), ("Kênh", "2.1, loa siêu trầm không dây"), ("Kết nối", "HDMI eARC, quang, Bluetooth"), ("Bảo hành", "24 tháng")],
+    "LT-001": [("CPU", "8 nhân, tiết kiệm điện"), ("RAM / SSD", "16GB / 512GB"), ("Màn hình", "14 inch 2.8K, 90Hz"), ("Trọng lượng", "1,2 kg"), ("Bảo hành", "24 tháng")],
+    "LT-002": [("Màn hình", "11 inch, 120Hz"), ("Bộ nhớ", "8GB / 128GB"), ("Pin", "Khoảng 10 giờ"), ("Bảo hành", "12 tháng")],
+    "LT-003": [("Cổng", "HDMI 4K, 3 x USB-A, SD, microSD, USB-C PD"), ("Sạc xuyên", "100W"), ("Chất liệu", "Nhôm"), ("Bảo hành", "12 tháng")],
+    "CP-004": [("Chất liệu", "Nhôm nguyên khối"), ("Tương thích", "Laptop 10–17 inch"), ("Số nấc chỉnh", "6"), ("Bảo hành", "6 tháng")],
+    "CP-003": [("Tấm nền", "IPS 27 inch"), ("Độ phân giải", "2560 x 1440"), ("Tần số quét", "75Hz"), ("Cổng", "HDMI, DisplayPort"), ("Bảo hành", "24 tháng")],
+    "MN-001": [("Tấm nền", "IPS 24 inch"), ("Độ phân giải", "1920 x 1080"), ("Tần số quét", "100Hz"), ("Cổng", "HDMI, USB-C 65W"), ("Bảo hành", "24 tháng")],
+    "MN-002": [("Tấm nền", "VA cong 34 inch, 1500R"), ("Độ phân giải", "3440 x 1440"), ("Tần số quét", "144Hz"), ("Bảo hành", "24 tháng")],
+    "MN-003": [("Nguồn", "USB-C 5V"), ("Nhiệt độ màu", "2700K – 6500K"), ("Lắp đặt", "Kẹp trên màn hình, không khoan"), ("Bảo hành", "12 tháng")],
+    "CP-001": [("Bố cục", "75%, 84 phím"), ("Switch", "Thay nóng, linear"), ("Kết nối", "USB-C, Bluetooth, 2.4GHz"), ("Bảo hành", "12 tháng")],
+    "CP-002": [("Cảm biến", "Quang học, 26.000 DPI"), ("Kết nối", "2.4GHz, Bluetooth"), ("Pin", "Sạc USB-C, 70 giờ"), ("Bảo hành", "12 tháng")],
+    "GR-001": [("Kích thước", "90 x 40 cm"), ("Độ dày", "4 mm"), ("Mặt đế", "Cao su chống trượt"), ("Bảo hành", "3 tháng")],
+    "GR-002": [("Độ phân giải", "2K, 30 khung hình/giây"), ("Lấy nét", "Tự động"), ("Micro", "Kép, lọc ồn"), ("Bảo hành", "12 tháng")],
+    "PH-001": [("Chiều dài", "2 m"), ("Công suất", "Tối đa 100W"), ("Vỏ", "Bện dù"), ("Bảo hành", "6 tháng")],
+    "PH-002": [("Công suất", "65W"), ("Cổng", "2 x USB-C, 1 x USB-A"), ("Công nghệ", "GaN"), ("Bảo hành", "12 tháng")],
+    "PH-003": [("Dung lượng", "20.000mAh"), ("Sạc nhanh", "22.5W hai chiều"), ("Cổng", "USB-C, 2 x USB-A"), ("Bảo hành", "12 tháng")],
+    "PH-004": [("Màn hình", "6,7 inch OLED, 120Hz"), ("Bộ nhớ", "8GB / 256GB"), ("Camera", "50MP chính, 12MP góc rộng"), ("Pin", "5000mAh"), ("Bảo hành", "12 tháng")],
+    "SP-003": [("Màn hình", "AMOLED 1,4 inch"), ("Cảm biến", "Nhịp tim, SpO2, GPS"), ("Chống nước", "5ATM"), ("Pin", "7 ngày"), ("Bảo hành", "12 tháng")],
+    "SM-001": [("Độ phân giải", "2K"), ("Góc quay", "360 độ ngang, 110 độ dọc"), ("Lưu trữ", "Thẻ nhớ, đám mây"), ("Bảo hành", "12 tháng")],
+    "SM-002": [("Tải tối đa", "16A / 3500W"), ("Kết nối", "Wi-Fi 2.4GHz"), ("Tính năng", "Hẹn giờ, đo điện năng"), ("Bảo hành", "12 tháng")],
+    "SM-003": [("Màn hình", "AMOLED 1,1 inch"), ("Cảm biến", "Nhịp tim, SpO2, giấc ngủ"), ("Pin", "14 ngày"), ("Bảo hành", "12 tháng")],
+}
+
+
 def slugify(text: str) -> str:
     text = text.replace("đ", "d").replace("Đ", "D")
     text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
@@ -74,6 +103,7 @@ def seed(session: Session | None = None) -> int:
             product.price = price
             product.stock = stock
             product.description = description
+            product.specs = [list(row) for row in SPECS.get(sku, [])]
             product.is_active = True
         # Sản phẩm cũ không còn trong danh sách thì ẩn đi (không xóa, vì đơn hàng cũ còn tham chiếu)
         skus = [row[0] for row in PRODUCTS]

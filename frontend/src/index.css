@@ -3,7 +3,8 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
-@custom-variant dark (&:is(.dark *));
+/* Biến thể dark: không áp dụng bên trong khu vực Shop (.shop luôn tông sáng, ADR-005) */
+@custom-variant dark (&:is(.dark *):not(.shop, .shop *));
 
 @theme inline {
   --font-heading: var(--font-sans);
@@ -39,6 +40,8 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+  --color-buy: var(--buy);
+  --color-buy-foreground: var(--buy-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -73,6 +76,8 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
+  --buy: #ffd60a;
+  --buy-foreground: #141414;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -128,3 +133,63 @@
     @apply font-sans;
   }
 }
+
+/* ---------- Khu vực Shop: luôn tông sáng, bất kể Console đang sáng hay tối ---------- */
+.shop {
+  --background: #ffffff;
+  --foreground: #141414;
+  --card: #ffffff;
+  --card-foreground: #141414;
+  --popover: #ffffff;
+  --popover-foreground: #141414;
+  --primary: #141414;
+  --primary-foreground: #ffffff;
+  /* #f2f2f2: đúng màu nền của ảnh sản phẩm (docs/assets/IMAGE_BRIEF.md) để ảnh hòa vào thẻ */
+  --secondary: #f2f2f2;
+  --secondary-foreground: #141414;
+  --muted: #f2f2f2;
+  --muted-foreground: #6b6b6b;
+  --accent: #f2f2f2;
+  --accent-foreground: #141414;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #e7e7e4;
+  --input: #e2e2df;
+  --ring: #8a8a8a;
+  color-scheme: light;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* "Vết khuyết" ở góc dưới bên phải (kiểu bo góc ngược):
+   khối nền trắng ăn vào góc thẻ, hai pseudo-element vẽ hai góc lõm nối mềm với cạnh thẻ.
+   radial-gradient: trong bán kính r thì trong suốt (thấy màu thẻ), ngoài r thì là màu nền trang. */
+.notch {
+  --r: 1.25rem;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background: var(--background);
+  border-top-left-radius: var(--r);
+}
+.notch::before,
+.notch::after {
+  content: "";
+  position: absolute;
+  width: var(--r);
+  height: var(--r);
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 0 0,
+    transparent calc(var(--r) - 0.5px),
+    var(--background) var(--r)
+  );
+}
+.notch::before {
+  right: 0;
+  bottom: 100%;
+}
+.notch::after {
+  right: 100%;
+  bottom: 0;
+}
+

@@ -22,6 +22,7 @@ export interface Product {
   price: number
   image_url: string | null
   stock: number
+  specs: [label: string, value: string][] // thông số kỹ thuật theo thứ tự hiển thị
 }
 
 // Generic: Page<Product> nghĩa là "một trang kết quả mà mỗi phần tử là Product"
@@ -42,6 +43,7 @@ export interface ProductFilters {
   q?: string
   category?: CategoryCode
   page?: number
+  pageSize?: number
 }
 
 export function useProducts(filters: ProductFilters) {
@@ -49,7 +51,7 @@ export function useProducts(filters: ProductFilters) {
   if (filters.q) params.set("q", filters.q)
   if (filters.category) params.set("category", filters.category)
   params.set("page", String(filters.page ?? 1))
-  params.set("page_size", "12")
+  params.set("page_size", String(filters.pageSize ?? 12))
 
   return useQuery({
     queryKey: ["products", filters],

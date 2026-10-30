@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Index, Integer, String, Text
+from sqlalchemy import JSON, BigInteger, Boolean, DateTime, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -31,6 +31,8 @@ class Product(Base):
     description: Mapped[str] = mapped_column(Text, default="")
     price: Mapped[int] = mapped_column(BigInteger)  # VND, số nguyên
     image_url: Mapped[str | None] = mapped_column(String(500))
+    # Thông số kỹ thuật dạng danh sách [nhãn, giá trị] để giữ đúng thứ tự hiển thị
+    specs: Mapped[list | None] = mapped_column(JSON)
     stock: Mapped[int] = mapped_column(Integer, default=0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)

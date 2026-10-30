@@ -79,3 +79,22 @@ def test_categories_count_active_only(client, products):
 def test_slugify_vietnamese():
     assert slugify("Bình giữ nhiệt Lumi 500ml") == "binh-giu-nhiet-lumi-500ml"
     assert slugify("Đồng hồ thông minh") == "dong-ho-thong-minh"
+
+
+def test_product_specs_keep_order(client, products, db):
+    products[0].specs = [["Kết nối", "Bluetooth 5.3"], ["Bảo hành", "12 tháng"]]
+    db.commit()
+    body = client.get("/api/products/tai-nghe-a").json()
+    assert body["specs"] == [["Kết nối", "Bluetooth 5.3"], ["Bảo hành", "12 tháng"]]
+    assert client.get("/api/products/loa-b").json()["specs"] == []  # chưa có thông số -> danh sách rỗng
+
+
+def test_seed_hides_products_no_longer_sold(db):
+    from app.modules.catalog.seed import PRODUCTS, seed
+
+    db.add(Product(sku="OLD-1", slug="hang-cu", name="Hàng cũ", category="gear", price=1, stock=1))
+    db.commit()
+    seed(db)
+    db.rollback()
+    assert db.query(Product).filter_by(sku="OLD-1").one().is_active is False
+    assert db.query(Product).filter(Product.is_active.is_(True)).count() == len(PRODUCTS)

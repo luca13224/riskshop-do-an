@@ -1,27 +1,9 @@
-import {
-  Headphones,
-  Keyboard,
-  Laptop,
-  Monitor,
-  Package,
-  Smartphone,
-  Watch,
-  type LucideIcon,
-} from "lucide-react"
-
 import type { CategoryCode } from "@/lib/api/catalog"
 import { cn } from "@/lib/utils"
 
-// Ảnh minh họa tự vẽ theo danh mục: demo chạy offline, không phụ thuộc ảnh bên ngoài hay bản quyền ảnh.
-const STYLES: Record<CategoryCode, { icon: LucideIcon; bg: string }> = {
-  audio: { icon: Headphones, bg: "from-violet-500/25 to-fuchsia-500/10" },
-  laptop: { icon: Laptop, bg: "from-sky-500/25 to-cyan-500/10" },
-  monitor: { icon: Monitor, bg: "from-cyan-500/25 to-teal-500/10" },
-  gear: { icon: Keyboard, bg: "from-amber-500/25 to-orange-500/10" },
-  phone: { icon: Smartphone, bg: "from-rose-500/25 to-pink-500/10" },
-  smart: { icon: Watch, bg: "from-emerald-500/25 to-lime-500/10" },
-}
+import { CategoryIcon } from "./CategoryIcon"
 
+// Khi chưa có ảnh: vẽ icon theo danh mục trên nền xám nhạt, cùng màu nền với ảnh sản phẩm thật (#f2f2f2).
 interface ProductImageProps {
   category: CategoryCode
   imageUrl: string | null
@@ -42,26 +24,23 @@ export function ProductImage({
       <img
         src={imageUrl}
         alt={name}
-        className={cn("aspect-square w-full object-cover", className)}
+        className={cn("aspect-square w-full object-contain", className)}
       />
     )
   }
-  const style = STYLES[category] ?? { icon: Package, bg: "from-muted to-muted" }
-  const Icon = style.icon
   return (
     <div
       role="img"
       aria-label={name}
       className={cn(
-        "flex aspect-square w-full items-center justify-center bg-gradient-to-br",
-        style.bg,
+        "flex aspect-square w-full items-center justify-center bg-secondary",
         className
       )}
     >
-      <Icon
-        className={cn("size-14 text-foreground/70", iconClassName)}
-        strokeWidth={1.25}
-        aria-hidden
+      <CategoryIcon
+        category={category}
+        className={cn("size-16 text-foreground/25", iconClassName)}
+        strokeWidth={1}
       />
     </div>
   )
