@@ -102,7 +102,7 @@ def reset(db: Session) -> dict[str, str]:
     for email, name, role in STAFF:
         make_user(db, email, name, role, password_for(email), timedelta(days=60))
 
-    cheap = db.query(Product).filter(Product.sku == "HM-001").one()  # Bình giữ nhiệt
+    cheap = db.query(Product).filter(Product.sku == "SM-002").one()  # Ổ cắm thông minh (món rẻ)
     make_user(db, "minh@shop.test", "Nguyễn Minh", CUSTOMER, password_for("minh@shop.test"), timedelta(hours=20),
           phone="0901111111")
     khang = make_user(db, "khang@shop.test", "Phạm Khang", CUSTOMER, password_for("khang@shop.test"),

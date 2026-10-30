@@ -11,9 +11,9 @@ def products(db):
     items = [
         Product(sku="T-1", slug="tai-nghe-a", name="Tai nghe A", category="audio", price=500_000, stock=5),
         Product(sku="T-2", slug="loa-b", name="Loa B", category="audio", price=300_000, stock=0),
-        Product(sku="T-3", slug="ban-phim-c", name="Bàn phím C", category="computer", price=900_000, stock=3,
+        Product(sku="T-3", slug="ban-phim-c", name="Bàn phím C", category="monitor", price=900_000, stock=3,
                 description="Bàn phím có 100% phím"),
-        Product(sku="T-4", slug="an-di", name="Sản phẩm đã ẩn", category="home", price=100_000, stock=1,
+        Product(sku="T-4", slug="an-di", name="Sản phẩm đã ẩn", category="gear", price=100_000, stock=1,
                 is_active=False),
     ]
     db.add_all(items)
@@ -73,7 +73,7 @@ def test_inactive_or_missing_product_is_404(client, products):
 
 def test_categories_count_active_only(client, products):
     cats = {c["code"]: c["product_count"] for c in client.get("/api/categories").json()}
-    assert cats["audio"] == 2 and cats["computer"] == 1 and cats["home"] == 0
+    assert cats["audio"] == 2 and cats["monitor"] == 1 and cats["gear"] == 0
 
 
 def test_slugify_vietnamese():

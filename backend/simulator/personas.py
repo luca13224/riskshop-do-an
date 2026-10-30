@@ -12,8 +12,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 # Bậc giá (SKU trong seed sản phẩm)
-CHEAP = ["HM-001", "FS-003", "CP-002", "AU-002", "SP-001", "AU-001"]  # 249k–590k
-MID = ["FS-002", "CP-001", "HM-003", "AU-003", "SP-003"]  # 990k–2,39 triệu
+CHEAP = ["SM-002", "PH-001", "CP-002", "AU-002", "GR-001", "AU-001"]  # 149k–590k
+MID = ["GR-002", "CP-001", "AU-003", "SP-003"]  # 890k–2,39 triệu
 # Đơn giá trị cao: (sku, số lượng)
 HIGH = [("CP-003", 1), ("AU-003", 2), ("SP-003", 2)]  # 5,49 tr / 3,78 tr / 4,78 tr
 

@@ -137,7 +137,7 @@ def cod_high_value(r: Runner) -> str:
 
 def cod_bad_history(r: Runner) -> str:
     c = r.customer("khang", "may-khang")
-    item = r.product(c, "Bình giữ nhiệt")
+    item = r.product(c, "Ổ cắm")
     c.get(f"/products/{item['slug']}")
     # Tạo lịch sử 5 đơn COD: 1 giao thành công, 4 giao thất bại (giả lập đơn vị vận chuyển)
     for n, result in enumerate(["DELIVERED"] + ["DELIVERY_FAILED"] * 4, start=1):
