@@ -1,90 +1,219 @@
-import { ShoppingCart } from "lucide-react"
-import { Link, Outlet, useNavigate } from "react-router"
+import { LogOut, Package, ShoppingBag, User } from "lucide-react"
+import { Link, NavLink, Outlet, useNavigate } from "react-router"
 
 import { Button } from "@/components/ui/button"
 import { isStaff, useLogout, useMe } from "@/lib/api/auth"
 import { useCart } from "@/lib/api/cart"
+import { useCategories } from "@/lib/api/catalog"
+import { cn } from "@/lib/utils"
 
 function CartButton() {
   const { data: cart } = useCart()
   const count = cart?.item_count ?? 0
   return (
-    <Button variant="ghost" size="sm" asChild>
-      <Link
-        to="/cart"
-        aria-label={`Giỏ hàng, ${count} sản phẩm`}
-        className="relative"
-      >
-        <ShoppingCart />
-        {count > 0 && (
-          <span className="absolute -top-1 -right-1 flex min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] leading-5 font-semibold text-primary-foreground">
-            {count > 99 ? "99+" : count}
-          </span>
-        )}
-      </Link>
-    </Button>
+    <Link
+      to="/cart"
+      aria-label={`Giỏ hàng, ${count} sản phẩm`}
+      className="relative flex size-10 items-center justify-center rounded-full hover:bg-secondary"
+    >
+      <ShoppingBag className="size-5" />
+      {count > 0 && (
+        <span className="absolute -top-0.5 -right-0.5 flex min-w-5 items-center justify-center rounded-full bg-buy px-1 text-[11px] leading-5 font-semibold text-buy-foreground">
+          {count > 99 ? "99+" : count}
+        </span>
+      )}
+    </Link>
   )
 }
 
-// Khung chung của khu vực Shop: thanh trên cùng + nội dung trang (Outlet)
+function Logo() {
+  return (
+    <Link
+      to="/"
+      className="flex items-center gap-2"
+      aria-label="RiskShop, về trang chủ"
+    >
+      <span className="flex size-8 items-center justify-center rounded-xl bg-foreground text-background">
+        <span className="size-2.5 rounded-full bg-buy" aria-hidden />
+      </span>
+      <span className="text-lg font-bold tracking-tight">RiskShop</span>
+    </Link>
+  )
+}
+
+// Khung chung của khu vực Shop. Lớp .shop (index.css) giữ Shop luôn ở tông sáng (ADR-005).
 export function ShopLayout() {
   const { data: user } = useMe()
   const logout = useLogout()
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-svh">
-      <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
-          <Link to="/" className="text-lg font-semibold tracking-tight">
-            RiskShop
-          </Link>
-          <nav className="flex items-center gap-2 text-sm">
+    <div className="shop flex min-h-svh flex-col">
+      <p className="bg-buy px-4 py-2 text-center text-xs font-medium text-buy-foreground sm:text-sm">
+        Khách mới nhập mã <b>TANTHU</b> giảm 50.000đ cho đơn từ 200.000đ
+      </p>
+
+      <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+          <Logo />
+
+          <nav
+            className="hidden items-center gap-1 text-sm md:flex"
+            aria-label="Chính"
+          >
+            <HeaderLink to="/" end>
+              Trang chủ
+            </HeaderLink>
+            <a
+              href="/#san-pham"
+              className="rounded-full px-3 py-2 hover:bg-secondary"
+            >
+              Sản phẩm
+            </a>
+            {user?.role === "customer" && (
+              <HeaderLink to="/orders">Đơn hàng</HeaderLink>
+            )}
+          </nav>
+
+          <div className="flex items-center gap-1">
             {user ? (
               <>
-                <span className="hidden text-muted-foreground sm:inline">
+                <span className="hidden max-w-40 truncate px-2 text-sm text-muted-foreground lg:inline">
                   {user.full_name}
                 </span>
                 {user.role === "customer" && (
                   <>
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link to="/orders">Đơn hàng</Link>
-                    </Button>
+                    <Link
+                      to="/orders"
+                      aria-label="Đơn hàng của tôi"
+                      className="flex size-10 items-center justify-center rounded-full hover:bg-secondary md:hidden"
+                    >
+                      <Package className="size-5" />
+                    </Link>
                     <CartButton />
                   </>
                 )}
                 {isStaff(user) && (
-                  <Button variant="outline" size="sm" asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full"
+                    asChild
+                  >
                     <Link to="/console">Risk Console</Link>
                   </Button>
                 )}
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
+                  type="button"
+                  aria-label="Đăng xuất"
+                  title="Đăng xuất"
                   disabled={logout.isPending}
                   onClick={() =>
                     logout.mutate(undefined, { onSuccess: () => navigate("/") })
                   }
+                  className="flex size-10 items-center justify-center rounded-full hover:bg-secondary"
                 >
-                  Đăng xuất
-                </Button>
+                  <LogOut className="size-5" />
+                </button>
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/login">Đăng nhập</Link>
-                </Button>
-                <Button size="sm" asChild>
+                <Link
+                  to="/login"
+                  className="flex items-center gap-2 rounded-full px-3 py-2 text-sm hover:bg-secondary"
+                >
+                  <User className="size-5" />
+                  <span className="hidden sm:inline">Đăng nhập</span>
+                </Link>
+                <Button size="sm" className="h-9 rounded-full px-4" asChild>
                   <Link to="/register">Đăng ký</Link>
                 </Button>
               </>
             )}
-          </nav>
+          </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4">
+
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6">
         <Outlet />
       </main>
+
+      <ShopFooter />
     </div>
+  )
+}
+
+function HeaderLink({
+  to,
+  end,
+  children,
+}: {
+  to: string
+  end?: boolean
+  children: string
+}) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        cn(
+          "rounded-full px-3 py-2 hover:bg-secondary",
+          isActive && "font-semibold"
+        )
+      }
+    >
+      {children}
+    </NavLink>
+  )
+}
+
+function ShopFooter() {
+  const categories = useCategories()
+  return (
+    <footer className="mt-20 bg-[#141414] text-white/70">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+        <div>
+          <p className="text-lg font-bold text-white">RiskShop</p>
+          <p className="mt-3 text-sm leading-relaxed">
+            Sàn đồ công nghệ mô phỏng, có hệ thống kiểm soát rủi ro và ngăn ngừa
+            lạm dụng chính sách chạy phía sau mọi đơn hàng.
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold text-white">Danh mục</p>
+          <ul className="mt-3 grid gap-2 text-sm">
+            {categories.data?.map((c) => (
+              <li key={c.code}>
+                <Link
+                  to={`/?category=${c.code}#san-pham`}
+                  className="hover:text-white"
+                >
+                  {c.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p className="font-semibold text-white">Mua sắm</p>
+          <ul className="mt-3 grid gap-2 text-sm">
+            <li>Thanh toán khi nhận hàng (COD) hoặc trả trước</li>
+            <li>Mã TANTHU cho khách mới</li>
+            <li>Mã GIAM10 giảm 10% (tối đa 100.000đ) cho đơn từ 500.000đ</li>
+          </ul>
+        </div>
+        <div>
+          <p className="font-semibold text-white">Về dự án</p>
+          <p className="mt-3 text-sm leading-relaxed">
+            Đồ án tốt nghiệp, Trường Đại học Thủy Lợi. Sản phẩm, giá và đơn hàng
+            đều là dữ liệu mô phỏng.
+          </p>
+        </div>
+      </div>
+      <p className="border-t border-white/10 py-5 text-center text-xs">
+        © 2026 RiskShop · Dữ liệu mô phỏng, không phải cửa hàng thật
+      </p>
+    </footer>
   )
 }

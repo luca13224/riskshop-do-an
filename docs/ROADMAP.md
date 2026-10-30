@@ -5,7 +5,7 @@
 ## Kế hoạch 4 tuần (ADR-005)
 | Tuần | Thời gian | Nội dung | Xong khi |
 |---|---|---|---|
-| 1 | 31/10 – 06/11 | Mặt tiền shop: danh mục đồ công nghệ (đã xong), ảnh sản phẩm, tông sáng, thẻ sản phẩm kiểu Neotek, xem nhanh (quick view), trang chi tiết có bảng thông số | Trang chủ, danh mục, chi tiết đều có ảnh thật; đẹp ở 375 px và 1440 px |
+| 1 | 31/10 – 06/11 | Mặt tiền shop: danh mục đồ công nghệ (xong), tông sáng + thẻ + xem nhanh + trang chi tiết (xong), ảnh sản phẩm (chờ), tông sáng, thẻ sản phẩm kiểu Neotek, xem nhanh (quick view), trang chi tiết có bảng thông số | Trang chủ, danh mục, chi tiết đều có ảnh thật; đẹp ở 375 px và 1440 px |
 | 2 | 07/11 – 13/11 | Banner rạp chiếu phim: vòng danh mục 3D, màn hình chiếu chính, "đèn rạp bật sáng" khi cuộn, nút glow, hiệu ứng vào trang, giảm chuyển động | Mở trang chủ là có "wow", vẫn bấm được bằng bàn phím và trên điện thoại |
 | 3 | 14/11 – 20/11 | Dashboard tổng quan (shop + rủi ro + việc cần xử lý) và khiếu nại (appeals) | Quản lý trả lời được 3 câu hỏi trong một màn hình; khách bị chặn nhầm có đường khiếu nại |
 | 4 | 21/11 – 30/11 | Hoàn thiện, demo reset trên dữ liệu chuẩn, tập 9 cảnh demo, bản nháp báo cáo và slide | Chạy trọn kịch bản demo không lỗi |

@@ -12,6 +12,7 @@ class ProductOut(BaseModel):
     price: int
     image_url: str | None
     stock: int
+    specs: list[tuple[str, str]] = []
 
     model_config = {"from_attributes": True}
 

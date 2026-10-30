@@ -20,6 +20,7 @@ def _to_out(p: Product) -> ProductOut:
         price=p.price,
         image_url=p.image_url,
         stock=p.stock,
+        specs=p.specs or [],
     )
 
 

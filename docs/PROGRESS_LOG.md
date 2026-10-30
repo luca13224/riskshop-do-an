@@ -2,6 +2,25 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Tuần 1 (phần 1): mặt tiền shop theo ADR-005
+**Đã hoàn thành**
+- Gian hàng chỉ còn đồ công nghệ: 6 danh mục, 24 sản phẩm. Sản phẩm cũ được ẩn chứ không xóa. Thêm cột `products.specs` (thông số kỹ thuật dạng danh sách [nhãn, giá trị]).
+- Khu vực Shop luôn ở tông sáng (lớp `.shop` trong `index.css`), không đổi theo chế độ sáng/tối của Console. Màu nhấn vàng chỉ dùng cho nút mua (`variant="buy"`).
+- Khung shop: thanh thông báo mã TANTHU, header dính trên cùng, footer tối.
+- Trang chủ theo nhịp khối: banner tạm (tuần 2 sẽ thay bằng "rạp chiếu phim"), ô danh mục, "Nổi bật tuần này" cuộn ngang (xen kẽ theo danh mục), banner câu chuyện có vết khuyết, tất cả sản phẩm (tìm kiếm, lọc, phân trang), dải cam kết.
+- Thẻ sản phẩm kiểu Neotek: nền `#f2f2f2`, nút "Xem nhanh" hiện khi rê chuột hoặc focus (màn hình cảm ứng thì luôn hiện), nút thêm giỏ nằm trong vết khuyết. Dùng "stretched link" để không lồng nút trong link.
+- Popup xem nhanh dùng `<dialog>` của trình duyệt (tự khóa focus, Esc để đóng).
+- Trang chi tiết: breadcrumb, bảng thông số, cam kết, sản phẩm cùng danh mục.
+- Đã kiểm tra ở 1440 px và 375 px (sửa lỗi tràn ngang trên điện thoại). 140 test qua.
+
+**Bài học**
+- React StrictMode ở chế độ dev chạy effect hai lần. Gọi `dialog.close()` trong hàm dọn dẹp sẽ bắn sự kiện `close`, làm popup tắt ngay khi vừa mở.
+- Lưới CSS có một cột `auto` sẽ bị phần tử cuộn ngang kéo giãn. Phải dùng `minmax(0, 1fr)`.
+
+**Còn thiếu**
+- Ảnh sản phẩm thật (chờ chọn nguồn, xem `docs/assets/IMAGE_BRIEF.md`). Hiện đang dùng icon theo danh mục trên nền xám.
+- Mô tả dài cho từng sản phẩm (phần "Mô tả" đang lặp lại mô tả ngắn).
+
 ## 2026-10-30 — Giới hạn đăng nhập sai và che dữ liệu cá nhân
 **Đã hoàn thành**
 - Bảng `login_attempts` (chỉ lưu bản băm HMAC). Sai 5 lần/tài khoản hoặc 20 lần/IP trong 15 phút → 429 `LOGIN_RATE_LIMITED`, kiểm tra trước khi so mật khẩu, áp dụng cả với email không tồn tại (không lộ email nào có thật).

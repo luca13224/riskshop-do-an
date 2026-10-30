@@ -51,7 +51,9 @@ export function AddToCart({ product }: { product: Product }) {
           disabled={outOfStock}
         />
         <Button
+          variant="buy"
           size="lg"
+          className="h-11 rounded-full px-6"
           onClick={onAdd}
           disabled={outOfStock || addToCart.isPending}
         >
