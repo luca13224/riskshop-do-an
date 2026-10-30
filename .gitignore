@@ -1,0 +1,39 @@
+# Bí mật và cấu hình cục bộ — không bao giờ commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Dữ liệu sinh ra / dữ liệu lớn
+data/raw/
+data/generated/
+*.sqlite
+*.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Node.js
+node_modules/
+dist/
+build/
+
+# Log
+logs/
+*.log
+
+# IDE / hệ điều hành
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# File tạm của Office
+~$*
