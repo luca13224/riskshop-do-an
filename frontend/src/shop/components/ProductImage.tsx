@@ -24,7 +24,9 @@ export function ProductImage({
       <img
         src={imageUrl}
         alt={name}
-        className={cn("aspect-square w-full object-contain", className)}
+        loading="lazy"
+        // Ảnh chụp thật (Unsplash), mỗi ảnh một nền khác nhau: phủ kín ô cho đồng đều
+        className={cn("aspect-square w-full object-cover", className)}
       />
     )
   }

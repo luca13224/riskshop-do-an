@@ -524,7 +524,8 @@ function Ring({
                   top: 30,
                   width: CARD_W,
                   height: CARD_H,
-                  background: `linear-gradient(170deg, ${TINT[cat.code]}55, #0b0f18 55%, #070a10)`,
+                  // Ảnh danh mục (tông tối) + lớp phủ tối dần xuống dưới để chữ luôn đọc được + ánh màu riêng của danh mục
+                  background: `linear-gradient(180deg, rgba(5,7,11,.1), rgba(5,7,11,.55) 38%, rgba(5,7,11,.92) 68%), linear-gradient(170deg, ${TINT[cat.code]}66, transparent 55%), url(/categories/${cat.code}.webp) center / cover, #0b0f18`,
                   boxShadow:
                     "0 24px 46px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.14), inset 0 16px 30px rgba(255,255,255,.05)",
                 }}
@@ -555,8 +556,8 @@ function Ring({
                 >
                   <CategoryIcon
                     category={cat.code}
-                    className="size-16"
-                    strokeWidth={1.25}
+                    className="size-11"
+                    strokeWidth={1.5}
                   />
                 </span>
                 {/* Tên đặt ở nửa trên: nửa dưới thẻ bị màn hình chiếu chính che (cố ý, để tạo chiều sâu) */}

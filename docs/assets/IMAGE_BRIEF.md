@@ -78,6 +78,39 @@ advertising style, no text, no logo, no brand marks. Scene:
 - Đúng dung lượng file. Claude sẽ chạy script nén và kiểm tra kích thước.
 
 ## 4. Sổ nguồn ảnh
-| File | Nguồn (công cụ AI / URL ảnh gốc) | Giấy phép | Ngày |
+Ảnh lấy từ Unsplash, đã loại ảnh Unsplash+ (trả phí). Giấy phép Unsplash License cho dùng miễn phí, kể cả thương mại, không bắt buộc ghi nguồn; vẫn ghi lại để minh bạch. Ảnh được cắt và nén WebP bằng script (kích thước theo mục 1 và 2).
+
+Lưu ý: một số ảnh chụp sản phẩm của thương hiệu thật, ví dụ điện thoại có logo. Sản phẩm trong shop là tên tự đặt, ảnh chỉ để minh họa. Nếu sau này tạo được ảnh đồng bộ nền `#F2F2F2` theo mục 1 thì thay vào.
+
+| File | Nguồn (tác giả, URL ảnh gốc) | Giấy phép | Ngày |
 |---|---|---|---|
-| _(chưa có)_ | | | |
+| `frontend/public/products/AU-001.webp` | TheRegisti, https://unsplash.com/photos/qt9_OfTaaeY | Unsplash License | 2026-10-31 |
+| `frontend/public/products/AU-002.webp` | Habib Dadkhah, https://unsplash.com/photos/S0B-pmGjdVA | Unsplash License | 2026-10-31 |
+| `frontend/public/products/AU-003.webp` | C D-X, https://unsplash.com/photos/PDX_a_82obo | Unsplash License | 2026-10-31 |
+| `frontend/public/products/AU-004.webp` | Jonas Leupe, https://unsplash.com/photos/2RyHepsRFqE | Unsplash License | 2026-10-31 |
+| `frontend/public/products/LT-001.webp` | Ales Nesetril, https://unsplash.com/photos/Im7lZjxeLhg | Unsplash License | 2026-10-31 |
+| `frontend/public/products/LT-002.webp` | Kelly Sikkema, https://unsplash.com/photos/qjewkQ3JeVU | Unsplash License | 2026-10-31 |
+| `frontend/public/products/LT-003.webp` | Lasse Jensen, https://unsplash.com/photos/4nVJUZEJb3s | Unsplash License | 2026-10-31 |
+| `frontend/public/products/CP-004.webp` | Workperch, https://unsplash.com/photos/iTUZ7VcJI8M | Unsplash License | 2026-10-31 |
+| `frontend/public/products/CP-003.webp` | Daniel Eliashevskyi, https://unsplash.com/photos/aTg26S0_OC0 | Unsplash License | 2026-10-31 |
+| `frontend/public/products/MN-001.webp` | Mediamodifier, https://unsplash.com/photos/9ixBVUCo6NU | Unsplash License | 2026-10-31 |
+| `frontend/public/products/MN-002.webp` | Daniel Korpai, https://unsplash.com/photos/8GDCzWrcE3M | Unsplash License | 2026-10-31 |
+| `frontend/public/products/MN-003.webp` | Kirill Martynov, https://unsplash.com/photos/xZoNX2slteU | Unsplash License | 2026-10-31 |
+| `frontend/public/products/CP-001.webp` | Roy Wen, https://unsplash.com/photos/XNLdEeILUqw | Unsplash License | 2026-10-31 |
+| `frontend/public/products/CP-002.webp` | Oscar Ivan Esquivel Arteaga, https://unsplash.com/photos/ZtxED1cpB1E | Unsplash License | 2026-10-31 |
+| `frontend/public/products/GR-001.webp` | Oakywood, https://unsplash.com/photos/Zah7GC6mNKg | Unsplash License | 2026-10-31 |
+| `frontend/public/products/GR-002.webp` | Bedirhan Gül, https://unsplash.com/photos/Gq8qdtRwwJs | Unsplash License | 2026-10-31 |
+| `frontend/public/products/PH-001.webp` | Mika Baumeister, https://unsplash.com/photos/RWxeE7wu1T8 | Unsplash License | 2026-10-31 |
+| `frontend/public/products/PH-002.webp` | Andrey Matveev, https://unsplash.com/photos/1A_MMH9w-Sc | Unsplash License | 2026-10-31 |
+| `frontend/public/products/PH-003.webp` | Andrey Matveev, https://unsplash.com/photos/7JbgHNq4h4k | Unsplash License | 2026-10-31 |
+| `frontend/public/products/PH-004.webp` | kuaileqie RE, https://unsplash.com/photos/NvM9V3mLrKs | Unsplash License | 2026-10-31 |
+| `frontend/public/products/SP-003.webp` | Simon Daoudi, https://unsplash.com/photos/2wFoa040m8g | Unsplash License | 2026-10-31 |
+| `frontend/public/products/SM-001.webp` | Turquo Cabbit, https://unsplash.com/photos/RWo6JqzzhDU | Unsplash License | 2026-10-31 |
+| `frontend/public/products/SM-002.webp` | Kelly Sikkema, https://unsplash.com/photos/fZirmwarM0E | Unsplash License | 2026-10-31 |
+| `frontend/public/products/SM-003.webp` | Nikita Kostrykin, https://unsplash.com/photos/5--lSW0MiE0 | Unsplash License | 2026-10-31 |
+| `frontend/public/categories/audio.webp` | Sebastian Banasiewcz, https://unsplash.com/photos/oXXc-s5nNy8 | Unsplash License | 2026-10-31 |
+| `frontend/public/categories/laptop.webp` | Hans, https://unsplash.com/photos/bZD2E08iKCc | Unsplash License | 2026-10-31 |
+| `frontend/public/categories/monitor.webp` | Amr Taha™, https://unsplash.com/photos/6VjuO4aw19c | Unsplash License | 2026-10-31 |
+| `frontend/public/categories/gear.webp` | Jon Spectacle, https://unsplash.com/photos/-Jrmmm_sbtA | Unsplash License | 2026-10-31 |
+| `frontend/public/categories/phone.webp` | Shyam Mishra, https://unsplash.com/photos/jfMT9qmubPU | Unsplash License | 2026-10-31 |
+| `frontend/public/categories/smart.webp` | Daniel Korpai, https://unsplash.com/photos/hbTKIbuMmBI | Unsplash License | 2026-10-31 |
