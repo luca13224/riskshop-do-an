@@ -2,6 +2,20 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Tuần 2: banner "rạp chiếu phim"
+**Đã hoàn thành** (`frontend/src/shop/components/CinemaHero.tsx`)
+- Vòng màn ảnh 3D: 24 thẻ (6 danh mục × 4) trên hình trụ R = 760 px, camera ở tâm, thẻ quá 38° thì ẩn. Vị trí tính bằng `requestAnimationFrame` và ghi thẳng vào style, không qua state của React.
+- Tự quay 4°/giây. Dừng khi rê chuột hoặc focus bàn phím. Bấm một màn ảnh thì vòng xoay nó ra giữa (easing 700 ms) và dừng lại; bấm lại hoặc nút ▶ để quay tiếp.
+- Màn hình chiếu chính đặt trước vòng, đè lên phần dưới: tự chiếu 4 sản phẩm của danh mục đang ở giữa (hoặc danh mục vừa chọn), có nút "Xem tất cả" để cuộn tới lưới sản phẩm đã lọc.
+- Cuộn xuống thì "đèn rạp bật sáng" (biến CSS `--lights`). Header chuyển tối khi nằm trên banner và sáng lại khi đèn bật, bằng cách đổi token màu cục bộ (`.header-dark`).
+- Nút glow (dải ánh sáng cyan ở chân nút, học từ mẫu Vertex), badge, hiệu ứng vào trang dùng thuộc tính `translate` để không đè transform.
+- Tôn trọng `prefers-reduced-motion`: vòng không tự quay, bấm thì nhảy thẳng tới thẻ, tắt hiệu ứng vào trang.
+- Đã kiểm tra ở 1440 px và 375 px. Trên điện thoại, vòng chỉ thu nhỏ tối đa 0,55 lần, phần thừa hai bên bị cắt.
+
+**Lưu ý khi kiểm tra**
+- Khung trình duyệt bị ẩn thì trình duyệt tạm dừng `requestAnimationFrame` và animation CSS, trông như trang trống. Đây không phải lỗi code.
+- Chưa kiểm tra chế độ giảm chuyển động trên trình duyệt thật (công cụ không giả lập được). Logic đã có trong code.
+
 ## 2026-10-30 — Tuần 1 (phần 1): mặt tiền shop theo ADR-005
 **Đã hoàn thành**
 - Gian hàng chỉ còn đồ công nghệ: 6 danh mục, 24 sản phẩm. Sản phẩm cũ được ẩn chứ không xóa. Thêm cột `products.specs` (thông số kỹ thuật dạng danh sách [nhãn, giá trị]).

@@ -193,3 +193,121 @@
   bottom: 0;
 }
 
+/* ---------- Banner "rạp chiếu phim" (ADR-005) ---------- */
+
+/* Nút glow: dải ánh sáng cyan đọng ở CHÂN nút, là gradient nền bị chính khung bo góc cắt (overflow:hidden).
+   Không phải bóng đổ hay quầng sáng bên ngoài. Học từ mẫu "Vertex" (docs/reviews/2026-10-30_UI_DIRECTION.md). */
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+  display: inline-grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(
+    to top,
+    #9ad9ec 1px,
+    #79e0f1 3px,
+    #3ec8e4 5px,
+    #14a8c6 6px,
+    #038aa8 8px,
+    #006180 10px,
+    #04465a 14px,
+    #0a2a37 18px,
+    #0f1824 24px,
+    #0a111d 34px,
+    #0a111d 100%
+  );
+  box-shadow:
+    inset 0 3px 3px -2px rgba(180, 228, 255, 0.1),
+    inset 1px 0 0 rgba(255, 255, 255, 0.09),
+    inset -1px 0 0 rgba(255, 255, 255, 0.09),
+    0 0 8px rgba(60, 190, 235, 0.1),
+    0 2px 5px -3px rgba(90, 220, 255, 0.45);
+  transition:
+    translate 0.25s,
+    filter 0.25s;
+}
+/* Vệt sáng mảnh ở mép trên */
+.btn-glow::before {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 38%;
+  top: 0.8px;
+  height: 1.9px;
+  filter: blur(0.55px);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(160, 240, 255, 0.74) 50%,
+    transparent
+  );
+}
+/* Ánh sáng hai mép bên, có mask để chỉ sáng ở phần chân nút */
+.btn-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(200, 245, 255, 0.7), transparent 13px),
+    linear-gradient(270deg, rgba(200, 245, 255, 0.7), transparent 13px);
+  -webkit-mask: linear-gradient(
+    to top,
+    #000 0,
+    #000 6px,
+    rgba(0, 0, 0, 0.4) 12px,
+    rgba(0, 0, 0, 0.09) 24px,
+    transparent 30px
+  );
+  mask: linear-gradient(
+    to top,
+    #000 0,
+    #000 6px,
+    rgba(0, 0, 0, 0.4) 12px,
+    rgba(0, 0, 0, 0.09) 24px,
+    transparent 30px
+  );
+}
+.btn-glow > * {
+  position: relative;
+  z-index: 1;
+}
+.btn-glow:hover {
+  translate: 0 -1px;
+  filter: brightness(1.12);
+}
+
+/* Header trên nền banner tối: đổi lại các token màu ngay tại header,
+   nhờ vậy mọi nút bên trong (bg-secondary, text-muted-foreground...) tự đổi theo mà không sửa từng nút. */
+.shop .header-dark {
+  --background: #05070b;
+  --foreground: #f4f7fb;
+  --secondary: rgba(255, 255, 255, 0.08);
+  --muted-foreground: rgba(255, 255, 255, 0.6);
+  --border: rgba(255, 255, 255, 0.08);
+  --primary: #ffffff;
+  --primary-foreground: #05070b;
+}
+
+/* Hiệu ứng vào trang: dùng thuộc tính `translate` riêng (không dùng `transform`)
+   để không đè lên transform của vòng 3D và các hiệu ứng khác. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+.rise {
+  animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+  .btn-glow {
+    transition: none;
+  }
+}
