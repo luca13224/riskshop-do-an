@@ -9,15 +9,17 @@
 | # | Cảnh | Thời lượng | Chứng minh điều gì | Mức |
 |---|---|---|---|---|
 | 0 | Mở đầu: bài toán | 0:30 | Vì sao hệ thống cần tồn tại | MVP |
+| 0b | Bức tranh tổng thể (Dashboard) | 0:45 | Người quản lý nhìn một màn hình là biết tình trạng và việc cần làm | MVP |
 | 1 | Khách hàng bình thường mua sắm | 1:00 | Người dùng hợp lệ không bị làm phiền; quyết định nhanh | MVP |
 | 2 | Tấn công: farm voucher | 2:00 | Phát hiện theo thời gian thực, hành động mềm, không lộ luật | MVP |
 | 3 | Điều tra case | 1:30 | Giải thích được, quy trình xử lý, audit | MVP |
 | 4 | Gia đình chung Wi-Fi (hard negative) | 1:00 | Kiểm soát chặn nhầm | MVP |
 | 5 | Bùng hàng COD và khách quen | 1:30 | Quyết định theo chính sách; giữ đơn chờ duyệt | MVP |
+| 5d | Khiếu nại khi bị chặn nhầm | 1:00 | Khách có đường lên tiếng; xét lại bốn mắt; miễn trừ có kiểm soát | MVP |
 | 6 | Quản lý luật | 1:00 | Cấu hình được, có phiên bản, phân quyền | MVP (cơ bản) |
 | 7 | Kết quả thực nghiệm | 1:00 | Đã kiểm chứng bằng số liệu | MVP |
 | 8 | Kết luận và hạn chế | 0:30 | Trung thực học thuật, hướng phát triển | MVP |
-| | **Tổng** | **~10:00** | | |
+| | **Tổng** | **~11:45** | | |
 
 **Bố cục màn hình khi demo:** chia đôi. Bên trái là **Shop** (vai khách hàng hoặc bot); bên phải là **Risk Console** (vai nhân viên rủi ro). Cảnh 7 dùng toàn màn hình.
 
@@ -28,6 +30,16 @@
 - **Hiển thị:** 1 slide gồm hai luồng chính sách (voucher, COD) và các hình thức lạm dụng tương ứng. Nếu dùng số liệu thiệt hại thì chỉ dùng số **có nguồn kiểm chứng được** [XM].
 - **Câu chốt:** "Hệ thống của em quyết định trong vài chục mili-giây, giải thích được vì sao, và để con người có tiếng nói cuối cùng."
   - Con số độ trễ chỉ được nói nếu đã đo ở cảnh 7.
+
+## Cảnh 0b — Bức tranh tổng thể (0:45)
+- **Chuẩn bị:** `demo reset` rồi `python -m simulator.history --days 14 --yes` để có 14 ngày lịch sử mô phỏng.
+- **Hiển thị:** Console → **Tổng quan**.
+  - Thẻ **Tình trạng** (Bình thường / Cần chú ý / Cảnh báo) kèm lý do, suy ra từ dữ liệu.
+  - **Việc cần làm trước** xếp theo mức khẩn cấp.
+  - **Heatmap thứ × giờ** chỉ ra khung giờ bị lạm dụng.
+  - **Phân bố điểm rủi ro**.
+- **Nói:** "Người quản lý không cần đọc bảng số: nhìn một màn hình là biết hệ thống có ổn không và phải làm gì trước."
+- **Lưu ý trung thực:** dữ liệu lịch sử là mô phỏng (email @sim.test), ghi rõ ở cuối trang.
 
 ## Cảnh 1 — Khách hàng bình thường (1:00)
 - **Bên trái (Shop):** khách mới hợp lệ "Minh" (đăng ký hôm qua, nên được dùng voucher tân thủ) duyệt trang chủ → chi tiết sản phẩm → thêm vào giỏ → áp mã `TANTHU` → checkout COD → **đặt hàng thành công**.
@@ -72,6 +84,20 @@
 - **5c.** Lan đặt COD giá trị cao → `ALLOW` (hard negative). Mở chi tiết: **luật tín hiệu tích cực** (lịch sử giao thành công dài) đã kéo điểm xuống.
 - **Chứng minh:** cùng mức rủi ro nhưng hành động khác nhau theo chính sách; vòng đời đơn hàng có bước giữ đơn chờ duyệt; lịch sử tốt được ghi nhận.
 - **Cần có:** module fulfillment (giả lập giao thành công/thất bại để có lịch sử), luật tỷ lệ COD thất bại có làm mượt, luật giá trị COD bất thường, luật tích cực, trạng thái `PENDING_REVIEW`, ẩn phương thức thanh toán theo quyết định.
+
+## Cảnh 5d — Khiếu nại khi bị chặn nhầm (1:00)
+- **Bên trái:** tài khoản mới ở cảnh 5b (đơn đang bị giữ) mở trang **Khiếu nại**.
+  - Khách chỉ thấy "Đơn hàng bị giữ lại chờ xác minh", **không thấy luật hay điểm**.
+  - Khách viết lý do và gửi.
+- **Bên phải:**
+  - Đăng nhập vai **Analyst**, mở khiếu nại: thấy luật đã khớp nhưng **không có nút kết luận**.
+  - Đổi sang vai **Risk Manager**: viết câu trả lời cho khách, bấm **Chấp nhận**.
+  - Kết quả: đơn chuyển "Đã xác nhận", khách được miễn trừ COD 30 ngày, Audit Log có bản ghi `appeal.resolve`.
+- **Chứng minh:**
+  - Khép kín vòng xử lý chặn nhầm, đúng điểm yếu mà thực nghiệm đã chỉ ra (hard negative).
+  - Nguyên tắc bốn mắt.
+  - Miễn trừ không tắt luật: luật vẫn được ghi lại để giải thích.
+- **Cần có:** module appeals, `risk_allowlist`, `decide(..., exempt)` (ADR-006).
 
 ## Cảnh 6 — Quản lý luật (1:00)
 - **Thao tác:**
@@ -152,6 +178,7 @@
 > Đã cài đặt (2026-10-30): `python -m app.modules.lab.reset --yes` tạo lại trạng thái chuẩn gồm Minh (khách mới, đăng ký 20 giờ trước), Khang (5 đơn COD, 4 thất bại), Lan (30 đơn giao thành công), 3 nhân viên analyst / manager / admin; mật khẩu trong `backend/.env.accounts`.
 
 - **Script `demo reset`** đưa CSDL về trạng thái chuẩn trong dưới 1 phút: có sẵn tài khoản Minh, Khang, Lan, nhân viên, sản phẩm, voucher.
+- **Lịch sử mô phỏng 14 ngày** (`python -m simulator.history --days 14 --yes`, chạy sau demo reset) để Dashboard có dữ liệu trải theo ngày và giờ. Khách lịch sử dùng thiết bị và IP riêng nên không ảnh hưởng nhân vật Minh, Khang, Lan.
 - **Chạy hoàn toàn offline trên laptop**, không phụ thuộc mạng hay API bên ngoài.
 - **Video quay sẵn** toàn bộ kịch bản để dự phòng.
 - Attack Lab **tắt ở chế độ thường**, chỉ bật bằng cấu hình demo, và chỉ vai Admin dùng được.

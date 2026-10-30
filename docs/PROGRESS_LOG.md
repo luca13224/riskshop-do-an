@@ -2,6 +2,16 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-31 — Dữ liệu demo nhiều ngày, kịch bản demo, CI
+**Đã hoàn thành**
+- `python -m simulator.history --days 14 --yes`: sinh lịch sử demo CỘNG DỒN sau demo reset. Mỗi ngày là một đợt khách theo persona của tập dev, thao tác qua API thật; sau đó dời thời gian theo từng khách về đúng ngày và giờ trong quá khứ (trọng số giờ: trưa và tối đông hơn). Đơn ngày cũ được giả lập giao hàng (kẻ bùng hàng thì giao thất bại). Chỉ chạy khi DEMO_MODE=true. Test `test_demo_history.py` chạy trên CSDL test.
+- DEMO_SCRIPT thêm cảnh 0b (Dashboard) và 5d (Khiếu nại), tổng khoảng 11:45.
+- CI GitHub Actions (`.github/workflows/ci.yml`): backend chạy toàn bộ pytest trên MariaDB 10.11; frontend chạy lint và build.
+- Tổng 152 test qua.
+
+**Chưa làm**
+- Chưa chạy demo reset và sinh lịch sử trên CSDL dev: lệnh xóa dữ liệu cần Luca xác nhận trực tiếp.
+
 ## 2026-10-31 — Thiết kế lại Risk Console và Dashboard
 **Đã hoàn thành**
 - Design tokens cho toàn bộ Console (lớp `.console`): nền dark navy, điểm nhấn cyan, thẻ kính mờ có viền mảnh, hover sáng viền. Màu trạng thái rủi ro cố định (xanh/vàng/cam/đỏ) và luôn kèm chữ.

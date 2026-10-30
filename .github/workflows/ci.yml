@@ -1,0 +1,58 @@
+# CI: mỗi lần push hoặc mở pull request, GitHub tự chạy kiểm tra cho cả backend và frontend.
+# Backend chạy toàn bộ pytest trên một MariaDB 10.11 thật (cùng phiên bản với XAMPP trên máy dev).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: riskshop_test
+          MARIADB_USER: riskshop
+          MARIADB_PASSWORD: ci-password
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      # Chỉ là cấu hình cho máy CI tạm thời, không phải bí mật thật
+      DATABASE_URL: mysql+pymysql://riskshop:ci-password@127.0.0.1:3306/riskshop_test?charset=utf8mb4
+      TEST_DATABASE_URL: mysql+pymysql://riskshop:ci-password@127.0.0.1:3306/riskshop_test?charset=utf8mb4
+      IP_HASH_SECRET: ci-only-not-a-real-secret
+      DEMO_MODE: "true"
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - run: python -m pytest -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
