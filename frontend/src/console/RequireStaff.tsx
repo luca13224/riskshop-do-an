@@ -11,16 +11,29 @@ export function RequireStaff() {
   const location = useLocation()
 
   if (isPending) {
-    return <p className="p-6 text-sm text-muted-foreground">Đang kiểm tra đăng nhập…</p>
+    return (
+      <p className="p-6 text-sm text-muted-foreground">
+        Đang kiểm tra đăng nhập…
+      </p>
+    )
   }
   if (!user) {
-    return <Navigate to={`/login?next=${encodeURIComponent(location.pathname)}`} replace />
+    return (
+      <Navigate
+        to={`/login?next=${encodeURIComponent(location.pathname)}`}
+        replace
+      />
+    )
   }
   if (!isStaff(user)) {
     return (
       <div className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center">
-        <h1 className="text-xl font-semibold">Bạn không có quyền vào Risk Console</h1>
-        <p className="text-sm text-muted-foreground">Khu vực này chỉ dành cho nhân viên kiểm soát rủi ro.</p>
+        <h1 className="text-xl font-semibold">
+          Bạn không có quyền vào Risk Console
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Khu vực này chỉ dành cho nhân viên kiểm soát rủi ro.
+        </p>
         <Button variant="outline" asChild>
           <Link to="/">Về trang mua sắm</Link>
         </Button>

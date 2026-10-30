@@ -5,7 +5,13 @@ import { z } from "zod"
 
 import { FormField } from "@/components/form-field"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { isStaff, useLogin } from "@/lib/api/auth"
 
 // Quy tắc kiểm tra form, chạy ngay trên trình duyệt (backend vẫn kiểm tra lại)
@@ -27,8 +33,11 @@ export function LoginPage() {
       const user = await login.mutateAsync(values)
       // Chỉ cho chuyển tới đường dẫn nội bộ (bắt đầu bằng "/"), tránh bị lợi dụng chuyển sang trang lạ
       const next = params.get("next")
-      const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null
-      navigate(safeNext ?? (isStaff(user) ? "/console" : "/"), { replace: true })
+      const safeNext =
+        next && next.startsWith("/") && !next.startsWith("//") ? next : null
+      navigate(safeNext ?? (isStaff(user) ? "/console" : "/"), {
+        replace: true,
+      })
     } catch {
       // Lỗi đã nằm trong login.error, hiển thị bên dưới
     }
@@ -39,7 +48,9 @@ export function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Đăng nhập</CardTitle>
-          <CardDescription>Dùng chung cho khách hàng và nhân viên.</CardDescription>
+          <CardDescription>
+            Dùng chung cho khách hàng và nhân viên.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="grid gap-4" noValidate>
@@ -69,7 +80,10 @@ export function LoginPage() {
             </Button>
             <p className="text-center text-sm text-muted-foreground">
               Chưa có tài khoản?{" "}
-              <Link to="/register" className="font-medium text-foreground underline-offset-4 hover:underline">
+              <Link
+                to="/register"
+                className="font-medium text-foreground underline-offset-4 hover:underline"
+              >
                 Đăng ký
               </Link>
             </p>

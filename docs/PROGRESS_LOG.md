@@ -2,6 +2,37 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Đặt hàng: khép kín luồng mua hàng
+**Đã hoàn thành**
+- Backend `order`: checkout trong một transaction (khóa dòng sản phẩm `FOR UPDATE` theo thứ tự id, kiểm tra lại voucher, chụp giá vào đơn, ghi lượt voucher bằng `UPDATE` có điều kiện + UNIQUE, làm trống giỏ; lỗi thì rollback toàn bộ); bắt buộc header `Idempotency-Key` (gửi lặp trả đơn cũ, 200); địa chỉ chuẩn hóa + băm (cho luật R03); xem đơn của mình (đơn người khác trả 404); Console: danh sách đơn, giả lập giao hàng theo máy trạng thái (giao thất bại thì hoàn kho, COD giao thành công thì PAID). 68 test qua, gồm 2 test tranh chấp đồng thời (2 khách giành món cuối và lượt voucher cuối: đúng 1 thành công).
+- Frontend: trang thanh toán (địa chỉ, COD/chuyển khoản giả lập, mã idempotency tạo một lần mỗi lần vào trang), đơn hàng của tôi, chi tiết đơn có dòng thời gian, trang Đơn hàng trong Console có nút giả lập giao hàng (chỉ Admin/Risk Manager); giờ hiển thị theo múi giờ Việt Nam.
+- Đã thử trọn luồng trên trình duyệt: đăng ký → thêm vào giỏ → áp TANTHU → đặt hàng COD → Admin giao hàng → "Đã giao".
+
+**Còn mở**
+- Chưa có Risk Engine: các chỗ nối `voucher_apply` và `place_order` đã đánh dấu trong code.
+- Chưa có hủy đơn phía khách; Console chưa có menu trên điện thoại.
+
+## 2026-10-30 — Giỏ hàng và voucher
+**Đã hoàn thành**
+- Backend `promotion` (bảng vouchers, kiểm tra điều kiện: tồn tại, còn hạn, còn lượt, thành viên mới trong 30 ngày, giá trị tối thiểu; giảm cố định hoặc % có trần) và `cart` (mỗi khách một giỏ, kiểm tra tồn kho, tự gỡ voucher và báo lý do khi giỏ không còn đủ điều kiện). Cart lấy sản phẩm qua hàm công khai của catalog (giữ ranh giới module). Seed voucher TANTHU (có cờ `risk_checked`), GIAM10. 53 test qua.
+- Frontend: nút thêm vào giỏ có chọn số lượng (chưa đăng nhập thì chuyển sang trang đăng nhập rồi quay lại), icon giỏ có số trên thanh trên cùng, trang giỏ hàng (đổi số lượng, xóa, ô mã giảm giá, tóm tắt tiền). Đã thử trên trình duyệt.
+- Chỗ nối Risk Engine (context `voucher_apply`) đã đánh dấu trong `cart/service.py`.
+
+**Sự cố**
+- `uvicorn --reload` vẫn kẹt kể cả khi dùng watchfiles: từ nay chạy backend không reload, khởi động lại sau mỗi đợt sửa (ghi trong skill `debug-helper`, README).
+
+**Chưa commit** (theo cách làm mới: commit khi xong trọn luồng MVP).
+
+## 2026-10-30 — Module catalog (làm trực tiếp trên trang xem trước)
+**Đã hoàn thành**
+- Backend `app/modules/catalog`: bảng `products` (migration đã thử lên/xuống); API `GET /api/products` (tìm kiếm có escape ký tự `%`/`_`, lọc danh mục, phân trang tối đa 48), `GET /api/products/{slug}`, `GET /api/categories`; seed 16 sản phẩm mẫu; 11 test mới, tổng 34 test qua.
+- Frontend: trang chủ có tìm kiếm, lọc danh mục, lưới sản phẩm, phân trang, đủ trạng thái tải/rỗng/lỗi; trang chi tiết sản phẩm; bộ lọc nằm trên URL; tự cuộn lên đầu khi đổi trang; ảnh minh họa tự vẽ theo danh mục (chạy offline, không vướng bản quyền ảnh).
+- Đã kiểm tra trên trình duyệt: lọc, tìm, không có kết quả, link sản phẩm hỏng, màn hình điện thoại 375px (không tràn ngang).
+
+**Sự cố và cách xử lý**
+- `uvicorn --reload` lại kẹt: đã cài `watchfiles` (thêm vào `requirements-dev.txt`) để nạp lại code ổn định trên Windows.
+- ESLint bắt lỗi gọi `setState` trong `useEffect` và dùng `? :` như câu lệnh: đã sửa (dùng `key` để tạo lại ô tìm kiếm, tách hàm `setOrDelete`).
+
 ## 2026-10-30 — Module auth và hai khu vực giao diện
 **Đã hoàn thành**
 - Backend `app/modules/auth`: bảng users, devices, user_devices, user_ips, auth_sessions (migration `auth tables`, đã thử upgrade/downgrade/upgrade); API register/login/logout/me; mật khẩu Argon2id; phiên lưu bản băm token, cookie HttpOnly + SameSite=Lax; thông báo đăng nhập sai không lộ email; `require_roles` chặn theo vai trò ở backend; ghi nhận thiết bị (header `X-Device-Id`) và IP (chỉ lưu bản băm HMAC + bản che); CLI tạo tài khoản nhân viên. 23 test qua, chạy trên CSDL `riskshop_test` qua migration thật.

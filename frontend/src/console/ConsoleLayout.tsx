@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 // Các mục menu theo kịch bản demo. Mục chưa làm thì hiện mờ (ready: false).
 const NAV_ITEMS = [
   { to: "/console", label: "Tổng quan", ready: true, end: true },
+  { to: "/console/orders", label: "Đơn hàng", ready: true },
   { to: "/console/monitor", label: "Live Monitor", ready: false },
   { to: "/console/cases", label: "Case", ready: false },
   { to: "/console/rules", label: "Luật rủi ro", ready: false },
@@ -23,7 +24,10 @@ export function ConsoleLayout() {
   return (
     <div className="flex min-h-svh">
       <aside className="hidden w-56 shrink-0 border-r bg-muted/30 p-4 md:block">
-        <Link to="/console" className="block px-2 text-lg font-semibold tracking-tight">
+        <Link
+          to="/console"
+          className="block px-2 text-lg font-semibold tracking-tight"
+        >
           Risk Console
         </Link>
         <nav className="mt-6 grid gap-1 text-sm">
@@ -36,17 +40,20 @@ export function ConsoleLayout() {
                 className={({ isActive }) =>
                   cn(
                     "rounded-md px-2 py-1.5 hover:bg-muted",
-                    isActive && "bg-muted font-medium text-foreground",
+                    isActive && "bg-muted font-medium text-foreground"
                   )
                 }
               >
                 {item.label}
               </NavLink>
             ) : (
-              <span key={item.to} className="cursor-not-allowed rounded-md px-2 py-1.5 text-muted-foreground/60">
+              <span
+                key={item.to}
+                className="cursor-not-allowed rounded-md px-2 py-1.5 text-muted-foreground/60"
+              >
                 {item.label} <span className="text-xs">(sắp có)</span>
               </span>
-            ),
+            )
           )}
         </nav>
       </aside>
@@ -66,7 +73,11 @@ export function ConsoleLayout() {
               variant="ghost"
               size="sm"
               disabled={logout.isPending}
-              onClick={() => logout.mutate(undefined, { onSuccess: () => navigate("/login") })}
+              onClick={() =>
+                logout.mutate(undefined, {
+                  onSuccess: () => navigate("/login"),
+                })
+              }
             >
               Đăng xuất
             </Button>

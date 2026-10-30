@@ -19,7 +19,7 @@ description: Gỡ lỗi có phương pháp cho đồ án (backend FastAPI, front
 - Python sai môi trường: kích hoạt đúng `.venv` của thư mục `backend/`.
 - Ổ C gần đầy: cache và cài đặt để ở ổ D.
 - Ký tự xuống dòng LF/CRLF: cảnh báo của Git, không phải lỗi.
-- `uvicorn --reload` trên Windows đôi khi kẹt ở dòng "Reloading..." mà không khởi động lại: API mới trả 404. Cách xử lý: dừng hẳn server rồi chạy lại.
+- `uvicorn --reload` trên Windows hay kẹt ở dòng "Reloading..." (kể cả khi dùng watchfiles), nhất là khi tạo nhiều file mới liên tiếp: API mới trả 404. Quy ước: khi Claude chạy backend thì **không dùng `--reload`**, mà dừng rồi chạy lại sau mỗi đợt sửa backend.
 - In tiếng Việt từ script Python ra cửa sổ dòng lệnh Windows bị `UnicodeEncodeError`: gọi `sys.stdout.reconfigure(encoding="utf-8")` ở đầu script.
 - Cài thêm gói npm khi `npm run dev` đang chạy: trình duyệt có thể báo "Invalid hook call" hoặc "Outdated Optimize Dep". Tải lại trang (hoặc khởi động lại dev server) là hết.
 

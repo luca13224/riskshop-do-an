@@ -19,6 +19,12 @@
 
 Tổng: **29 bảng** (27 MVP + 2 Recommended). `account_risk_profiles` chưa vẽ trong sơ đồ vì là Recommended (xem mục 8).
 
+**Bổ sung khi làm module order (2026-10-30):** `orders` thêm `payment_status` (UNPAID/PAID) và `voucher_code`; UNIQUE(`user_id`, `idempotency_key`); `order_items` thêm `category` (chụp lại lúc đặt); `addresses` thuộc module order, UNIQUE(`user_id`, `norm_hash`) để không tạo trùng địa chỉ của cùng người; `voucher_redemptions` thuộc module promotion, UNIQUE(`voucher_id`, `user_id`) và UNIQUE(`order_id`); `shipment_events` thêm `actor_id`.
+
+**Bổ sung khi làm module cart + promotion (2026-10-30):** `carts` bỏ cột `status`, thay bằng `UNIQUE(user_id)` (mỗi khách đúng một giỏ, đặt hàng xong thì làm trống); `vouchers` thêm `max_discount` (trần giảm cho loại percent) và `description`; `cart_items` thêm `added_at`. Bảng `voucher_redemptions` sẽ tạo cùng module order (ghi lượt dùng tại thời điểm đặt hàng).
+
+**Bổ sung khi làm module catalog (2026-10-30):** bảng `products` có thêm cột `category` (VARCHAR(32), mã danh mục cố định trong code: audio, computer, home, fashion, sport) và index `(is_active, category)`. Chưa cần bảng `categories` riêng (mục 8).
+
 **Bổ sung khi làm module auth (2026-10-30):** bảng `auth_sessions` (id, `token_hash` CHAR(64) UNIQUE, `user_id` FK, `device_id` FK nullable, `created_at`, `expires_at`, `revoked_at`). Cookie phiên chứa token ngẫu nhiên; CSDL chỉ lưu SHA-256 của token, nên lộ CSDL cũng không dùng lại được phiên. Đăng xuất là ghi `revoked_at`, nên phiên bị thu hồi ngay ở phía server.
 
 ## 2. Nhóm người dùng và bán hàng

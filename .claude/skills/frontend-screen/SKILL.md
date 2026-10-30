@@ -21,7 +21,7 @@ description: Chuẩn dựng một màn hình React + TypeScript + Tailwind + sha
 - Tuân thủ skill `ui-design-bar`: tokens, chữ tiếng Việt, khả năng truy cập (accessibility).
 
 ## Tự kiểm tra trước khi đưa Luca xem
-Chạy `npm run build` (bắt lỗi TypeScript), mở trang bằng trình duyệt tích hợp, chụp màn hình ở 375 px và 1440 px, đọc console trình duyệt, bấm thử mọi nút. Báo lại những gì đã kiểm tra.
+Chạy `npm run build` (bắt lỗi TypeScript) và `npm run lint` (bắt lỗi kiểu như gọi `setState` trong `useEffect`, dùng `? :` như câu lệnh), mở trang bằng trình duyệt tích hợp, chụp màn hình ở 375 px và 1440 px, đọc console trình duyệt, bấm thử mọi nút. Báo lại những gì đã kiểm tra.
 
 ## Khi dạy Luca
 Luca chưa học TypeScript. Lần đầu gặp một khái niệm (type, interface, generic, hook), giải thích ngắn bằng ví dụ ngay trong màn hình đang làm. Đề nghị Luca tự viết phần dễ (khai báo type, một component nhỏ), Claude review.

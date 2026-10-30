@@ -59,7 +59,10 @@ export function useLogin() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: LoginInput) =>
-      apiFetch<User>("/api/auth/login", { method: "POST", body: JSON.stringify(input) }),
+      apiFetch<User>("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
     onSuccess: (user) => queryClient.setQueryData(ME_KEY, user),
   })
 }
@@ -68,7 +71,10 @@ export function useRegister() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: RegisterInput) =>
-      apiFetch<User>("/api/auth/register", { method: "POST", body: JSON.stringify(input) }),
+      apiFetch<User>("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
     onSuccess: (user) => queryClient.setQueryData(ME_KEY, user),
   })
 }

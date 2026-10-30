@@ -26,7 +26,10 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+export async function apiFetch<T>(
+  path: string,
+  init?: RequestInit
+): Promise<T> {
   let response: Response
   try {
     response = await fetch(path, {
@@ -41,7 +44,10 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     })
   } catch {
     // Không tới được server: backend chưa chạy hoặc mất mạng
-    throw new ApiError(0, { code: "NETWORK_ERROR", message: "Không kết nối được máy chủ." })
+    throw new ApiError(0, {
+      code: "NETWORK_ERROR",
+      message: "Không kết nối được máy chủ.",
+    })
   }
 
   if (!response.ok) {

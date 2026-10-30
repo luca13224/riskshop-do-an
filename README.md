@@ -14,8 +14,10 @@ Sinh viên: Luca — Hệ thống thông tin quản lý, Trường Đại học 
    .venv/Scripts/python -m pip install -r requirements-dev.txt
    cp .env.example .env   # rồi điền mật khẩu CSDL
    .venv/Scripts/alembic upgrade head
+   .venv/Scripts/python -m app.modules.catalog.seed     # 16 sản phẩm mẫu (chạy lại an toàn)
+   .venv/Scripts/python -m app.modules.promotion.seed   # voucher TANTHU, GIAM10
    ```
-   Chạy: `.venv/Scripts/python -m uvicorn app.main:app --reload --port 8000` → tài liệu API: http://localhost:8000/docs
+   Chạy: `.venv/Scripts/python -m uvicorn app.main:app --port 8000` (sửa code backend xong thì dừng và chạy lại; `--reload` hay bị kẹt trên Windows) → tài liệu API: http://localhost:8000/docs
    Test: `.venv/Scripts/python -m pytest -q`
 3. **Frontend** (lần đầu `npm install`): `cd frontend && npm run dev` → http://localhost:5173
 
