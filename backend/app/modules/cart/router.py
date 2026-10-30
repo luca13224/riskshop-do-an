@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
-from app.modules.auth.deps import require_roles
+from app.modules.auth.deps import get_client_context, require_roles
+from app.modules.auth.service import ClientContext
 from app.modules.auth.models import CUSTOMER, User
 from app.modules.cart import service
 from app.modules.cart.schemas import AddItemIn, ApplyVoucherIn, CartOut, UpdateItemIn
@@ -34,8 +35,13 @@ def remove_item(product_id: int, user: User = Depends(customer), db: Session = D
 
 
 @router.post("/voucher", response_model=CartOut)
-def apply_voucher(data: ApplyVoucherIn, user: User = Depends(customer), db: Session = Depends(get_db)):
-    return service.apply_voucher(db, user, data.code)
+def apply_voucher(
+    data: ApplyVoucherIn,
+    user: User = Depends(customer),
+    db: Session = Depends(get_db),
+    client: ClientContext = Depends(get_client_context),
+):
+    return service.apply_voucher(db, user, data.code, client)
 
 
 @router.delete("/voucher", response_model=CartOut)

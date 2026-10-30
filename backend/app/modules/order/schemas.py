@@ -81,6 +81,11 @@ class StaffOrderOut(OrderSummaryOut):
     customer_name: str
 
 
+class PaymentOptionsOut(BaseModel):
+    cod_allowed: bool
+    message: str | None
+
+
 class ShipmentUpdateIn(BaseModel):
     status: Literal["SHIPPING", "DELIVERED", "DELIVERY_FAILED"]
     note: str = Field(default="", max_length=255)

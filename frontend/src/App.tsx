@@ -5,6 +5,7 @@ import { ConsoleLayout } from "@/console/ConsoleLayout"
 import { RequireStaff } from "@/console/RequireStaff"
 import { ConsoleHomePage } from "@/console/pages/ConsoleHomePage"
 import { ConsoleOrdersPage } from "@/console/pages/ConsoleOrdersPage"
+import { LiveMonitorPage } from "@/console/pages/LiveMonitorPage"
 import { ShopLayout } from "@/shop/ShopLayout"
 import { CartPage } from "@/shop/pages/CartPage"
 import { CheckoutPage } from "@/shop/pages/CheckoutPage"
@@ -36,6 +37,7 @@ export function App() {
           <Route element={<ConsoleLayout />}>
             <Route index element={<ConsoleHomePage />} />
             <Route path="orders" element={<ConsoleOrdersPage />} />
+            <Route path="monitor" element={<LiveMonitorPage />} />
           </Route>
         </Route>
 

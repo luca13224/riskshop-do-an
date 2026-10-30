@@ -33,6 +33,12 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     return user
 
 
+def get_optional_user(request: Request, db: Session = Depends(get_db)) -> User | None:
+    """Người dùng hiện tại nếu đã đăng nhập, ngược lại None (cho các trang công khai)."""
+    token = request.cookies.get(get_settings().session_cookie_name)
+    return service.get_user_by_token(db, token) if token else None
+
+
 def require_roles(*roles: str) -> Callable[..., User]:
     """Chặn ở BACKEND: vai trò không nằm trong danh sách thì trả 403, dù frontend có ẩn nút hay không."""
 

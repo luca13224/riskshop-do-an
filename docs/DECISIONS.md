@@ -60,3 +60,15 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
   - Module `risk` không phụ thuộc module `order`; chỉ nhận ngữ cảnh đánh giá và trả về quyết định cùng `actions`.
   - Không đổi hướng kiến trúc lần nữa trừ khi có ADR mới với lý do rõ ràng.
 - Hệ quả / rủi ro: khối lượng frontend lớn hơn trong khi Luca chưa học Vite/TypeScript, nên học theo kiểu vừa làm vừa học, có review; Docker hoãn lại vì ổ C còn ít dung lượng.
+
+## ADR-004: Risk Engine đọc dữ liệu của module khác ở chế độ chỉ đọc, qua một lớp "feature store"
+- Ngày: 2026-10-30
+- Trạng thái: Accepted
+- Bối cảnh: Đặc trưng F01–F11 cần dữ liệu của nhiều module (users, user_devices, user_ips, addresses, orders, events). ADR-003 yêu cầu module `risk` không phụ thuộc `order`; trong khi `order` gọi `risk` lúc đặt hàng. Nếu `risk` import code của `order` sẽ tạo vòng phụ thuộc.
+- Các phương án:
+  - (1) Mỗi module tự cung cấp hàm đếm cho risk: đúng ranh giới nhưng gây vòng import order ↔ risk, và rải logic đặc trưng ra nhiều nơi.
+  - (2) Risk đọc bảng của module khác bằng SQL thuần, chỉ đọc, tập trung trong `risk/features.py`.
+  - (3) Bảng tổng hợp riêng do worker cập nhật bất đồng bộ (account_risk_profiles): tách biệt hoàn toàn, nhưng phức tạp và có độ trễ dữ liệu.
+- Quyết định: (2) cho MVP. (3) để Recommended khi dữ liệu lớn.
+- Lý do: không có vòng import; toàn bộ định nghĩa đặc trưng nằm ở một file, dễ đọc và dễ bảo vệ; đúng mô hình thực tế (hệ thống rủi ro đọc dữ liệu giao dịch). Ghi dữ liệu vẫn chỉ qua module sở hữu.
+- Hệ quả / rủi ro: risk phụ thuộc vào TÊN bảng và cột của module khác; đổi cấu trúc các bảng đó phải kiểm tra lại `features.py` (test kịch bản trong `tests/test_risk_scenarios.py` sẽ báo lỗi nếu lệch).

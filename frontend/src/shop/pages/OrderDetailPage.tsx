@@ -44,6 +44,19 @@ export function OrderDetailPage() {
         </div>
       )}
 
+      {order.data.status === "PENDING_REVIEW" && (
+        <div
+          className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm"
+          role="status"
+        >
+          <p className="font-medium">Đơn hàng đang chờ xác minh</p>
+          <p className="text-muted-foreground">
+            Để bảo vệ bạn và người bán, đơn hàng này cần được xác nhận thêm
+            trước khi giao. Chúng tôi sẽ liên hệ qua số điện thoại nhận hàng.
+          </p>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Link

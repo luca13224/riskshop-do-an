@@ -4,7 +4,12 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
+from app.modules.auth.deps import get_client_context, get_optional_user
+from app.modules.auth.models import User
+from app.modules.auth.service import ClientContext
 from app.modules.catalog import service
+from app.modules.events import service as events
+from app.modules.events.models import PRODUCT_VIEW
 from app.modules.catalog.models import CATEGORIES
 from app.modules.catalog.schemas import CategoryOut, ProductOut, ProductPage
 
@@ -23,8 +28,20 @@ def list_products(
 
 
 @router.get("/products/{slug}", response_model=ProductOut)
-def get_product(slug: str, db: Session = Depends(get_db)):
-    return service.get_product_by_slug(db, slug)
+def get_product(
+    slug: str,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(get_optional_user),
+    ctx: ClientContext = Depends(get_client_context),
+):
+    product = service.get_product_by_slug(db, slug)
+    # Ghi lượt xem sản phẩm (đặc trưng F06: người thật thường xem sản phẩm trước khi mua)
+    events.record(
+        db, PRODUCT_VIEW, user_id=user.id if user else None, device_uid=ctx.device_uid, ip=ctx.ip,
+        payload={"product_id": product.id},
+    )
+    db.commit()
+    return product
 
 
 @router.get("/categories", response_model=list[CategoryOut])

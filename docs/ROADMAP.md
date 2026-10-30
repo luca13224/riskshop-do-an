@@ -25,7 +25,7 @@
 - [x] Module catalog + seed 16 sản phẩm; trang danh sách (tìm kiếm, lọc danh mục, phân trang) và chi tiết sản phẩm
 - [x] Module cart + promotion: giỏ hàng, áp voucher theo luật nghiệp vụ, tự gỡ voucher khi giỏ hết đủ điều kiện
 - [x] Module order + fulfillment: checkout (COD/trả trước, idempotency, ghi lượt dùng voucher chống race condition), lịch sử đơn, giả lập giao hàng
-- [ ] Module events (telemetry: product_view, voucher_attempt, signup, login) + module risk: đặc trưng F01–F11, luật v0, ma trận quyết định, nối vào voucher_apply / payment_options / place_order
-- [ ] Console: Live Monitor (SSE), Case Queue, Case Detail, Rules, Attack Lab, Audit Log
+- [x] Module events + module risk: đặc trưng F01–F11, luật v1, ma trận quyết định, nối vào voucher_apply / payment_options / place_order; Live Monitor (polling)
+- [ ] Console: Case Queue, Case Detail, Rules, Attack Lab, Audit Log (Live Monitor đã có bản polling; SSE là Recommended)
 - [ ] (Recommended) Giới hạn số lần thử đăng nhập (rate limit)
 - [ ] Hỏi hạn nộp và yêu cầu của GVHD; chốt 2 nhóm chính sách (voucher tân thủ + COD)

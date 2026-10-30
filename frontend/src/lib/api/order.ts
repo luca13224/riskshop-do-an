@@ -143,3 +143,16 @@ export function useUpdateShipment() {
       queryClient.invalidateQueries({ queryKey: ["console", "orders"] }),
   })
 }
+
+// Risk Engine (context payment_options): có cho thanh toán COD với giỏ hiện tại không
+export function usePaymentOptions(enabled: boolean) {
+  return useQuery({
+    queryKey: ["payment-options"],
+    queryFn: () =>
+      apiFetch<{ cod_allowed: boolean; message: string | null }>(
+        "/api/orders/payment-options"
+      ),
+    enabled,
+    staleTime: 0,
+  })
+}

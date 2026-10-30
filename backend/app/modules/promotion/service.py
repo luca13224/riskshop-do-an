@@ -27,6 +27,7 @@ class AppliedVoucher:
     description: str
     discount: int
     risk_checked: bool
+    new_user_only: bool
 
 
 def normalize_code(code: str) -> str:
@@ -82,6 +83,7 @@ def validate(db: Session, voucher: Voucher | None, user: User, subtotal: int) ->
         description=voucher.description,
         discount=compute_discount(voucher, subtotal),
         risk_checked=voucher.risk_checked,
+        new_user_only=voucher.new_user_only,
     )
 
 

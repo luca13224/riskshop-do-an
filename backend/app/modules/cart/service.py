@@ -10,6 +10,11 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
 from app.modules.auth.models import User
+from app.modules.auth.service import ClientContext
+from app.modules.events import service as events
+from app.modules.events.models import VOUCHER_ATTEMPT
+from app.modules.risk import service as risk
+from app.modules.risk.models import VOUCHER_APPLY
 from app.modules.cart.models import Cart, CartItem
 from app.modules.cart.schemas import CartItemOut, CartOut, CartVoucherOut
 from app.modules.catalog import service as catalog
@@ -66,18 +71,40 @@ def remove_item(db: Session, user: User, product_id: int) -> CartOut:
     return view_cart(db, user)
 
 
-def apply_voucher(db: Session, user: User, code: str) -> CartOut:
+def apply_voucher(db: Session, user: User, code: str, client: ClientContext) -> CartOut:
     cart = _get_or_create_cart(db, user)
     items, subtotal = _load_items(db, cart)
     if not items:
         raise AppError("CART_EMPTY", "Giỏ hàng đang trống.", 409)
+
+    # Ghi lần thử (kể cả mã sai) và commit ngay: đây là đặc trưng F05 cho luật R05 "thử mã liên tục"
+    events.record(db, VOUCHER_ATTEMPT, user_id=user.id, device_uid=client.device_uid, ip=client.ip,
+                  payload={"code": promotion.normalize_code(code)})
+    db.commit()
+
     voucher = promotion.find_voucher(db, code)
-    promotion.validate(db, voucher, user, subtotal)  # sai điều kiện -> AppError
-    # Chỗ nối Risk Engine (context voucher_apply) sẽ đặt ở đây khi làm module risk:
-    # voucher có risk_checked=True -> chấm điểm -> có thể gỡ voucher (ALLOW_WITH_RESTRICTION).
-    cart.voucher_id = voucher.id
+    applied = promotion.validate(db, voucher, user, subtotal)  # luật NGHIỆP VỤ: sai điều kiện -> AppError
+
+    if applied.risk_checked:
+        # Luật RỦI RO (context voucher_apply)
+        result = risk.evaluate(db, risk.EvaluationRequest(
+            context=VOUCHER_APPLY, user=user, client=client, order_value=subtotal,
+            voucher_code=applied.code, voucher_new_user=applied.new_user_only,
+        ))
+        risk.record(db, result)
+        if result.actions["remove_voucher"]:
+            db.commit()
+            # Thông điệp chung chung: không nói luật nào khớp, để kẻ gian không học được luật
+            raise AppError("VOUCHER_NOT_APPLICABLE", result.customer_message, 409)
+
+    cart.voucher_id = applied.id
     db.commit()
     return view_cart(db, user)
+
+
+def drop_voucher(db: Session, user: User) -> None:
+    """Gỡ voucher khỏi giỏ (Risk Engine yêu cầu lúc đặt hàng). Bên gọi commit."""
+    _get_or_create_cart(db, user).voucher_id = None
 
 
 def remove_voucher(db: Session, user: User) -> CartOut:

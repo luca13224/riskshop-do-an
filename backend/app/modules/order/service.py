@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from app.core.errors import AppError
 from app.core.time import utcnow
 from app.modules.auth.models import User
+from app.modules.auth.service import ClientContext
 from app.modules.cart import service as cart
 from app.modules.catalog import service as catalog
 from app.modules.order import models as m
@@ -32,6 +33,8 @@ from app.modules.order.schemas import (
     StaffOrderOut,
 )
 from app.modules.promotion import service as promotion
+from app.modules.risk import service as risk
+from app.modules.risk.models import PAYMENT_OPTIONS, PLACE_ORDER
 
 IDEMPOTENCY_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")
 
@@ -56,8 +59,12 @@ def normalize_address(a: AddressIn) -> str:
     return "|".join(" ".join(part.split()) for part in raw.split("|"))
 
 
+def address_hash(a: AddressIn) -> str:
+    return hashlib.sha256(normalize_address(a).encode()).hexdigest()
+
+
 def _save_address(db: Session, user: User, a: AddressIn) -> int:
-    norm_hash = hashlib.sha256(normalize_address(a).encode()).hexdigest()
+    norm_hash = address_hash(a)
     db.execute(
         mysql_insert(m.Address)
         .values(user_id=user.id, norm_hash=norm_hash, created_at=utcnow(), **a.model_dump())
@@ -74,7 +81,9 @@ def _new_order_code() -> str:
     return "RS" + utcnow().strftime("%y%m%d") + "".join(secrets.choice(alphabet) for _ in range(6))
 
 
-def checkout(db: Session, user: User, data: CheckoutIn, idempotency_key: str) -> tuple[OrderOut, bool]:
+def checkout(
+    db: Session, user: User, data: CheckoutIn, idempotency_key: str, client: ClientContext
+) -> tuple[OrderOut, bool]:
     """Trả về (đơn, created). created=False nghĩa là request lặp lại (cùng Idempotency-Key)."""
     if not IDEMPOTENCY_RE.match(idempotency_key or ""):
         raise AppError("IDEMPOTENCY_KEY_REQUIRED", "Thiếu hoặc sai định dạng Idempotency-Key.", 400)
@@ -96,15 +105,34 @@ def checkout(db: Session, user: User, data: CheckoutIn, idempotency_key: str) ->
             # Kiểm tra lại: từ lúc áp mã tới lúc đặt hàng, voucher có thể đã hết hạn/hết lượt
             applied = promotion.validate(db, promotion.get_voucher(db, voucher_id), user, subtotal)
         discount = applied.discount if applied else 0
+        # Lưu địa chỉ TRƯỚC khi chấm điểm, để đặc trưng F03 (tài khoản chung địa chỉ) tính cả đơn này
+        address_id = _save_address(db, user, data.address)
 
-        # Chỗ nối Risk Engine (context place_order) sẽ đặt ở đây khi làm module risk:
-        # quyết định có thể là REVIEW (status = PENDING_REVIEW), từ chối COD, hoặc BLOCK.
-        status = m.CONFIRMED
+        # ---- Risk Engine, context place_order: lớp bảo vệ cuối, luôn chạy ở server ----
+        result = risk.evaluate(db, risk.EvaluationRequest(
+            context=PLACE_ORDER, user=user, client=client, order_value=subtotal - discount,
+            voucher_code=applied.code if applied else None,
+            voucher_new_user=applied.new_user_only if applied else None,
+            payment_method=data.payment_method, address_hash=address_hash(data.address),
+        ))
+        actions = result.actions
+        if actions["block"] or actions["disable_cod"] or actions["remove_voucher"]:
+            # Không tạo đơn: hoàn tác giữ chỗ tồn kho..., nhưng VẪN lưu quyết định để truy vết
+            db.rollback()
+            if actions["remove_voucher"]:
+                cart.drop_voucher(db, user)
+            risk.record(db, result)
+            db.commit()
+            if actions["block"]:
+                raise AppError("ORDER_BLOCKED", result.customer_message, 403)
+            code = "VOUCHER_NOT_APPLICABLE" if actions["remove_voucher"] else "COD_NOT_AVAILABLE"
+            raise AppError(code, result.customer_message, 409)
+        status = m.PENDING_REVIEW if actions["hold_order"] else m.CONFIRMED
 
         order = m.Order(
             order_code=_new_order_code(),
             user_id=user.id,
-            address_id=_save_address(db, user, data.address),
+            address_id=address_id,
             status=status,
             payment_method=data.payment_method,
             # Trả trước: cổng thanh toán là giả lập (sandbox), coi như đã thanh toán ngay
@@ -131,6 +159,7 @@ def checkout(db: Session, user: User, data: CheckoutIn, idempotency_key: str) ->
             )
         if applied:
             promotion.redeem(db, applied, user, order.id)
+        risk.record(db, result, order_id=order.id)
         cart.clear_cart(db, user)
         db.commit()
     except AppError:
@@ -144,6 +173,23 @@ def checkout(db: Session, user: User, data: CheckoutIn, idempotency_key: str) ->
             return get_order(db, user, existing.order_code), False
         raise
     return get_order(db, user, order.order_code), True
+
+
+def payment_options(db: Session, user: User, client: ClientContext) -> dict:
+    """Risk Engine, context payment_options: có cho thanh toán COD với giỏ hiện tại không.
+
+    Chỉ để giao diện ẩn nút COD cho đẹp; lớp chặn thật vẫn là lần chấm điểm lúc đặt hàng.
+    """
+    quantities, voucher_id = cart.get_checkout_snapshot(db, user)
+    products = catalog.get_active_products(db, list(quantities))
+    subtotal = sum(products[pid].price * qty for pid, qty in quantities.items() if pid in products)
+    result = risk.evaluate(db, risk.EvaluationRequest(
+        context=PAYMENT_OPTIONS, user=user, client=client, order_value=subtotal, payment_method=m.COD,
+    ))
+    risk.record(db, result)
+    db.commit()
+    cod_allowed = not result.actions["disable_cod"]
+    return {"cod_allowed": cod_allowed, "message": None if cod_allowed else result.customer_message}
 
 
 def _find_by_key(db: Session, user: User, key: str) -> m.Order | None:

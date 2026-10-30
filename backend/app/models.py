@@ -8,3 +8,5 @@ from app.modules.catalog import models as catalog_models  # noqa: F401
 from app.modules.promotion import models as promotion_models  # noqa: F401
 from app.modules.cart import models as cart_models  # noqa: F401
 from app.modules.order import models as order_models  # noqa: F401
+from app.modules.events import models as event_models  # noqa: F401
+from app.modules.risk import models as risk_models  # noqa: F401

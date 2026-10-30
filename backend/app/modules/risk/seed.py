@@ -1,0 +1,121 @@
+"""Bộ luật v1 (theo docs/RULES_V0.md) và ngưỡng của ma trận quyết định.
+
+    python -m app.modules.risk.seed
+
+Chạy lại an toàn: luật đã có thì GIỮ NGUYÊN (không ghi đè phiên bản mà Risk Manager có thể đã sửa).
+Mọi con số là lập luận chuyên gia ban đầu, sẽ hiệu chỉnh trên tập dev rồi khóa trước khi chạy tập test.
+"""
+
+import sys
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+import app.models  # noqa: F401  (nạp đủ model để khóa ngoại tới users được nhận ra)
+from app.core.db import SessionLocal
+from app.modules.risk.models import PAYMENT_OPTIONS, PLACE_ORDER, VOUCHER_APPLY, DecisionPolicy, Rule, RuleVersion
+
+V, C = "voucher", "cod"
+
+RULES = [
+    dict(code="VCH_NEW_ACCOUNT", name="R01 · Tài khoản mới dùng voucher tân thủ", rule_type="compound",
+         strength="weak", policies=[V], contexts=[VOUCHER_APPLY, PLACE_ORDER],
+         params={"conditions": [{"feature": "voucher_new_user", "op": "eq", "value": True},
+                                {"feature": "account_age_hours", "op": "lt", "value": 24}], "points": 10},
+         reason_template="Tài khoản mới tạo {account_age_hours} giờ dùng voucher tân thủ"),
+    dict(code="DEV_MULTI_NEW_ACCOUNTS", name="R02 · Nhiều tài khoản mới trên cùng thiết bị", rule_type="count_threshold_tiers",
+         strength="strong", policies=[V], contexts=[VOUCHER_APPLY, PLACE_ORDER],
+         params={"feature": "new_accounts_on_device_30d", "tiers": [{"gte": 5, "points": 50}, {"gte": 3, "points": 35}]},
+         reason_template="{value} tài khoản mới trên cùng thiết bị trong 30 ngày (ngưỡng {threshold})"),
+    dict(code="ADDR_MULTI_ACCOUNTS", name="R03 · Nhiều tài khoản cùng địa chỉ giao hàng", rule_type="count_threshold_tiers",
+         strength="medium", policies=[V], contexts=[PLACE_ORDER],
+         params={"feature": "accounts_on_address_30d", "tiers": [{"gte": 5, "points": 30}, {"gte": 3, "points": 20}]},
+         reason_template="{value} tài khoản dùng chung địa chỉ giao hàng trong 30 ngày (ngưỡng {threshold})"),
+    dict(code="IP_MULTI_NEW_ACCOUNTS", name="R04 · Nhiều tài khoản mới cùng IP", rule_type="count_threshold_tiers",
+         strength="weak", policies=[V], contexts=[VOUCHER_APPLY, PLACE_ORDER],
+         params={"feature": "new_accounts_on_ip_24h", "tiers": [{"gte": 3, "points": 10}]},
+         reason_template="{value} tài khoản mới cùng IP trong 24 giờ (ngưỡng {threshold}, tín hiệu yếu)"),
+    dict(code="VCH_VELOCITY", name="R05 · Thử mã giảm giá liên tục", rule_type="count_threshold_tiers",
+         strength="strong", policies=[V], contexts=[VOUCHER_APPLY],
+         params={"feature": "voucher_attempts_device_10m", "tiers": [{"gte": 5, "points": 25}]},
+         reason_template="{value} lần thử mã giảm giá từ cùng thiết bị trong 10 phút (ngưỡng {threshold})"),
+    dict(code="BOT_SPEED", name="R06 · Tốc độ thao tác giống bot", rule_type="compound",
+         strength="medium", policies=[V, C], contexts=[PAYMENT_OPTIONS, PLACE_ORDER],
+         params={"conditions": [{"feature": "signup_to_checkout_sec", "op": "lt", "value": 60},
+                                {"feature": "product_views_24h", "op": "eq", "value": 0}], "points": 20},
+         reason_template="Đặt hàng {signup_to_checkout_sec} giây sau khi đăng ký, chưa xem sản phẩm nào"),
+    dict(code="COD_FAIL_RATE", name="R07 · Tỷ lệ giao COD thất bại cao", rule_type="rate_threshold_tiers",
+         strength="medium", policies=[C], contexts=[PAYMENT_OPTIONS, PLACE_ORDER],
+         params={"rate_feature": "cod_fail_rate_smoothed", "count_feature": "cod_finished", "min_count": 3,
+                 "tiers": [{"gte": 0.30, "points": 45, "strength": "strong"}, {"gte": 0.20, "points": 25}]},
+         reason_template="Tỷ lệ giao COD thất bại {rate} trên {count} đơn (ngưỡng {threshold})"),
+    dict(code="COD_HIGH_VALUE_LOW_HISTORY", name="R08 · COD giá trị cao, ít lịch sử", rule_type="compound",
+         strength="medium", policies=[C], contexts=[PAYMENT_OPTIONS, PLACE_ORDER],
+         params={"conditions": [{"feature": "payment_cod", "op": "eq", "value": True},
+                                {"feature": "delivered_orders", "op": "lt", "value": 2}],
+                 "tiers": {"feature": "order_value", "levels": [
+                     {"gte": 5_000_000, "points": 70, "strength": "strong"}, {"gte": 3_000_000, "points": 40}]}},
+         reason_template="Đơn COD {value}đ từ tài khoản mới có {delivered_orders} đơn giao thành công"),
+    dict(code="GOOD_HISTORY", name="R09 · Khách uy tín (luật tích cực)", rule_type="compound",
+         strength="positive", policies=[C], contexts=[PAYMENT_OPTIONS, PLACE_ORDER],
+         params={"conditions": [{"feature": "delivered_orders", "op": "gte", "value": 10},
+                                {"feature": "fail_rate_raw", "op": "lte", "value": 0.05}], "points": -30},
+         reason_template="Khách uy tín: {delivered_orders} đơn giao thành công"),
+    dict(code="COD_OPEN_ORDERS", name="R10 · Treo nhiều đơn COD", rule_type="count_threshold_tiers",
+         strength="medium", policies=[C], contexts=[PAYMENT_OPTIONS, PLACE_ORDER],
+         params={"feature": "open_cod_orders", "tiers": [{"gte": 3, "points": 25}]},
+         reason_template="{value} đơn COD đang chờ giao (ngưỡng {threshold})"),
+]
+
+POLICIES = {
+    VOUCHER_APPLY: {V: {"restrict": 50, "open_case": 80}},
+    PAYMENT_OPTIONS: {C: {"restrict": 40, "review": 70, "block": 90}},
+    PLACE_ORDER: {V: {"restrict": 50, "open_case": 80}, C: {"restrict": 40, "review": 70, "block": 90}},
+}
+
+
+def seed_rules(db: Session) -> int:
+    """Tạo luật còn thiếu. Luật đã có mà nội dung trong file này khác bản đang dùng
+    thì tạo PHIÊN BẢN MỚI (không sửa đè phiên bản cũ, để quyết định cũ vẫn truy vết được)."""
+    created = 0
+    for spec in RULES:
+        rule = db.scalar(select(Rule).where(Rule.code == spec["code"]))
+        if rule:
+            current = db.get(RuleVersion, rule.active_version_id)
+            if (current.contexts, current.params, current.reason_template) != (
+                spec["contexts"], spec["params"], spec["reason_template"]
+            ):
+                version = RuleVersion(rule_id=rule.id, version=current.version + 1, contexts=spec["contexts"],
+                                      params=spec["params"], reason_template=spec["reason_template"],
+                                      change_note="Cập nhật từ seed: đồng bộ payment_options với place_order")
+                db.add(version)
+                db.flush()
+                rule.active_version_id = version.id
+                created += 1
+            continue
+        rule = Rule(code=spec["code"], name=spec["name"], rule_type=spec["rule_type"],
+                    strength=spec["strength"], policies=spec["policies"])
+        db.add(rule)
+        db.flush()
+        version = RuleVersion(rule_id=rule.id, version=1, contexts=spec["contexts"], params=spec["params"],
+                              reason_template=spec["reason_template"], change_note="Phiên bản đầu (RULES_V0)")
+        db.add(version)
+        db.flush()
+        rule.active_version_id = version.id
+        created += 1
+    for context, thresholds in POLICIES.items():
+        active = db.scalar(select(DecisionPolicy).where(DecisionPolicy.context == context,
+                                                        DecisionPolicy.is_active.is_(True)))
+        if active is None or active.thresholds != thresholds:
+            if active:
+                active.is_active = False
+            db.add(DecisionPolicy(context=context, version=(active.version + 1) if active else 1,
+                                  thresholds=thresholds))
+    db.commit()
+    return created
+
+
+if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8")
+    with SessionLocal() as session:
+        print(f"Đã thêm hoặc nâng phiên bản {seed_rules(session)} luật (tổng {len(RULES)} luật).")

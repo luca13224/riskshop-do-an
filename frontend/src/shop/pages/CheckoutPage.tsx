@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
+import { useEffect, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { Link, Navigate, useNavigate } from "react-router"
 import { z } from "zod"
@@ -9,9 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useMe } from "@/lib/api/auth"
 import { useCart } from "@/lib/api/cart"
+import { ApiError } from "@/lib/api/client"
 import {
   PAYMENT_LABELS,
   useCheckout,
+  usePaymentOptions,
   type PaymentMethod,
 } from "@/lib/api/order"
 import { formatVND } from "@/lib/format"
@@ -54,7 +57,18 @@ export function CheckoutPage() {
     },
   })
   const { errors, isSubmitting } = form.formState
-  const paymentMethod = useWatch({ control: form.control, name: "payment_method" })
+  const paymentMethod = useWatch({
+    control: form.control,
+    name: "payment_method",
+  })
+  const queryClient = useQueryClient()
+  // Hỏi Risk Engine trước: nếu không cho COD thì tắt lựa chọn COD ngay trên giao diện
+  const options = usePaymentOptions(user?.role === "customer")
+  const codAllowed = options.data?.cod_allowed ?? true
+  useEffect(() => {
+    if (options.data && !options.data.cod_allowed)
+      form.setValue("payment_method", "PREPAID")
+  }, [options.data, form])
 
   if (isPending) return null
   if (!user) return <Navigate to="/login?next=/checkout" replace />
@@ -70,8 +84,14 @@ export function CheckoutPage() {
         payment_method,
       })
       navigate(`/orders/${order.order_code}?new=1`, { replace: true })
-    } catch {
-      // Lỗi hiển thị bên dưới nút đặt hàng
+    } catch (err) {
+      // Lỗi hiển thị bên dưới nút đặt hàng. Nếu Risk Engine vừa hạn chế, cập nhật lại giao diện:
+      if (err instanceof ApiError && err.code === "COD_NOT_AVAILABLE") {
+        await options.refetch()
+      }
+      if (err instanceof ApiError && err.code === "VOUCHER_NOT_APPLICABLE") {
+        await queryClient.invalidateQueries({ queryKey: ["cart"] }) // voucher đã bị gỡ khỏi giỏ
+      }
     }
   })
 
@@ -158,13 +178,17 @@ export function CheckoutPage() {
                   key={method}
                   className={cn(
                     "flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition hover:bg-muted/50",
-                    paymentMethod === method && "border-foreground"
+                    paymentMethod === method && "border-foreground",
+                    method === "COD" &&
+                      !codAllowed &&
+                      "cursor-not-allowed opacity-50"
                   )}
                 >
                   <input
                     type="radio"
                     value={method}
                     className="mt-1"
+                    disabled={method === "COD" && !codAllowed}
                     {...form.register("payment_method")}
                   />
                   <span>
@@ -173,7 +197,10 @@ export function CheckoutPage() {
                     </span>
                     <span className="block text-sm text-muted-foreground">
                       {method === "COD"
-                        ? "Trả tiền mặt cho nhân viên giao hàng."
+                        ? codAllowed
+                          ? "Trả tiền mặt cho nhân viên giao hàng."
+                          : (options.data?.message ??
+                            "Chưa hỗ trợ cho đơn hàng này.")
                         : "Cổng thanh toán mô phỏng, đơn được coi là đã thanh toán ngay."}
                     </span>
                   </span>

@@ -2,10 +2,18 @@ from fastapi import APIRouter, Depends, Header, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
-from app.modules.auth.deps import require_roles
+from app.modules.auth.deps import get_client_context, require_roles
 from app.modules.auth.models import ADMIN, CUSTOMER, RISK_MANAGER, STAFF_ROLES, User
+from app.modules.auth.service import ClientContext
 from app.modules.order import service
-from app.modules.order.schemas import CheckoutIn, OrderOut, OrderSummaryOut, ShipmentUpdateIn, StaffOrderOut
+from app.modules.order.schemas import (
+    CheckoutIn,
+    OrderOut,
+    OrderSummaryOut,
+    PaymentOptionsOut,
+    ShipmentUpdateIn,
+    StaffOrderOut,
+)
 
 router = APIRouter(tags=["order"])
 customer = require_roles(CUSTOMER)
@@ -18,11 +26,22 @@ def checkout(
     idempotency_key: str = Header(default="", alias="Idempotency-Key"),
     user: User = Depends(customer),
     db: Session = Depends(get_db),
+    client: ClientContext = Depends(get_client_context),
 ):
-    order, created = service.checkout(db, user, data, idempotency_key)
+    order, created = service.checkout(db, user, data, idempotency_key, client)
     if not created:
         response.status_code = status.HTTP_200_OK  # request lặp lại: trả đơn cũ, không tạo đơn mới
     return order
+
+
+@router.get("/orders/payment-options", response_model=PaymentOptionsOut)
+def payment_options(
+    user: User = Depends(customer),
+    db: Session = Depends(get_db),
+    client: ClientContext = Depends(get_client_context),
+):
+    # Khai báo TRƯỚC /orders/{order_code}, nếu không "payment-options" bị hiểu là một mã đơn
+    return service.payment_options(db, user, client)
 
 
 @router.get("/orders", response_model=list[OrderSummaryOut])

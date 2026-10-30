@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 const NAV_ITEMS = [
   { to: "/console", label: "Tổng quan", ready: true, end: true },
   { to: "/console/orders", label: "Đơn hàng", ready: true },
-  { to: "/console/monitor", label: "Live Monitor", ready: false },
+  { to: "/console/monitor", label: "Live Monitor", ready: true },
   { to: "/console/cases", label: "Case", ready: false },
   { to: "/console/rules", label: "Luật rủi ro", ready: false },
   { to: "/console/lab", label: "Attack Lab", ready: false },

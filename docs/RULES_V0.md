@@ -1,8 +1,17 @@
 # RULES V0 — Bộ luật rủi ro phiên bản đầu
 
-> Ngày: 2026-10-30 · Trạng thái: **Bản nháp v0, chờ Luca duyệt**
+> Ngày: 2026-10-30 · Trạng thái: **v0.1: đã cài đặt (Luca đã duyệt v0)**
 > Nguồn gốc các con số: **lập luận chuyên gia ban đầu [ĐX]**, chưa hiệu chỉnh trên dữ liệu. Mọi ngưỡng, điểm và cửa sổ thời gian là **tham số cấu hình**, sẽ hiệu chỉnh trên tập dev rồi khóa trước khi chạy tập test (xem bản tư vấn, mục 6.3 và 7.3).
 > Phạm vi: 2 nhóm chính sách là voucher tân thủ và COD (theo `DEMO_SCRIPT.md`).
+
+
+## 0. Thay đổi khi cài đặt (v0.1, 2026-10-30)
+Những điểm dưới đây được điều chỉnh khi lập trình Risk Engine; code và test là nguồn chính xác nhất (`backend/app/modules/risk/seed.py`).
+- **Điểm tính riêng theo chính sách:** mỗi lần đánh giá có điểm `voucher` và điểm `cod` riêng (luật thuộc chính sách nào thì cộng vào chính sách đó; R06 thuộc cả hai). Hành động áp theo từng chính sách: điểm voucher quyết định gỡ voucher, điểm COD quyết định tắt COD / giữ đơn / chặn. Quyết định tổng là mức nghiêm trọng nhất.
+- **R03 (địa chỉ) chỉ chạy ở `place_order`**, vì lúc áp voucher chưa có địa chỉ. Farm voucher dùng chung địa chỉ sẽ bị chặn voucher ở bước đặt hàng (trả lỗi `VOUCHER_NOT_APPLICABLE`, voucher bị gỡ khỏi giỏ, khách đặt lại với giá gốc).
+- **`payment_options` dùng cùng luật COD và cùng ngưỡng với `place_order`** (R06, R08 lên phiên bản 2): đơn sẽ bị hạn chế/chặn thì ẩn COD ngay; đơn sẽ bị giữ chờ duyệt thì vẫn cho chọn COD. Tránh giao diện và lúc đặt hàng mâu thuẫn nhau.
+- **Lúc đặt hàng bị hạn chế:** không tạo đơn, hoàn tác giữ chỗ tồn kho, nhưng vẫn lưu quyết định để truy vết.
+- **R07** mặc định độ mạnh "vừa"; chỉ bậc ≥ 0,30 là "mạnh". **R08** bậc 3 triệu "vừa", bậc 5 triệu "mạnh".
 
 ## 1. Ba điểm kiểm soát (evaluation context)
 

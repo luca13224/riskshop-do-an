@@ -18,6 +18,8 @@ from app.core.time import utcnow
 from app.modules.auth import security
 from app.modules.auth.models import CUSTOMER, AuthSession, Device, User, UserDevice, UserIp
 from app.modules.auth.schemas import RegisterIn
+from app.modules.events import models as event_types
+from app.modules.events import service as events
 
 _DEVICE_UID_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")
 
@@ -54,6 +56,7 @@ def register_customer(db: Session, data: RegisterIn, ctx: ClientContext) -> tupl
             raise AppError("PHONE_TAKEN", "Số điện thoại này đã được dùng.", 409) from exc
         raise AppError("EMAIL_TAKEN", "Email này đã được đăng ký.", 409) from exc
     token = _start_session(db, user, ctx)
+    events.record(db, event_types.SIGNUP, user_id=user.id, device_uid=ctx.device_uid, ip=ctx.ip)
     db.commit()
     return user, token
 
@@ -75,6 +78,7 @@ def login(db: Session, email: str, password: str, ctx: ClientContext) -> tuple[U
     if user.status != "active":
         raise AppError("ACCOUNT_LOCKED", "Tài khoản đang bị khóa. Vui lòng liên hệ hỗ trợ.", 403)
     token = _start_session(db, user, ctx)
+    events.record(db, event_types.LOGIN, user_id=user.id, device_uid=ctx.device_uid, ip=ctx.ip)
     db.commit()
     return user, token
 
@@ -102,7 +106,7 @@ def get_user_by_token(db: Session, token: str) -> User | None:
 
 
 def _start_session(db: Session, user: User, ctx: ClientContext) -> str:
-    device_id = _record_client(db, user, ctx)
+    device_id = record_client(db, user, ctx)
     token = security.new_session_token()
     db.add(
         AuthSession(
@@ -115,8 +119,10 @@ def _start_session(db: Session, user: User, ctx: ClientContext) -> str:
     return token
 
 
-def _record_client(db: Session, user: User, ctx: ClientContext) -> int | None:
+def record_client(db: Session, user: User, ctx: ClientContext) -> int | None:
     """Ghi nhận thiết bị và IP mà tài khoản vừa dùng (nguyên liệu cho luật R02, R04).
+
+    Hàm công khai: module risk gọi trước mỗi lần chấm điểm để số liệu luôn mới.
 
     Dùng INSERT ... ON DUPLICATE KEY UPDATE để an toàn khi nhiều request đến cùng lúc.
     """

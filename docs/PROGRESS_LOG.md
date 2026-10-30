@@ -2,6 +2,19 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Risk Engine v1
+**Đã hoàn thành**
+- Module `events` (signup, login, product_view, voucher_attempt) và `risk` (features F01–F11 đọc chỉ-đọc bằng SQL, 3 loại luật thuần, điểm theo từng chính sách voucher/COD, ma trận quyết định, fail-open/fail-closed, lưu quyết định + rule_hits bất biến, luật có phiên bản; seed R01–R10). Nối vào áp voucher, payment-options, checkout.
+- Console Live Monitor (polling 2 giây, bấm dòng để xem lý do). Checkout ẩn COD theo Risk Engine; đơn chờ xác minh có thông báo.
+- 90 test qua (20+ test kịch bản demo). Đã chạy thử "tấn công thu nhỏ": farm3 bị gỡ voucher, đơn COD 5,49 triệu chờ duyệt.
+- Sửa lỗi logic: payment_options dùng cùng luật/ngưỡng với place_order (R06, R08 lên v2; policy payment_options v2).
+
+- Đã kiểm tra trên trình duyệt: tài khoản mới, giỏ 3,78 triệu → COD bị khóa, tự chọn chuyển khoản; đơn 2,84 triệu của khách đã xem sản phẩm → cho qua (0 điểm, đúng luật).
+- ADR-004 (feature store chỉ đọc), RULES_V0 lên v0.1.
+
+**Việc tiếp theo**
+- Case Queue / Case Detail (worker mở case khi `open_case`), Rules UI, Attack Lab, Audit Log.
+
 ## 2026-10-30 — Đặt hàng: khép kín luồng mua hàng
 **Đã hoàn thành**
 - Backend `order`: checkout trong một transaction (khóa dòng sản phẩm `FOR UPDATE` theo thứ tự id, kiểm tra lại voucher, chụp giá vào đơn, ghi lượt voucher bằng `UPDATE` có điều kiện + UNIQUE, làm trống giỏ; lỗi thì rollback toàn bộ); bắt buộc header `Idempotency-Key` (gửi lặp trả đơn cũ, 200); địa chỉ chuẩn hóa + băm (cho luật R03); xem đơn của mình (đơn người khác trả 404); Console: danh sách đơn, giả lập giao hàng theo máy trạng thái (giao thất bại thì hoàn kho, COD giao thành công thì PAID). 68 test qua, gồm 2 test tranh chấp đồng thời (2 khách giành món cuối và lượt voucher cuối: đúng 1 thành công).

@@ -17,6 +17,7 @@ from app.modules.auth.router import router as auth_router
 from app.modules.cart.router import router as cart_router
 from app.modules.catalog.router import router as catalog_router
 from app.modules.order.router import router as order_router
+from app.modules.risk.router import router as risk_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
@@ -41,6 +42,7 @@ def create_app() -> FastAPI:
     app.include_router(catalog_router, prefix="/api")
     app.include_router(cart_router, prefix="/api")
     app.include_router(order_router, prefix="/api")
+    app.include_router(risk_router, prefix="/api")
     return app
 
 
