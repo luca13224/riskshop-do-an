@@ -1,5 +1,6 @@
 import { LogOut, Package, ShoppingBag, User } from "lucide-react"
-import { Link, NavLink, Outlet, useNavigate } from "react-router"
+import { useEffect, useState } from "react"
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router"
 
 import { Button } from "@/components/ui/button"
 import { isStaff, useLogout, useMe } from "@/lib/api/auth"
@@ -41,19 +42,61 @@ function Logo() {
   )
 }
 
+// Header có đang nằm trên phần nền tối của banner trang chủ không (để đổi sang giao diện tối).
+function useHeaderOverDark(): boolean {
+  const { pathname } = useLocation()
+  const [overDark, setOverDark] = useState(false)
+  useEffect(() => {
+    if (pathname !== "/") return
+    let raf = 0
+    function update() {
+      raf = 0
+      const dark = document.querySelector("[data-hero-dark]")
+      const header = document.querySelector("header")
+      if (!dark || !header) return setOverDark(false)
+      // Tối khi phần nền tối còn nằm dưới header VÀ "đèn rạp" chưa bật quá 1/3 (xem useLightsOn ở CinemaHero)
+      const hero = document.getElementById("hero")
+      const lights = hero
+        ? Number(getComputedStyle(hero).getPropertyValue("--lights") || 0)
+        : 0
+      setOverDark(
+        dark.getBoundingClientRect().bottom >
+          header.getBoundingClientRect().bottom && lights < 0.3
+      )
+    }
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update)
+    }
+    raf = requestAnimationFrame(update)
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      window.removeEventListener("scroll", onScroll)
+      cancelAnimationFrame(raf)
+      setOverDark(false)
+    }
+  }, [pathname])
+  return pathname === "/" && overDark
+}
+
 // Khung chung của khu vực Shop. Lớp .shop (index.css) giữ Shop luôn ở tông sáng (ADR-005).
 export function ShopLayout() {
   const { data: user } = useMe()
   const logout = useLogout()
   const navigate = useNavigate()
+  const overDark = useHeaderOverDark()
 
   return (
-    <div className="shop flex min-h-svh flex-col">
+    <div className="shop flex min-h-svh flex-col overflow-x-clip">
       <p className="bg-buy px-4 py-2 text-center text-xs font-medium text-buy-foreground sm:text-sm">
         Khách mới nhập mã <b>TANTHU</b> giảm 50.000đ cho đơn từ 200.000đ
       </p>
 
-      <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
+      <header
+        className={cn(
+          "sticky top-0 z-40 border-b bg-background/85 text-foreground backdrop-blur-md transition-colors duration-300",
+          overDark && "header-dark"
+        )}
+      >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <Logo />
 

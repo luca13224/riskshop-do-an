@@ -19,7 +19,6 @@ import { Link, useSearchParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useMe } from "@/lib/api/auth"
 import {
   useCategories,
   useProducts,
@@ -28,10 +27,10 @@ import {
 } from "@/lib/api/catalog"
 import { cn } from "@/lib/utils"
 import { CategoryIcon } from "@/shop/components/CategoryIcon"
+import { CinemaHero } from "@/shop/components/CinemaHero"
 import { ProductCard } from "@/shop/components/ProductCard"
 
 // Trang chủ theo nhịp các khối (ADR-005): banner → danh mục → nổi bật → câu chuyện → tất cả sản phẩm → cam kết.
-// Banner hiện tại là bản tạm; tuần 2 sẽ thay bằng banner "rạp chiếu phim".
 export function HomePage() {
   const [params, setParams] = useSearchParams()
   const category = (params.get("category") as CategoryCode | null) ?? undefined
@@ -48,66 +47,14 @@ export function HomePage() {
 
   return (
     // Lưới 1 cột minmax(0,1fr): cột không bị nội dung cuộn ngang (hàng Nổi bật) kéo giãn ra ngoài màn hình
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-16 pt-6 sm:gap-20">
-      <Hero />
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-16 sm:gap-20">
+      <CinemaHero onBrowse={pickCategory} />
       <CategoryTiles active={category} onPick={pickCategory} />
       <FeaturedRow />
       <StoryBanner />
       <AllProducts sectionRef={productsRef} onPickCategory={pickCategory} />
       <ServiceStrip />
     </div>
-  )
-}
-
-// ---------- Banner (bản tạm, tông tối, nhấn cyan theo ADR-005) ----------
-function Hero() {
-  const { data: user } = useMe()
-  return (
-    <section className="relative isolate overflow-hidden rounded-[2rem] bg-[#06080d] px-6 py-14 text-white sm:px-12 sm:py-20">
-      {/* Lưới chấm mờ + quầng sáng cyan: gợi hình bo mạch, chuẩn bị cho ẩn dụ "tín hiệu điện" */}
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 [background-image:radial-gradient(rgba(120,225,255,.35)_1px,transparent_1px)] [mask-image:radial-gradient(70%_80%_at_75%_40%,#000,transparent)] [background-size:22px_22px] opacity-40"
-      />
-      <div
-        aria-hidden
-        className="absolute -top-32 -right-24 -z-10 size-[28rem] rounded-full bg-cyan-400/25 blur-3xl"
-      />
-      <p className="text-sm font-medium text-cyan-200/90">
-        {user
-          ? `Xin chào, ${user.full_name}`
-          : "Đồ công nghệ cho góc làm việc và giải trí"}
-      </p>
-      <h1 className="mt-3 max-w-2xl text-4xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">
-        Nâng cấp thiết bị,
-        <br />
-        mua sắm an tâm.
-      </h1>
-      <p className="mt-5 max-w-lg text-base text-white/70">
-        Tai nghe, màn hình, laptop, phụ kiện. Mọi đơn hàng đều được kiểm tra an
-        toàn trước khi giao, ưu đãi thật dành cho người dùng thật.
-      </p>
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Button
-          variant="buy"
-          size="lg"
-          className="h-12 rounded-full px-7 text-base"
-          asChild
-        >
-          <a href="#san-pham">Mua sắm ngay</a>
-        </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          className="h-12 rounded-full border-white/25 bg-white/5 px-7 text-base text-white hover:bg-white/10 hover:text-white"
-          asChild
-        >
-          <Link to={user ? "/cart" : "/register"}>
-            {user ? "Xem giỏ hàng" : "Nhận ưu đãi tân thủ"}
-          </Link>
-        </Button>
-      </div>
-    </section>
   )
 }
 
