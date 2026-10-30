@@ -2,6 +2,16 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Attack Lab (cảnh 2, 4, 5 của kịch bản demo)
+**Đã hoàn thành**
+- Module `lab`: 4 kịch bản (farm voucher 6 tài khoản/1 thiết bị, gia đình 4 người chung Wi-Fi + địa chỉ, COD 5,49 triệu từ tài khoản mới, khách bùng 4/5 đơn COD). Mỗi bước ghi kỳ vọng và kết quả thực tế; chạy trong worker, gọi API thật qua HTTP (httpx chuyển sang requirements chính).
+- Chỉ bật khi `DEMO_MODE=true` (tắt thì API trả 404 như không tồn tại), chỉ vai Admin; mỗi lần chạy ghi audit log.
+- Giao diện Attack Lab: thẻ kịch bản (mô tả + kỳ vọng), danh sách lần chạy cập nhật mỗi giây khi đang chạy.
+- 107 test qua; test chạy trọn 4 kịch bản qua API, mọi bước khớp kỳ vọng. Đã chạy thử trên trình duyệt: farm voucher "Hoàn tất, đúng kỳ vọng" (2 được dùng voucher, 4 bị gỡ).
+
+**Giới hạn đã biết**
+- Mọi lưu lượng của Lab đi từ 127.0.0.1 nên cùng một IP; luật IP (R04, tín hiệu yếu) vì vậy luôn được cộng. Ghi rõ khi trình bày.
+
 ## 2026-10-30 — Case management (cảnh 3 của kịch bản demo)
 **Đã hoàn thành**
 - Hàng đợi việc nền trong CSDL (`app/core/jobs.py`: enqueue cùng transaction, worker lấy việc bằng `FOR UPDATE SKIP LOCKED`, thử lại với thời gian chờ tăng dần, quá số lần thì failed) và worker `python -m worker.main`.

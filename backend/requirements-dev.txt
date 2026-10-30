@@ -1,4 +1,3 @@
 -r requirements.txt
 pytest==9.2.0
-httpx==0.28.1
 watchfiles==1.3.0  # để uvicorn --reload ổn định trên Windows

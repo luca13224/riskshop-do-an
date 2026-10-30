@@ -19,7 +19,8 @@ Sinh viên: Luca — Hệ thống thông tin quản lý, Trường Đại học 
    .venv/Scripts/python -m app.modules.risk.seed        # bộ luật rủi ro R01–R10 + ngưỡng quyết định
    ```
    Chạy: `.venv/Scripts/python -m uvicorn app.main:app --port 8000` (sửa code backend xong thì dừng và chạy lại; `--reload` hay bị kẹt trên Windows) → tài liệu API: http://localhost:8000/docs
-   **Worker** (mở case từ quyết định rủi ro), chạy ở cửa sổ dòng lệnh thứ hai: `.venv/Scripts/python -m worker.main`
+   **Worker** (mở case, chạy kịch bản Attack Lab), chạy ở cửa sổ dòng lệnh thứ hai: `.venv/Scripts/python -m worker.main`
+   **Attack Lab** chỉ hiện khi `.env` có `DEMO_MODE=true` và chỉ tài khoản `admin` dùng được.
    Test: `.venv/Scripts/python -m pytest -q`
 3. **Frontend** (lần đầu `npm install`): `cd frontend && npm run dev` → http://localhost:5173
 

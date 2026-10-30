@@ -17,6 +17,7 @@ from app.modules.auth.router import router as auth_router
 from app.modules.cart.router import router as cart_router
 from app.modules.cases.router import router as cases_router
 from app.modules.catalog.router import router as catalog_router
+from app.modules.lab.router import router as lab_router
 from app.modules.order.router import router as order_router
 from app.modules.risk.router import router as risk_router
 
@@ -45,6 +46,7 @@ def create_app() -> FastAPI:
     app.include_router(order_router, prefix="/api")
     app.include_router(risk_router, prefix="/api")
     app.include_router(cases_router, prefix="/api")
+    app.include_router(lab_router, prefix="/api")
     return app
 
 

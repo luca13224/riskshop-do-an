@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { to: "/console/monitor", label: "Live Monitor", ready: true },
   { to: "/console/cases", label: "Case", ready: true },
   { to: "/console/rules", label: "Luật rủi ro", ready: false },
-  { to: "/console/lab", label: "Attack Lab", ready: false },
+  { to: "/console/lab", label: "Attack Lab", ready: true },
   { to: "/console/reports", label: "Báo cáo", ready: false },
   { to: "/console/audit", label: "Audit Log", ready: false },
 ]

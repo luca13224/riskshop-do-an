@@ -28,6 +28,11 @@ class Settings(BaseSettings):
     # True khi chạy HTTPS (cookie chỉ gửi qua kết nối mã hóa); local dùng HTTP nên để False
     cookie_secure: bool = False
 
+    # Attack Lab: nút "tạo hàng loạt tài khoản giả" KHÔNG được tồn tại trên hệ thống thật,
+    # nên mặc định tắt; chỉ bật bằng cấu hình ở môi trường demo.
+    demo_mode: bool = False
+    lab_api_base: str = "http://127.0.0.1:8000/api"
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

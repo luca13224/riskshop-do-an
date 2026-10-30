@@ -14,6 +14,7 @@ import app.models  # noqa: F401  (nạp đủ model)
 from app.core import jobs
 from app.core.db import SessionLocal
 from app.modules.cases import service as cases
+from app.modules.lab import service as lab
 from app.modules.risk.service import OPEN_CASE_JOB
 
 POLL_SECONDS = 1.0
@@ -21,6 +22,7 @@ POLL_SECONDS = 1.0
 
 def register_handlers() -> None:
     jobs.HANDLERS[OPEN_CASE_JOB] = cases.open_from_decision
+    jobs.HANDLERS[lab.LAB_RUN_JOB] = lab.execute
 
 
 def main() -> None:

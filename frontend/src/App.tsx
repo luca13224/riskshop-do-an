@@ -7,6 +7,7 @@ import { ConsoleHomePage } from "@/console/pages/ConsoleHomePage"
 import { ConsoleOrdersPage } from "@/console/pages/ConsoleOrdersPage"
 import { LiveMonitorPage } from "@/console/pages/LiveMonitorPage"
 import { CasesPage } from "@/console/pages/CasesPage"
+import { AttackLabPage } from "@/console/pages/AttackLabPage"
 import { CaseDetailPage } from "@/console/pages/CaseDetailPage"
 import { ShopLayout } from "@/shop/ShopLayout"
 import { CartPage } from "@/shop/pages/CartPage"
@@ -42,6 +43,7 @@ export function App() {
             <Route path="monitor" element={<LiveMonitorPage />} />
             <Route path="cases" element={<CasesPage />} />
             <Route path="cases/:code" element={<CaseDetailPage />} />
+            <Route path="lab" element={<AttackLabPage />} />
           </Route>
         </Route>
 
