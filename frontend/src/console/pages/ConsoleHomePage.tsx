@@ -16,10 +16,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ColumnChart } from "@/console/components/ColumnChart"
 import { DecisionBadge } from "@/console/components/DecisionBadge"
+import { DecisionMix } from "@/console/components/DecisionMix"
+import { Sparkline } from "@/console/components/Sparkline"
 import { useMe } from "@/lib/api/auth"
 import { useDashboard, type Dashboard } from "@/lib/api/dashboard"
 import { useHealth } from "@/lib/api/health"
-import { CONTEXT_LABELS } from "@/lib/api/risk"
+import { CONTEXT_LABELS, type Decision } from "@/lib/api/risk"
 import { formatDateTime, formatVND } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
@@ -36,11 +38,22 @@ export function ConsoleHomePage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Tổng quan</h1>
-          <p className="text-sm text-muted-foreground">
-            {me ? `Xin chào ${me.full_name}. ` : ""}
-            {dash.data
-              ? `Cập nhật lúc ${formatDateTime(dash.data.generated_at)}, tự làm mới mỗi 30 giây.`
-              : "Đang tải số liệu…"}
+          <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
+            {me && <span>Xin chào {me.full_name}.</span>}
+            {/* Chấm xanh nhấp nháy khi đang tải số liệu mới (tự làm mới mỗi 30 giây) */}
+            <span className="inline-flex items-center gap-1.5" role="status">
+              <span className="relative flex size-2" aria-hidden>
+                {dash.isFetching && (
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#0ca30c] opacity-75 motion-reduce:animate-none" />
+                )}
+                <span className="relative inline-flex size-2 rounded-full bg-[#0ca30c]" />
+              </span>
+              {dash.isFetching
+                ? "Đang cập nhật…"
+                : dash.data
+                  ? `Cập nhật lúc ${formatDateTime(dash.data.generated_at)}, tự làm mới mỗi 30 giây`
+                  : "Đang tải số liệu…"}
+            </span>
           </p>
         </div>
         <div
@@ -84,35 +97,17 @@ export function ConsoleHomePage() {
           <Attention data={dash.data} />
           <ShopKpis data={dash.data} />
           <div className="grid gap-6 xl:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Đơn hàng theo ngày</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ColumnChart
-                  data={dash.data.series}
-                  series={[
-                    {
-                      key: "orders",
-                      label: "Đơn hàng",
-                      color: "var(--series-1)",
-                    },
-                  ]}
-                />
-              </CardContent>
-            </Card>
+            <OrdersChart data={dash.data} />
             <Card>
               <CardHeader>
                 <CardTitle>Hệ thống rủi ro can thiệp theo ngày</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Không tính lượt "Cho phép" (
-                  {(
-                    dash.data.current.decisions - dash.data.current.intervened
-                  ).toLocaleString("vi-VN")}{" "}
-                  lượt trong kỳ).
-                </p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="grid gap-6">
+                <DecisionMix counts={sumDecisions(dash.data)} />
+                <p className="-mb-3 text-xs text-muted-foreground">
+                  Theo ngày (không vẽ lượt "Cho phép" để thấy rõ các lượt can
+                  thiệp)
+                </p>
                 <ColumnChart
                   data={dash.data.series}
                   series={[
@@ -146,6 +141,73 @@ export function ConsoleHomePage() {
       )}
     </div>
   )
+}
+
+// ---------- Biểu đồ đơn hàng: đổi qua lại giữa số đơn và giá trị (GMV) ----------
+function OrdersChart({ data }: { data: Dashboard }) {
+  const [metric, setMetric] = useState<"orders" | "gmv">("orders")
+  return (
+    <Card>
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
+        <CardTitle>
+          {metric === "orders"
+            ? "Đơn hàng theo ngày"
+            : "Giá trị đơn hàng theo ngày"}
+        </CardTitle>
+        <div
+          className="inline-flex rounded-lg border p-0.5 text-xs"
+          role="group"
+          aria-label="Chỉ số"
+        >
+          {(
+            [
+              ["orders", "Số đơn"],
+              ["gmv", "Giá trị"],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={metric === key}
+              onClick={() => setMetric(key)}
+              className={cn(
+                "rounded-md px-2.5 py-1 transition",
+                metric === key
+                  ? "bg-foreground text-background"
+                  : "hover:bg-muted"
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ColumnChart
+          data={data.series}
+          series={[
+            {
+              key: metric,
+              label: metric === "orders" ? "Đơn hàng" : "Giá trị",
+              color: "var(--series-1)",
+            },
+          ]}
+          format={metric === "gmv" ? formatVND : undefined}
+        />
+      </CardContent>
+    </Card>
+  )
+}
+
+function sumDecisions(data: Dashboard): Record<Decision, number> {
+  const total = { ALLOW: 0, ALLOW_WITH_RESTRICTION: 0, REVIEW: 0, BLOCK: 0 }
+  for (const d of data.series) {
+    total.ALLOW += d.ALLOW
+    total.ALLOW_WITH_RESTRICTION += d.ALLOW_WITH_RESTRICTION
+    total.REVIEW += d.REVIEW
+    total.BLOCK += d.BLOCK
+  }
+  return total
 }
 
 // ---------- 1) Việc cần xử lý ----------
@@ -246,6 +308,11 @@ function ShopKpis({ data }: { data: Dashboard }) {
   const c = data.current
   const p = data.previous
   const pct = (a: number, b: number) => (b > 0 ? a / b : null)
+  // Chuỗi theo ngày cho sparkline trong từng thẻ
+  const s = data.series
+  const decisionsPerDay = s.map(
+    (d) => d.ALLOW + d.ALLOW_WITH_RESTRICTION + d.REVIEW + d.BLOCK
+  )
   return (
     <section aria-labelledby="chi-so" className="grid gap-3">
       <h2 id="chi-so" className="text-sm font-medium text-muted-foreground">
@@ -258,12 +325,14 @@ function ShopKpis({ data }: { data: Dashboard }) {
           now={c.gmv}
           before={p.gmv}
           note="Không tính đơn bị hủy hoặc từ chối"
+          trend={s.map((d) => d.gmv)}
         />
         <Kpi
           label="Đơn hàng"
           value={c.orders.toLocaleString("vi-VN")}
           now={c.orders}
           before={p.orders}
+          trend={s.map((d) => d.orders)}
         />
         <Kpi
           label="Khách hàng mới"
@@ -277,7 +346,15 @@ function ShopKpis({ data }: { data: Dashboard }) {
           now={pct(c.cod_orders, c.orders)}
           before={pct(p.cod_orders, p.orders)}
           neutral
-          note={`${c.voucher_orders} đơn có dùng voucher`}
+          note={`${c.cod_orders} đơn thanh toán khi nhận hàng`}
+        />
+        <Kpi
+          label="Đơn dùng voucher"
+          value={c.voucher_orders.toLocaleString("vi-VN")}
+          now={c.voucher_orders}
+          before={p.voucher_orders}
+          neutral
+          note={`${percent(pct(c.voucher_orders, c.orders))} tổng số đơn`}
         />
         <Kpi
           label="Lượt chấm điểm rủi ro"
@@ -285,6 +362,7 @@ function ShopKpis({ data }: { data: Dashboard }) {
           now={c.decisions}
           before={p.decisions}
           neutral
+          trend={decisionsPerDay}
         />
         <Kpi
           label="Tỷ lệ can thiệp"
@@ -293,6 +371,12 @@ function ShopKpis({ data }: { data: Dashboard }) {
           before={pct(p.intervened, p.decisions)}
           neutral
           note={`${c.intervened} lượt hạn chế, giữ hoặc chặn`}
+          trend={s.map((d, i) =>
+            decisionsPerDay[i]
+              ? (decisionsPerDay[i] - d.ALLOW) / decisionsPerDay[i]
+              : 0
+          )}
+          trendColor="var(--st-warning)"
         />
         <Kpi
           label="Độ trễ chấm điểm (p95)"
@@ -313,6 +397,8 @@ function Kpi({
   before,
   neutral,
   note,
+  trend,
+  trendColor,
 }: {
   label: string
   value: string
@@ -320,6 +406,8 @@ function Kpi({
   before?: number | null
   neutral?: boolean // tăng/giảm không mang nghĩa tốt/xấu (ví dụ tỷ lệ COD)
   note?: string
+  trend?: number[] // số liệu từng ngày, vẽ thành sparkline
+  trendColor?: string
 }) {
   let delta: ReactNode = null
   if (now !== undefined && before !== undefined && now !== null) {
@@ -355,7 +443,7 @@ function Kpi({
     }
   }
   return (
-    <div className="rounded-xl border p-4">
+    <div className="flex flex-col rounded-xl border p-4">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">
         {value}
@@ -364,6 +452,11 @@ function Kpi({
         {delta}
         {note && <span className="text-muted-foreground">{note}</span>}
       </div>
+      {trend && trend.some((v) => v > 0) && (
+        <div className="mt-auto pt-3 pr-1">
+          <Sparkline values={trend} color={trendColor} />
+        </div>
+      )}
     </div>
   )
 }

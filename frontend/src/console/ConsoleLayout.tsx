@@ -83,7 +83,29 @@ export function ConsoleLayout() {
             </Button>
           </div>
         </header>
-        <main className="flex-1 p-6">
+        {/* Điện thoại: thanh bên bị ẩn, thay bằng hàng menu cuộn ngang */}
+        <nav
+          aria-label="Menu Console"
+          className="flex [scrollbar-width:none] gap-1 overflow-x-auto border-b px-3 py-2 text-sm md:hidden"
+        >
+          {NAV_ITEMS.filter((item) => item.ready).map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                cn(
+                  "shrink-0 rounded-full px-3 py-1.5 whitespace-nowrap hover:bg-muted",
+                  isActive &&
+                    "bg-foreground text-background hover:bg-foreground"
+                )
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+        <main className="flex-1 p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

@@ -17,6 +17,12 @@ Ghi mới nhất ở trên cùng.
   - Quyết định rủi ro dùng bảng màu trạng thái (hạn chế / chờ duyệt / chặn), luôn kèm chữ. Nhãn "Chờ duyệt" đổi sang màu cam cho khớp.
 - Tự làm mới mỗi 30 giây. `test_dashboard.py` có 4 test; tổng 144 test qua. Đã kiểm tra ở 1440 px và 375 px.
 
+**Chỉnh thêm**
+- Sparkline (đường xu hướng mini) trong các thẻ GMV, đơn hàng, lượt chấm điểm, tỷ lệ can thiệp. Thêm thẻ "Đơn dùng voucher" để lưới thẻ đủ 4×2.
+- Thanh phân bố 100% cho cả 4 loại quyết định, kể cả "Cho phép" (biểu đồ cột theo ngày không vẽ loại này).
+- Biểu đồ đơn hàng có nút chuyển giữa Số đơn và Giá trị (GMV).
+- Chấm báo "Đang cập nhật" khi tự làm mới. Console trên điện thoại có hàng menu cuộn ngang.
+
 **Bài học**
 - Tham số query luôn là chuỗi, nên `Literal[7, 30]` (số nguyên) không bao giờ khớp. Dùng `int` có `ge`/`le`.
 - SVG có bề rộng cố định nằm trong ô lưới `auto` sẽ đẩy ô rộng ra, ResizeObserver lại đo đúng bề rộng đó nên không bao giờ co lại. Phải dùng `minmax(0, 1fr)`.
