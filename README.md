@@ -12,3 +12,4 @@ Sinh viên: Luca — Hệ thống thông tin quản lý, Trường Đại học 
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Kế hoạch, milestone |
 | [docs/TEST_PLAN.md](docs/TEST_PLAN.md) | Chiến lược và kịch bản kiểm thử |
 | [docs/PROGRESS_LOG.md](docs/PROGRESS_LOG.md) | Nhật ký tiến độ |
+| [docs/reviews/](docs/reviews/) | Các bản tư vấn, phản biện (chưa phải quyết định) |
