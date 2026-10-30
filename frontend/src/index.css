@@ -311,3 +311,29 @@
     transition: none;
   }
 }
+
+/* Bụi lơ lửng trong chùm sáng máy chiếu: mỗi hạt có thời gian, độ trễ, hướng trôi riêng (biến CSS) */
+@keyframes drift {
+  0% {
+    translate: 0 0;
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: var(--o, 0.6);
+  }
+  100% {
+    translate: var(--dx, 10px) -70px;
+    opacity: 0;
+  }
+}
+.dust {
+  animation: drift var(--t, 9s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dust {
+    animation: none;
+    opacity: 0.35;
+  }
+}
