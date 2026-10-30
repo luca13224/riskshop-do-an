@@ -14,7 +14,7 @@ Ghi mới nhất ở trên cùng.
 - Biến thể chưa biết: recall 0/33. Gia đình 5–6 người bị gỡ voucher. Bomber lịch sử ngắn lọt.
 
 **Bước tiếp theo**
-- Quyết định có làm bộ luật v2 cho các điểm yếu trên hay giữ làm "giới hạn và hướng phát triển" trong báo cáo.
+- (Đã quyết) Giữ bộ luật v1; các điểm yếu trên đưa vào mục "Giới hạn và hướng phát triển" của báo cáo, không làm luật v2.
 
 ## 2026-10-30 — Demo reset
 **Đã hoàn thành**

@@ -41,6 +41,7 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - **Biến thể chưa biết lọt hoàn toàn.** Luật dựa vào thiết bị/IP/địa chỉ dùng chung, nên farm tách thiết bị + đổi IP không để lại dấu vết chung. Đây là giới hạn cố hữu của rule-based, là lý do đề xuất hướng phát triển (đồ thị liên kết, ML).
 - Hard negative bị ảnh hưởng: khách mới mua COD giá trị cao 100% bị giữ chờ duyệt (đúng thiết kế fail-closed, chấp nhận đánh đổi); gia đình đông người (5–6 người, chỉ có ở tập test) bị gỡ voucher vì vượt ngưỡng "≥5 tài khoản/địa chỉ".
 - Bùng hàng COD chỉ bắt được ~50–67%: kẻ có lịch sử ngắn (dưới 3 đơn) chưa đủ dữ liệu cho luật tỉ lệ thất bại.
+- Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
 
 ## 4. Giới hạn
