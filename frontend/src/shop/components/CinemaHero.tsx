@@ -1,5 +1,12 @@
 import { ArrowRight, Pause, Play, ShieldCheck } from "lucide-react"
-import { useEffect, useRef, useState, type CSSProperties } from "react"
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type RefObject,
+} from "react"
 import { Link } from "react-router"
 
 import {
@@ -46,6 +53,26 @@ const TINT: Record<CategoryCode, string> = {
 }
 
 const easeOutCubic = (t: number) => 1 - (1 - t) ** 3
+const DEG_PER_PX = 180 / (Math.PI * R) // kéo 1 px trên khung thiết kế = xoay bao nhiêu độ trên vòng
+
+// Hạt bụi trong chùm sáng máy chiếu. Sinh bằng bộ số giả ngẫu nhiên có seed cố định
+// để lần nào tải trang cũng giống nhau (Math.random trong lúc render sẽ đổi mỗi lần vẽ lại).
+function seeded(seed: number) {
+  return () => {
+    seed = (seed * 16807) % 2147483647
+    return (seed - 1) / 2147483646
+  }
+}
+const rand = seeded(7)
+const DUST = Array.from({ length: 16 }, () => ({
+  left: 30 + rand() * 40, // % bề ngang, nằm trong chùm sáng
+  top: 20 + rand() * 60, // % chiều cao
+  size: 1 + rand() * 2,
+  t: 7 + rand() * 8,
+  delay: -rand() * 12,
+  dx: (rand() - 0.5) * 40,
+  o: 0.25 + rand() * 0.5,
+}))
 
 export function CinemaHero({
   onBrowse,
@@ -57,11 +84,13 @@ export function CinemaHero({
   const [front, setFront] = useState<CategoryCode | null>(null) // danh mục đang ở chính giữa
   const [selected, setSelected] = useState<CategoryCode | null>(null) // danh mục người xem đã bấm chọn
   const showing = selected ?? front
-  const lightsRef = useLightsOn()
+  const sectionRef = useLightsOn()
+  useSpotlight(sectionRef)
+  const progressRef = useRef<HTMLDivElement>(null) // thanh "đang chiếu", vòng lặp của Ring ghi thẳng vào
 
   return (
     <section
-      ref={lightsRef}
+      ref={sectionRef}
       id="hero"
       aria-label="Giới thiệu"
       // Tràn hết chiều ngang màn hình (thoát khỏi khung max-w của trang)
@@ -76,6 +105,28 @@ export function CinemaHero({
         <div className="absolute inset-0 [background-image:radial-gradient(rgba(255,255,255,.55)_1px,transparent_1px)] [background-size:46px_46px] opacity-[.12]" />
         <div className="absolute inset-x-0 bottom-0 h-2/3 bg-[linear-gradient(180deg,transparent,rgba(25,127,255,.07)_60%,rgba(25,127,255,.04))]" />
         <div className="absolute top-[45%] left-1/2 size-[46rem] -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" />
+        {/* Vùng sáng đi theo chuột (biến --mx, --my do useSpotlight ghi) */}
+        <div className="absolute inset-0 bg-[radial-gradient(520px_circle_at_var(--mx,50%)_var(--my,35%),rgba(80,200,255,.09),transparent_70%)]" />
+        {/* Chùm sáng máy chiếu: hình thang hẹp ở trên, loe dần xuống phía màn hình chiếu chính */}
+        <div className="absolute top-0 left-1/2 h-[88%] w-[min(1200px,140%)] -translate-x-1/2 bg-[linear-gradient(180deg,rgba(190,235,255,.10),rgba(190,235,255,.03)_65%,transparent)] blur-md [clip-path:polygon(44%_0,56%_0,100%_100%,0_100%)]" />
+        {DUST.map((d, i) => (
+          <span
+            key={i}
+            className="dust absolute rounded-full bg-cyan-50"
+            style={
+              {
+                left: `${d.left}%`,
+                top: `${d.top}%`,
+                width: d.size,
+                height: d.size,
+                "--t": `${d.t}s`,
+                "--delay": `${d.delay}s`,
+                "--dx": `${d.dx}px`,
+                "--o": d.o,
+              } as CSSProperties
+            }
+          />
+        ))}
       </div>
 
       <div className="relative z-10 mx-auto flex max-w-7xl flex-col items-center px-4 pt-14 text-center sm:px-6 sm:pt-20">
@@ -132,10 +183,12 @@ export function CinemaHero({
         selected={selected}
         onFront={setFront}
         onSelect={setSelected}
+        progressRef={progressRef}
       />
 
       <MainScreen
         category={cats.find((c) => c.code === showing) ?? null}
+        progressRef={progressRef}
         paused={selected !== null}
         onResume={() => setSelected(null)}
         onBrowse={onBrowse}
@@ -179,25 +232,60 @@ function useLightsOn() {
   return ref
 }
 
+// Vùng sáng đi theo chuột: ghi vị trí chuột (tính theo banner) vào --mx, --my.
+// Chỉ bật trên thiết bị có chuột; màn hình cảm ứng giữ vị trí mặc định.
+function useSpotlight(ref: RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    if (!window.matchMedia("(hover: hover)").matches) return
+    let raf = 0
+    let x = 0
+    let y = 0
+    function update() {
+      raf = 0
+      const el = ref.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      el.style.setProperty("--mx", `${x - rect.left}px`)
+      el.style.setProperty("--my", `${y - rect.top}px`)
+    }
+    const onMove = (e: PointerEvent) => {
+      x = e.clientX
+      y = e.clientY
+      if (!raf) raf = requestAnimationFrame(update)
+    }
+    window.addEventListener("pointermove", onMove, { passive: true })
+    return () => {
+      window.removeEventListener("pointermove", onMove)
+      cancelAnimationFrame(raf)
+    }
+  }, [ref])
+}
+
 // ---------------------------------------------------------------------------------------------
 function Ring({
   cats,
   selected,
   onFront,
   onSelect,
+  progressRef,
 }: {
   cats: Category[]
   selected: CategoryCode | null
   onFront: (code: CategoryCode) => void
   onSelect: (code: CategoryCode | null) => void
+  progressRef: RefObject<HTMLDivElement | null>
 }) {
   const wrapRef = useRef<HTMLDivElement>(null)
+  const groupRef = useRef<HTMLDivElement>(null)
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([])
   const [k, setK] = useState(1) // tỉ lệ thu nhỏ khung thiết kế cho vừa màn hình
 
   // Các giá trị dùng trong vòng lặp animation để ở ref, để vòng lặp không phải khởi động lại
   const phase = useRef(0)
   const hovering = useRef(false)
+  // Kéo/vuốt để xoay: x lúc bắt đầu, phase lúc bắt đầu, đã thực sự kéo chưa (quá 6 px)
+  const drag = useRef<{ x: number; phase: number; moved: boolean } | null>(null)
+  const justDragged = useRef(false) // vừa kéo xong thì bỏ qua cú "click" đi kèm
   const selectedRef = useRef(selected)
   const anim = useRef<{ from: number; to: number; start: number } | null>(null)
   const frontRef = useRef<CategoryCode | null>(null)
@@ -228,9 +316,18 @@ function Ring({
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)")
     let raf = 0
     let last = performance.now()
+    // Thị sai theo chuột: điểm nhìn (perspective-origin) dịch nhẹ sang trái/phải theo chuột,
+    // làm vòng màn ảnh hơi nghiêng theo. tilt đuổi dần theo target để chuyển động mượt.
+    let tiltTarget = 0
+    let tilt = 0
+    const onMove = (e: PointerEvent) => {
+      tiltTarget = e.clientX / window.innerWidth - 0.5
+    }
+    window.addEventListener("pointermove", onMove, { passive: true })
 
     function place() {
       let best = Infinity
+      let bestA = 0
       let frontIdx = 0
       cardRefs.current.forEach((el, i) => {
         if (!el) return
@@ -242,6 +339,7 @@ function Ring({
         }
         if (Math.abs(a) < best) {
           best = Math.abs(a)
+          bestA = a
           frontIdx = i
         }
         const r = (a * Math.PI) / 180
@@ -252,6 +350,22 @@ function Ring({
         el.style.filter = `brightness(${1 - 0.45 * ((1 - c) / (1 - Math.cos((CULL * Math.PI) / 180)))})`
         el.style.opacity = String(Math.min(1, (CULL - Math.abs(a)) / 8))
       })
+      // Màn ở chính giữa phát sáng (CSS đọc thuộc tính data-front)
+      cardRefs.current.forEach((el, i) =>
+        el?.toggleAttribute("data-front", i === frontIdx)
+      )
+      // Thanh "đang chiếu": thẻ giữa đi từ góc +STEP/2 về −STEP/2 thì thanh chạy từ 0 đến 100%.
+      // Tính thẳng từ góc nên dừng vòng (rê chuột, đã chọn) thì thanh cũng dừng theo.
+      if (progressRef.current) {
+        const p = selectedRef.current
+          ? 1
+          : Math.min(1, Math.max(0, (STEP / 2 - bestA) / STEP))
+        progressRef.current.style.transform = `scaleX(${p})`
+      }
+      if (groupRef.current && !reduce.matches) {
+        tilt += (tiltTarget - tilt) * 0.06
+        groupRef.current.style.perspectiveOrigin = `${50 + tilt * 10}% ${STAGE_H * 1.9}px`
+      }
       const list = catsRef.current
       if (list.length) {
         const code = list[frontIdx % list.length].code
@@ -272,7 +386,12 @@ function Ring({
           anim.current.from +
           (anim.current.to - anim.current.from) * easeOutCubic(p)
         if (p === 1) anim.current = null
-      } else if (!hovering.current && !selectedRef.current && !reduce.matches) {
+      } else if (
+        !hovering.current &&
+        !drag.current?.moved &&
+        !selectedRef.current &&
+        !reduce.matches
+      ) {
         phase.current -= SPEED * dt
       }
       place()
@@ -287,11 +406,47 @@ function Ring({
     return () => {
       cancelAnimationFrame(raf)
       document.removeEventListener("visibilitychange", onVisible)
+      window.removeEventListener("pointermove", onMove)
     }
-  }, [])
+  }, [progressRef])
+
+  // ---- Kéo / vuốt để xoay vòng ----
+  function onPointerDown(e: ReactPointerEvent) {
+    if (e.pointerType === "mouse" && e.button !== 0) return
+    drag.current = { x: e.clientX, phase: phase.current, moved: false }
+  }
+  function onPointerMove(e: ReactPointerEvent) {
+    const d = drag.current
+    if (!d) return
+    const dx = e.clientX - d.x
+    if (!d.moved) {
+      if (Math.abs(dx) < 6) return // dưới 6 px coi như một cú bấm, không phải kéo
+      d.moved = true
+      anim.current = null
+      wrapRef.current?.setPointerCapture(e.pointerId)
+    }
+    // Kéo sang phải thì vòng quay sang phải; chia cho k vì khung đang bị thu nhỏ
+    phase.current = d.phase + (dx / k) * DEG_PER_PX
+  }
+  function onPointerUp() {
+    const d = drag.current
+    drag.current = null
+    if (!d?.moved) return
+    // Trình duyệt có thể bắn thêm một "click" ngay sau khi thả tay: chặn nó, rồi mở lại ở lượt sau
+    justDragged.current = true
+    setTimeout(() => (justDragged.current = false), 0)
+    // Thả tay thì canh cho một màn ảnh nằm đúng chính giữa
+    anim.current = {
+      from: phase.current,
+      to: Math.round(phase.current / STEP) * STEP,
+      start: -1,
+    }
+    if (selectedRef.current) onSelect(null) // đã kéo sang danh mục khác thì bỏ chọn cũ
+  }
 
   // Bấm một màn ảnh: xoay nó ra chính giữa rồi dừng lại. Bấm lại màn đang chọn thì chạy tiếp.
   function pick(i: number, code: CategoryCode) {
+    if (justDragged.current) return
     if (selectedRef.current === code) {
       onSelect(null)
       return
@@ -311,13 +466,27 @@ function Ring({
     <div
       ref={wrapRef}
       className="rise relative mx-auto mt-10 w-full max-w-[1100px] sm:mt-14"
-      style={{ height: STAGE_H * k, "--d": "650ms" } as CSSProperties}
-      onPointerEnter={() => (hovering.current = true)}
+      // touch-action: pan-y -> vuốt dọc vẫn cuộn trang, vuốt ngang thì xoay vòng
+      style={
+        {
+          height: STAGE_H * k,
+          "--d": "650ms",
+          touchAction: "pan-y",
+        } as CSSProperties
+      }
+      onPointerEnter={(e) => {
+        if (e.pointerType === "mouse") hovering.current = true
+      }}
       onPointerLeave={() => (hovering.current = false)}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
       onFocus={() => (hovering.current = true)}
       onBlur={() => (hovering.current = false)}
     >
       <div
+        ref={groupRef}
         role="group"
         aria-label="Các danh mục, đang quay như màn ảnh rạp phim"
         className="absolute top-0 left-1/2"
@@ -347,7 +516,7 @@ function Ring({
                 aria-pressed={active}
                 aria-label={`${cat.name}, ${cat.product_count} sản phẩm`}
                 className={cn(
-                  "invisible absolute overflow-hidden rounded-xl text-left [backface-visibility:hidden] focus-visible:outline-2 focus-visible:outline-cyan-300",
+                  "group invisible absolute cursor-pointer overflow-hidden rounded-xl text-left select-none [backface-visibility:hidden] focus-visible:outline-2 focus-visible:outline-cyan-300",
                   active && "outline-2 outline-cyan-300"
                 )}
                 style={{
@@ -360,6 +529,23 @@ function Ring({
                     "0 24px 46px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.14), inset 0 16px 30px rgba(255,255,255,.05)",
                 }}
               >
+                {/* Vân quét mờ + vệt sáng mặt kính: cho thẻ giống một màn hình thật */}
+                <span
+                  aria-hidden
+                  className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,.035)_0_1px,transparent_1px_3px)]"
+                />
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-1/2 bg-[linear-gradient(160deg,rgba(255,255,255,.14),transparent_45%)]"
+                />
+                {/* Phát sáng khi đang ở chính giữa (thuộc tính data-front do vòng lặp gắn) */}
+                <span
+                  aria-hidden
+                  className="absolute inset-0 rounded-xl opacity-0 transition-opacity duration-500 group-data-[front]:opacity-100"
+                  style={{
+                    boxShadow: `inset 0 0 0 1px ${TINT[cat.code]}aa, inset 0 0 46px ${TINT[cat.code]}40`,
+                  }}
+                />
                 <span
                   className="absolute top-[24%] left-1/2 -translate-x-1/2 -translate-y-1/2"
                   style={{
@@ -395,11 +581,13 @@ function Ring({
 // Tự chiếu sản phẩm của danh mục đang ở chính giữa (hoặc danh mục người xem vừa bấm).
 function MainScreen({
   category,
+  progressRef,
   paused,
   onResume,
   onBrowse,
 }: {
   category: Category | null
+  progressRef: RefObject<HTMLDivElement | null>
   paused: boolean
   onResume: () => void
   onBrowse: (code: CategoryCode) => void
@@ -442,6 +630,17 @@ function MainScreen({
               <Pause className="size-3.5" />
             )}
           </button>
+        </div>
+
+        {/* Thanh "đang chiếu": chạy từ trái sang phải trong lúc một danh mục ở chính giữa */}
+        <div
+          className="mx-4 mb-2 h-0.5 overflow-hidden rounded-full bg-white/10 sm:mx-6"
+          aria-hidden
+        >
+          <div
+            ref={progressRef}
+            className="h-full origin-left scale-x-0 bg-cyan-300 shadow-[0_0_8px_#67e8f9]"
+          />
         </div>
 
         {/* "Trang web" bên trong màn hình: nền trắng như shop thật */}

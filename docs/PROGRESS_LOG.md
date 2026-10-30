@@ -12,6 +12,12 @@ Ghi mới nhất ở trên cùng.
 - Tôn trọng `prefers-reduced-motion`: vòng không tự quay, bấm thì nhảy thẳng tới thẻ, tắt hiệu ứng vào trang.
 - Đã kiểm tra ở 1440 px và 375 px. Trên điện thoại, vòng chỉ thu nhỏ tối đa 0,55 lần, phần thừa hai bên bị cắt.
 
+**Chỉnh thêm (31/10)**
+- Kéo/vuốt để xoay vòng (`touch-action: pan-y`, nên vuốt dọc vẫn cuộn trang). Thả tay thì vòng tự canh một màn vào chính giữa. Cú bấm đi kèm sau khi kéo bị bỏ qua.
+- Màn đang ở giữa phát sáng (thuộc tính `data-front`). Thanh "đang chiếu" trên màn hình chính tính thẳng từ góc của thẻ giữa nên luôn khớp với vòng, kể cả khi vòng dừng.
+- Chùm sáng máy chiếu kèm bụi lơ lửng (vị trí sinh từ seed cố định), vùng sáng theo chuột, thị sai nhẹ theo chuột (dịch `perspective-origin`).
+- Thẻ màn ảnh có vân quét và vệt sáng mặt kính. Thanh thông báo ở trang chủ chuyển sang tông tối.
+
 **Lưu ý khi kiểm tra**
 - Khung trình duyệt bị ẩn thì trình duyệt tạm dừng `requestAnimationFrame` và animation CSS, trông như trang trống. Đây không phải lỗi code.
 - Chưa kiểm tra chế độ giảm chuyển động trên trình duyệt thật (công cụ không giả lập được). Logic đã có trong code.

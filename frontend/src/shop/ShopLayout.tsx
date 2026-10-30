@@ -84,11 +84,22 @@ export function ShopLayout() {
   const logout = useLogout()
   const navigate = useNavigate()
   const overDark = useHeaderOverDark()
+  const isHome = useLocation().pathname === "/"
 
   return (
     <div className="shop flex min-h-svh flex-col overflow-x-clip">
-      <p className="bg-buy px-4 py-2 text-center text-xs font-medium text-buy-foreground sm:text-sm">
-        Khách mới nhập mã <b>TANTHU</b> giảm 50.000đ cho đơn từ 200.000đ
+      {/* Trang chủ mở đầu bằng "phòng chiếu" tối, nên thanh thông báo cũng tối theo (nhấn cyan, ADR-005) */}
+      <p
+        className={cn(
+          "px-4 py-2 text-center text-xs font-medium sm:text-sm",
+          isHome
+            ? "border-b border-white/5 bg-[#05070b] text-white/70"
+            : "bg-buy text-buy-foreground"
+        )}
+      >
+        Khách mới nhập mã{" "}
+        <b className={isHome ? "text-cyan-300" : undefined}>TANTHU</b> giảm
+        50.000đ cho đơn từ 200.000đ
       </p>
 
       <header
