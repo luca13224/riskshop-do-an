@@ -32,6 +32,7 @@ export interface Dashboard {
     in_review_cases: number
     stale_cases: number
     pending_orders: number
+    open_appeals: number
     failed_jobs: number
     risk_errors: number
   }

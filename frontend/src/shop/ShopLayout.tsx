@@ -125,7 +125,10 @@ export function ShopLayout() {
               Sản phẩm
             </a>
             {user?.role === "customer" && (
-              <HeaderLink to="/orders">Đơn hàng</HeaderLink>
+              <>
+                <HeaderLink to="/orders">Đơn hàng</HeaderLink>
+                <HeaderLink to="/appeals">Khiếu nại</HeaderLink>
+              </>
             )}
           </nav>
 

@@ -4,12 +4,7 @@ import { apiFetch } from "./client"
 
 // Kiểu dữ liệu khớp với schema bên backend (app/modules/catalog/schemas.py)
 export type CategoryCode =
-  | "audio"
-  | "laptop"
-  | "monitor"
-  | "gear"
-  | "phone"
-  | "smart"
+  "audio" | "laptop" | "monitor" | "gear" | "phone" | "smart"
 
 export interface Product {
   id: number

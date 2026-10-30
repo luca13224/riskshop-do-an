@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core import errors, health
 from app.core.config import get_settings
+from app.modules.appeals.router import router as appeals_router
 from app.modules.auth.deps import DEVICE_HEADER
 from app.modules.auth.router import console_router as users_console_router
 from app.modules.auth.router import router as auth_router
@@ -51,6 +52,7 @@ def create_app() -> FastAPI:
     app.include_router(cases_router, prefix="/api")
     app.include_router(lab_router, prefix="/api")
     app.include_router(reports_router, prefix="/api")
+    app.include_router(appeals_router, prefix="/api")
     return app
 
 

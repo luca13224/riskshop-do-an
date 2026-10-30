@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { to: "/console/orders", label: "Đơn hàng", ready: true },
   { to: "/console/monitor", label: "Live Monitor", ready: true },
   { to: "/console/cases", label: "Case", ready: true },
+  { to: "/console/appeals", label: "Khiếu nại", ready: true },
   { to: "/console/rules", label: "Luật rủi ro", ready: true },
   { to: "/console/lab", label: "Attack Lab", ready: true },
   { to: "/console/reports", label: "Báo cáo", ready: true },

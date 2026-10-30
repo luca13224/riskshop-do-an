@@ -215,9 +215,20 @@ function VoucherBox({ cart }: { cart: Cart }) {
           </form>
         )}
         {apply.isError && (
-          <p className="text-sm text-destructive" role="alert">
-            {apply.error.message}
-          </p>
+          <>
+            <p className="text-sm text-destructive" role="alert">
+              {apply.error.message}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Bạn nghĩ đây là nhầm lẫn?{" "}
+              <Link
+                to="/appeals"
+                className="font-medium text-foreground underline underline-offset-4"
+              >
+                Gửi khiếu nại
+              </Link>
+            </p>
+          </>
         )}
       </CardContent>
     </Card>

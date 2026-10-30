@@ -15,3 +15,4 @@ from app.modules.audit import models as audit_models  # noqa: F401
 from app.modules.cases import models as case_models  # noqa: F401
 from app.modules.lab import models as lab_models  # noqa: F401
 from app.modules.simulation import models as simulation_models  # noqa: F401
+from app.modules.appeals import models as appeal_models  # noqa: F401

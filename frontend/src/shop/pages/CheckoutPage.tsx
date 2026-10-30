@@ -206,6 +206,17 @@ export function CheckoutPage() {
                   </span>
                 </label>
               ))}
+              {!codAllowed && (
+                <p className="text-sm text-muted-foreground">
+                  Bạn nghĩ đây là nhầm lẫn?{" "}
+                  <Link
+                    to="/appeals"
+                    className="font-medium text-foreground underline underline-offset-4"
+                  >
+                    Gửi khiếu nại
+                  </Link>
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>

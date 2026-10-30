@@ -54,6 +54,34 @@ export function OrderDetailPage() {
             Để bảo vệ bạn và người bán, đơn hàng này cần được xác nhận thêm
             trước khi giao. Chúng tôi sẽ liên hệ qua số điện thoại nhận hàng.
           </p>
+          <p className="mt-2">
+            Bạn nghĩ đây là nhầm lẫn?{" "}
+            <Link
+              to="/appeals"
+              className="font-medium underline underline-offset-4"
+            >
+              Gửi khiếu nại
+            </Link>
+          </p>
+        </div>
+      )}
+
+      {order.data.status === "REJECTED" && (
+        <div
+          className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm"
+          role="status"
+        >
+          <p className="font-medium">Đơn hàng không được xác nhận</p>
+          <p className="text-muted-foreground">
+            Đơn đã bị hủy sau khi xem xét và hàng đã được hoàn về kho.{" "}
+            <Link
+              to="/appeals"
+              className="font-medium text-foreground underline underline-offset-4"
+            >
+              Gửi khiếu nại
+            </Link>{" "}
+            nếu bạn nghĩ đây là nhầm lẫn.
+          </p>
         </div>
       )}
 
