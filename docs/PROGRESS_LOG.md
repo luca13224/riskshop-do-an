@@ -15,7 +15,7 @@ Ghi mới nhất ở trên cùng.
 - Cách làm việc: sản phẩm và demo trước, báo cáo viết sau; Luca vừa làm vừa học TypeScript.
 
 **Vấn đề còn mở**
-- Script dựng shop WooCommerce đã chạy một phần trước khi dừng, để lại database `wp_shop`, user MariaDB `wp_shop` và thư mục `D:\xampp\htdocs\shop`. Cần dọn.
+- ~~Phần WooCommerce còn sót sau khi script chạy dở~~: đã xóa database `wp_shop`, user `wp_shop` và thư mục `D:\xampp\htdocs\shop`.
 - `C:\xampp` (bản cài cũ, khoảng 0,84 GB) chờ Luca tự xóa.
 - Chưa có thời hạn và yêu cầu của GVHD; chưa chốt các loại lạm dụng thuộc MVP.
 
