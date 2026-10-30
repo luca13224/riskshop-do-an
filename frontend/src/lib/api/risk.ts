@@ -24,7 +24,8 @@ export interface RiskDecision {
   actions: Record<string, boolean>
   latency_ms: number
   error: string | null
-  user_email: string
+  user_id: number
+  user_email: string // đã che sẵn ở backend, ví dụ mi***@gmail.com
   user_name: string
   order_code: string | null
   hits: RuleHit[]

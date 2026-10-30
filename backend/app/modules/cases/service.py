@@ -101,6 +101,7 @@ def _summaries(db: Session, cases: list[m.RiskCase]) -> list[CaseSummaryOut]:
             policy=c.policy,
             status=c.status,
             cluster_label=_cluster_label(c.cluster_key),
+            primary_user_id=c.primary_user_id,
             primary_user_email=users[c.primary_user_id].email,
             decision_count=stats.get(c.id, (0, 0))[0],
             max_score=stats.get(c.id, (0, 0))[1] or 0,

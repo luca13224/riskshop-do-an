@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import BigInteger, CHAR, DateTime, ForeignKey, Index, String
+from sqlalchemy import BigInteger, Boolean, CHAR, DateTime, ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -80,3 +80,22 @@ class AuthSession(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
     expires_at: Mapped[datetime] = mapped_column(DateTime)
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+
+class LoginAttempt(Base):
+    """Mỗi lần thử đăng nhập (đúng hoặc sai), dùng cho giới hạn đăng nhập sai.
+
+    Không lưu email hay IP gốc, chỉ lưu bản băm HMAC: đủ để đếm, không đủ để đọc ra ai.
+    """
+
+    __tablename__ = "login_attempts"
+    __table_args__ = (
+        Index("ix_login_attempts_email_time", "email_hash", "created_at"),
+        Index("ix_login_attempts_ip_time", "ip_hash", "created_at"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    email_hash: Mapped[str] = mapped_column(CHAR(64))
+    ip_hash: Mapped[str | None] = mapped_column(CHAR(64))
+    success: Mapped[bool] = mapped_column(Boolean)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)

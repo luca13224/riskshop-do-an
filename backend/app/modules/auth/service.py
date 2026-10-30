@@ -7,7 +7,7 @@ import re
 from dataclasses import dataclass
 from datetime import timedelta
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -16,8 +16,9 @@ from app.core.config import get_settings
 from app.core.errors import AppError
 from app.core.time import utcnow
 from app.modules.auth import security
-from app.modules.auth.models import CUSTOMER, AuthSession, Device, User, UserDevice, UserIp
-from app.modules.auth.schemas import RegisterIn
+from app.modules.auth.models import CUSTOMER, AuthSession, Device, LoginAttempt, User, UserDevice, UserIp
+from app.modules.audit import service as audit
+from app.modules.auth.schemas import ContactOut, RegisterIn
 from app.modules.events import models as event_types
 from app.modules.events import service as events
 
@@ -69,10 +70,42 @@ def create_user(db: Session, *, email: str, password: str, full_name: str, role:
     return user
 
 
+def _login_failures(db: Session, email_hash: str, ip_hash: str | None) -> tuple[int, int]:
+    """Đếm số lần đăng nhập SAI gần đây: (theo tài khoản, theo IP).
+
+    Theo tài khoản: chỉ đếm từ lần đăng nhập đúng gần nhất, để chủ tài khoản gõ nhầm vài lần
+    rồi đăng nhập được thì bộ đếm về 0.
+    Chỉ đếm lần sai, nên một IP đăng nhập đúng nhiều lần (văn phòng, Attack Lab) không bị chặn.
+    """
+    since = utcnow() - timedelta(minutes=get_settings().login_window_minutes)
+    last_ok = db.scalar(select(func.max(LoginAttempt.created_at))
+                        .where(LoginAttempt.email_hash == email_hash, LoginAttempt.success.is_(True)))
+    account_since = max(since, last_ok) if last_ok else since
+    by_account = db.scalar(select(func.count()).where(
+        LoginAttempt.email_hash == email_hash, LoginAttempt.success.is_(False),
+        LoginAttempt.created_at > account_since))
+    by_ip = db.scalar(select(func.count()).where(
+        LoginAttempt.ip_hash == ip_hash, LoginAttempt.success.is_(False),
+        LoginAttempt.created_at > since)) if ip_hash else 0
+    return by_account, by_ip
+
+
 def login(db: Session, email: str, password: str, ctx: ClientContext) -> tuple[User, str]:
+    settings = get_settings()
+    email_hash = security.hash_ip(email.strip().lower(), settings.ip_hash_secret)  # cùng hàm HMAC, khác dữ liệu
+    ip_hash = security.hash_ip(ctx.ip, settings.ip_hash_secret) if ctx.ip else None
+    by_account, by_ip = _login_failures(db, email_hash, ip_hash)
+    # Kiểm tra TRƯỚC khi so mật khẩu: đã quá giới hạn thì mật khẩu đúng cũng không được thử tiếp.
+    # Áp dụng cả với email không tồn tại, nên kẻ tấn công không dùng chỗ này để dò email.
+    if by_account >= settings.login_max_failures_per_account or by_ip >= settings.login_max_failures_per_ip:
+        raise AppError("LOGIN_RATE_LIMITED", f"Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau "
+                       f"{settings.login_window_minutes} phút.", 429)
+
     user = db.scalar(select(User).where(User.email == email))
     password_ok = security.verify_password(user.password_hash if user else None, password)
+    db.add(LoginAttempt(email_hash=email_hash, ip_hash=ip_hash, success=bool(user and password_ok)))
     if user is None or not password_ok:
+        db.commit()  # lưu lần thử sai trước khi báo lỗi
         # Cùng một thông điệp cho "sai email" và "sai mật khẩu", để không lộ email nào tồn tại
         raise AppError("INVALID_CREDENTIALS", "Email hoặc mật khẩu không đúng.", 401)
     if user.status != "active":
@@ -96,6 +129,20 @@ def accounts_on_device(db: Session, device_id: int) -> list[dict]:
          "last_seen_at": r.last_seen_at}
         for r in rows
     ]
+
+
+def reveal_contact(db: Session, actor: User, user_id: int, reason: str) -> ContactOut:
+    """Xem email/SĐT đầy đủ của một khách hàng. Console mặc định chỉ thấy bản đã che.
+
+    Mỗi lần xem ghi một dòng audit kèm lý do: ai xem, xem của ai, lúc nào, vì sao.
+    Audit chỉ ghi user_id, không chép lại email/SĐT vào log.
+    """
+    user = db.get(User, user_id)
+    if user is None or user.role != CUSTOMER:
+        raise AppError("USER_NOT_FOUND", "Không tìm thấy khách hàng.", 404)
+    audit.record(db, actor_id=actor.id, action="user.reveal_contact", entity_type="user", entity_id=str(user.id), note=reason)
+    db.commit()
+    return ContactOut(user_id=user.id, full_name=user.full_name, email=user.email, phone=user.phone)
 
 
 def logout(db: Session, token: str) -> None:

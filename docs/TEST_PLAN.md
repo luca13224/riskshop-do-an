@@ -8,8 +8,9 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 - Kịch bản end-to-end qua API: mỗi loại lạm dụng có kịch bản "lạm dụng" và "hợp lệ dễ nhầm" (`test_risk_scenarios.py`).
 - Checkout: idempotency, khóa tồn kho, lượt dùng voucher (`test_order.py`, `test_cart.py`).
 - Case, phân quyền, audit log, Attack Lab, trang luật, báo cáo, demo reset.
+- Giới hạn đăng nhập sai, che email trên Console, xem liên hệ có lý do + audit (`test_privacy.py`).
 - Bộ mô phỏng: khoảng tin cậy Wilson, tái lập theo seed, chạy quy mô nhỏ (`test_simulator.py`).
-- Lần chạy gần nhất: **126 test qua** (2026-10-30).
+- Lần chạy gần nhất: **138 test qua** (2026-10-30).
 
 ## 2. Thực nghiệm mô phỏng (`backend/simulator`)
 ```

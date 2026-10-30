@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core import errors, health
 from app.core.config import get_settings
 from app.modules.auth.deps import DEVICE_HEADER
+from app.modules.auth.router import console_router as users_console_router
 from app.modules.auth.router import router as auth_router
 from app.modules.cart.router import router as cart_router
 from app.modules.cases.router import router as cases_router
@@ -42,6 +43,7 @@ def create_app() -> FastAPI:
 
     app.include_router(health.router, prefix="/api")
     app.include_router(auth_router, prefix="/api")
+    app.include_router(users_console_router, prefix="/api")
     app.include_router(catalog_router, prefix="/api")
     app.include_router(cart_router, prefix="/api")
     app.include_router(order_router, prefix="/api")

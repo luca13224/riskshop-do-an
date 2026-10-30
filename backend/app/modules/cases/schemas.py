@@ -3,6 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.core.privacy import MaskedEmail
 from app.modules.risk.schemas import DecisionOut
 
 
@@ -11,7 +12,8 @@ class CaseSummaryOut(BaseModel):
     policy: str
     status: str
     cluster_label: str
-    primary_user_email: str
+    primary_user_id: int
+    primary_user_email: MaskedEmail
     decision_count: int
     max_score: int
     assigned_to_name: str | None
@@ -21,7 +23,7 @@ class CaseSummaryOut(BaseModel):
 
 class LinkedAccountOut(BaseModel):
     user_id: int
-    email: str
+    email: MaskedEmail
     full_name: str
     created_at: datetime
     last_seen_at: datetime

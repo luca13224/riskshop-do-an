@@ -4,6 +4,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.core.privacy import MaskedEmail
+
 _PHONE_RE = re.compile(r"^0\d{9}$")
 
 
@@ -77,7 +79,7 @@ class OrderSummaryOut(BaseModel):
 
 
 class StaffOrderOut(OrderSummaryOut):
-    customer_email: str
+    customer_email: MaskedEmail
     customer_name: str
 
 

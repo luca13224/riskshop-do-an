@@ -355,6 +355,7 @@ def _serialize(db: Session, rows) -> list[dict]:
             "actions": d.actions,
             "latency_ms": d.latency_ms,
             "error": d.error,
+            "user_id": d.user_id,
             "user_email": email,
             "user_name": name,
             "order_code": order_codes.get(d.order_id),
