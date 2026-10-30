@@ -1,3 +1,5 @@
+import { getDeviceId } from "@/lib/device"
+
 // Hàm gọi API dùng chung cho cả Shop và Console.
 // Backend luôn trả lỗi theo dạng { error: { code, message, request_id } },
 // nên ở đây ta biến nó thành một ApiError có đủ thông tin để hiển thị và debug.
@@ -29,7 +31,13 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   try {
     response = await fetch(path, {
       ...init,
-      headers: { "Content-Type": "application/json", ...init?.headers },
+      // Gửi kèm cookie phiên đăng nhập (cùng domain nhờ proxy của Vite)
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Device-Id": getDeviceId(),
+        ...init?.headers,
+      },
     })
   } catch {
     // Không tới được server: backend chưa chạy hoặc mất mạng
@@ -46,6 +54,9 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
       })
     }
     throw new ApiError(response.status, body.error)
+  }
+  if (response.status === 204) {
+    return undefined as T // "204 No Content": thành công nhưng không có dữ liệu trả về
   }
   return (await response.json()) as T
 }

@@ -9,7 +9,7 @@
 
 | Nhóm | Bảng | Module sở hữu (chỉ module này được ghi) |
 |---|---|---|
-| Người dùng và nhận diện | `users`, `devices`, `user_devices`, `user_ips`, `addresses` | auth, events |
+| Người dùng và nhận diện | `users`, `devices`, `user_devices`, `user_ips`, `auth_sessions`, `addresses` | auth, events |
 | Bán hàng | `products`, `carts`, `cart_items`, `vouchers`, `voucher_redemptions`, `orders`, `order_items`, `shipment_events` | catalog, cart, promotion, order, fulfillment |
 | Sự kiện | `events` | events |
 | Rủi ro | `rules`, `rule_versions`, `decision_policies`, `risk_decisions`, `rule_hits`, `account_risk_profiles` (R) | rules, risk |
@@ -17,7 +17,9 @@
 | Vận hành | `audit_logs`, `jobs` | audit, worker |
 | Thực nghiệm | `sim_runs`, `sim_labels` | simulator |
 
-Tổng: **28 bảng** (26 MVP + 2 Recommended). `account_risk_profiles` chưa vẽ trong sơ đồ vì là Recommended (xem mục 8).
+Tổng: **29 bảng** (27 MVP + 2 Recommended). `account_risk_profiles` chưa vẽ trong sơ đồ vì là Recommended (xem mục 8).
+
+**Bổ sung khi làm module auth (2026-10-30):** bảng `auth_sessions` (id, `token_hash` CHAR(64) UNIQUE, `user_id` FK, `device_id` FK nullable, `created_at`, `expires_at`, `revoked_at`). Cookie phiên chứa token ngẫu nhiên; CSDL chỉ lưu SHA-256 của token, nên lộ CSDL cũng không dùng lại được phiên. Đăng xuất là ghi `revoked_at`, nên phiên bị thu hồi ngay ở phía server.
 
 ## 2. Nhóm người dùng và bán hàng
 

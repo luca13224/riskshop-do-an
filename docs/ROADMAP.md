@@ -20,6 +20,8 @@
 - [x] Danh sách luật v0 (`docs/RULES_V0.md`), chờ Luca duyệt
 - [x] ERD v1 (`docs/ERD.md`), chờ Luca duyệt
 - [x] Tạo khung dự án `backend/`, `frontend/` và migration đầu tiên (baseline trống)
-- [ ] Module đầu tiên: auth (đăng ký, đăng nhập, vai trò) cùng các bảng users, devices
-- [ ] Router frontend: hai khu vực Shop (`/`) và Console (`/console`)
+- [x] Module auth: đăng ký, đăng nhập, đăng xuất, phiên trong CSDL, RBAC, ghi nhận thiết bị và IP
+- [x] Router frontend: hai khu vực Shop (`/`) và Console (`/console`, chặn theo vai trò)
+- [ ] Module catalog + seed sản phẩm; trang danh sách và chi tiết sản phẩm
+- [ ] (Recommended) Giới hạn số lần thử đăng nhập (rate limit)
 - [ ] Hỏi hạn nộp và yêu cầu của GVHD; chốt 2 nhóm chính sách (voucher tân thủ + COD)

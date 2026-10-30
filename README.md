@@ -19,7 +19,13 @@ Sinh viên: Luca — Hệ thống thông tin quản lý, Trường Đại học 
    Test: `.venv/Scripts/python -m pytest -q`
 3. **Frontend** (lần đầu `npm install`): `cd frontend && npm run dev` → http://localhost:5173
 
-Trang chủ hiện "Backend và cơ sở dữ liệu đã sẵn sàng" là cả ba phần đã nối với nhau.
+**Tài khoản nhân viên** (API đăng ký chỉ tạo được khách hàng), chạy trong thư mục `backend/`:
+```bash
+.venv/Scripts/python -m app.modules.auth.cli --email analyst@riskshop.test --name "Analyst Demo" --role analyst
+```
+Vai trò: `analyst`, `risk_manager`, `admin`. Mật khẩu được hỏi khi chạy. Tài khoản test local nên ghi vào `backend/.env.accounts` (đã nằm trong `.gitignore`).
+
+Đăng nhập bằng tài khoản nhân viên sẽ vào được http://localhost:5173/console; khách hàng vào đó sẽ bị chặn.
 
 ## Cấu trúc thư mục
 | Thư mục | Nội dung |

@@ -2,6 +2,21 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Module auth và hai khu vực giao diện
+**Đã hoàn thành**
+- Backend `app/modules/auth`: bảng users, devices, user_devices, user_ips, auth_sessions (migration `auth tables`, đã thử upgrade/downgrade/upgrade); API register/login/logout/me; mật khẩu Argon2id; phiên lưu bản băm token, cookie HttpOnly + SameSite=Lax; thông báo đăng nhập sai không lộ email; `require_roles` chặn theo vai trò ở backend; ghi nhận thiết bị (header `X-Device-Id`) và IP (chỉ lưu bản băm HMAC + bản che); CLI tạo tài khoản nhân viên. 23 test qua, chạy trên CSDL `riskshop_test` qua migration thật.
+- Frontend: React Router v8; Shop layout (đăng ký, đăng nhập, đăng xuất), Console layout có menu theo kịch bản demo và người gác cổng `RequireStaff`; form dùng React Hook Form + Zod; thông báo lỗi tiếng Việt.
+- Đã kiểm tra trên trình duyệt: báo lỗi form, đăng ký → vào Shop, khách vào `/console` bị chặn, chưa đăng nhập bị chuyển sang trang đăng nhập kèm `next`, đăng nhập sai và đúng, giao diện điện thoại 375px, tab mới không có lỗi console.
+
+**Sự cố đã gặp và cách xử lý**
+- `downgrade` tự sinh của Alembic lỗi trên MariaDB (lỗi 1553, xóa index đang làm chỗ dựa cho khóa ngoại): bỏ `drop_index` riêng; đã ghi vào skill `db-design`.
+- CLI in tiếng Việt lỗi trên cửa sổ dòng lệnh Windows; `uvicorn --reload` bị kẹt khi nạp lại: đã sửa hoặc ghi cách xử lý vào skill `debug-helper`.
+
+**Còn mở**
+- Chưa có rate limit cho đăng nhập (Recommended).
+- Console chưa có menu cho màn hình điện thoại (Console ưu tiên desktop).
+- Chưa ghi sự kiện `signup`/`login` vào bảng `events` (làm cùng module events, phục vụ luật R06).
+
 ## 2026-10-30 — Thiết kế tối thiểu và khung dự án
 **Đã hoàn thành**
 - Kịch bản demo v1, bộ luật v0, ERD v1 (28 bảng); Luca đã duyệt cả ba.

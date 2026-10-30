@@ -20,6 +20,14 @@ class Settings(BaseSettings):
     # Danh sách origin cho phép gọi API từ trình duyệt, cách nhau bằng dấu phẩy
     cors_origins: str = "http://localhost:5173"
 
+    # Khóa bí mật để băm IP (HMAC). Đổi khóa thì mọi bản băm IP cũ không so khớp được nữa.
+    ip_hash_secret: str
+    # Phiên đăng nhập
+    session_cookie_name: str = "rs_session"
+    session_ttl_hours: int = 24 * 7
+    # True khi chạy HTTPS (cookie chỉ gửi qua kết nối mã hóa); local dùng HTTP nên để False
+    cookie_secure: bool = False
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

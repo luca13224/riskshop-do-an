@@ -25,6 +25,8 @@ description: Chuẩn thiết kế cơ sở dữ liệu MariaDB của đồ án, 
 ## Migration (Alembic)
 - Mỗi thay đổi một migration, có `downgrade`.
 - Không sửa migration đã chạy; muốn đổi thì tạo migration mới.
+- **Luôn thử chu trình `upgrade` → `downgrade base` → `upgrade` trên CSDL test** trước khi commit.
+- MariaDB không cho xóa index đang làm chỗ dựa cho khóa ngoại (lỗi 1553). Trong `downgrade`, khi đằng nào cũng xóa bảng thì bỏ các lệnh `drop_index` riêng lẻ của bảng đó (bản autogenerate của Alembic hay sinh ra kiểu này).
 - Dữ liệu demo đi qua script seed hoặc `demo reset`, không nằm trong migration.
 
 ## Tài liệu
