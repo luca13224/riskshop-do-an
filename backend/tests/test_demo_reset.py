@@ -42,7 +42,11 @@ def test_reset_creates_baseline(db):
 
 
 def test_personas_behave_as_in_demo_script(db):
-    creds = reset(db)
+    assert_demo_personas(db, reset(db))
+
+
+def assert_demo_personas(db, creds: dict[str, str]) -> None:
+    """Ba nhân vật của kịch bản demo cho ra đúng kết quả (dùng lại sau khi sinh lịch sử mô phỏng)."""
     aria, viewpro = product_id(db, "AU-001"), product_id(db, "CP-003")
 
     # Cảnh 1: Minh (khách mới hợp lệ) dùng TANTHU được

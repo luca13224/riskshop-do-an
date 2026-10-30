@@ -10,6 +10,7 @@ from app.modules.order.models import Order
 from app.modules.risk.models import RiskDecision
 from conftest import TestSession
 from simulator.history import run
+from tests.test_demo_reset import assert_demo_personas
 
 
 def test_history_spreads_activity_over_past_days(db):
@@ -30,3 +31,11 @@ def test_history_spreads_activity_over_past_days(db):
     assert not db.scalar(select(func.count()).where(Order.status == "CONFIRMED"))
     # Tồn kho trả về số chuẩn sau khi chạy
     assert db.scalar(text("SELECT MAX(stock) FROM products")) < 100000
+
+
+def test_demo_personas_still_correct_after_history(db):
+    # Khách lịch sử dùng thiết bị, IP, địa chỉ riêng nên không được làm lệch kết quả của Minh, Khang, Lan
+    creds = reset(db)
+    run(days=3, seed=7, per_day=0.07, progress=lambda _: None, session_factory=TestSession)
+    db.rollback()
+    assert_demo_personas(db, creds)
