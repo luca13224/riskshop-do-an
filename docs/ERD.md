@@ -19,6 +19,8 @@
 
 Tổng: **29 bảng** (27 MVP + 2 Recommended). `account_risk_profiles` chưa vẽ trong sơ đồ vì là Recommended (xem mục 8).
 
+**Bổ sung khi làm module cases (2026-10-30):** bảng `jobs` nằm ở `app/core/jobs.py` (hàng đợi việc nền dùng chung); `case_decisions` thêm `added_at`; `case_actions.staff_id` cho phép NULL (= hệ thống); `audit_logs` thêm `note`; `risk_cases` có index `(status, opened_at)`. Chưa làm bảng `appeals` (Recommended).
+
 **Bổ sung khi làm module order (2026-10-30):** `orders` thêm `payment_status` (UNPAID/PAID) và `voucher_code`; UNIQUE(`user_id`, `idempotency_key`); `order_items` thêm `category` (chụp lại lúc đặt); `addresses` thuộc module order, UNIQUE(`user_id`, `norm_hash`) để không tạo trùng địa chỉ của cùng người; `voucher_redemptions` thuộc module promotion, UNIQUE(`voucher_id`, `user_id`) và UNIQUE(`order_id`); `shipment_events` thêm `actor_id`.
 
 **Bổ sung khi làm module cart + promotion (2026-10-30):** `carts` bỏ cột `status`, thay bằng `UNIQUE(user_id)` (mỗi khách đúng một giỏ, đặt hàng xong thì làm trống); `vouchers` thêm `max_discount` (trần giảm cho loại percent) và `description`; `cart_items` thêm `added_at`. Bảng `voucher_redemptions` sẽ tạo cùng module order (ghi lượt dùng tại thời điểm đặt hàng).

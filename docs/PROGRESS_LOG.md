@@ -2,6 +2,14 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Case management (cảnh 3 của kịch bản demo)
+**Đã hoàn thành**
+- Hàng đợi việc nền trong CSDL (`app/core/jobs.py`: enqueue cùng transaction, worker lấy việc bằng `FOR UPDATE SKIP LOCKED`, thử lại với thời gian chờ tăng dần, quá số lần thì failed) và worker `python -m worker.main`.
+- Risk Engine xếp việc `open_case` khi quyết định có `open_case`; worker mở case mới hoặc gom vào case đang mở của cùng cụm (voucher: theo thiết bị; COD: theo đơn). Mỗi cụm chỉ có một case mở nhờ cột `open_cluster_key` UNIQUE.
+- Module `cases`: danh sách, chi tiết (bằng chứng: các quyết định + luật khớp, tài khoản cùng thiết bị, đơn hàng chỉ hiện khu vực, lịch sử xử lý), nhận xử lý, kết luận bắt buộc ghi lý do; chỉ người nhận mới được kết luận; kết luận case COD sẽ duyệt hoặc từ chối đơn chờ xác minh (từ chối thì hoàn kho). Module `audit` ghi mọi thao tác trong cùng transaction.
+- Giao diện Case Queue (tự cập nhật 5 giây) và Case Detail. 99 test qua.
+- Đã thử trên trình duyệt: tấn công thu nhỏ 5 tài khoản farm → worker mở case cụm 95 điểm và case COD 70 điểm → Admin nhận xử lý → kết luận lạm dụng.
+
 ## 2026-10-30 — Risk Engine v1
 **Đã hoàn thành**
 - Module `events` (signup, login, product_view, voucher_attempt) và `risk` (features F01–F11 đọc chỉ-đọc bằng SQL, 3 loại luật thuần, điểm theo từng chính sách voucher/COD, ma trận quyết định, fail-open/fail-closed, lưu quyết định + rule_hits bất biến, luật có phiên bản; seed R01–R10). Nối vào áp voucher, payment-options, checkout.

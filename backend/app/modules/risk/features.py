@@ -43,6 +43,7 @@ def compute(db: Session, f: FeatureInput) -> dict:
         "voucher_new_user": f.voucher_new_user,
         "payment_cod": f.payment_cod,
         "order_value": f.order_value,  # F11
+        "device_id": f.device_id,  # không phải đặc trưng chấm điểm; lưu lại để gom case theo thiết bị
     }
 
     # F02: số tài khoản khách hàng MỚI (< 7 ngày) đã dùng cùng thiết bị trong 30 ngày, tính cả người hiện tại

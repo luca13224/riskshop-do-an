@@ -331,3 +331,38 @@ def update_shipment(db: Session, actor: User, order_code: str, new_status: str, 
         customer_email=owner.email,
         customer_name=owner.full_name,
     )
+
+
+# ---------- Dành cho module cases ----------
+
+def order_brief(db: Session, order_id: int) -> dict | None:
+    """Hàm công khai: thông tin ngắn của một đơn (hiển thị trong case)."""
+    order = db.get(m.Order, order_id)
+    if order is None:
+        return None
+    address = db.get(m.Address, order.address_id)
+    return {
+        "order_code": order.order_code,
+        "status": order.status,
+        "payment_method": order.payment_method,
+        "total": order.total,
+        "created_at": order.created_at,
+        # Nhân viên xem case chỉ thấy khu vực giao hàng, không thấy số nhà (tối thiểu hóa dữ liệu cá nhân)
+        "area": f"{address.ward}, {address.district}, {address.province}" if address else "",
+    }
+
+
+def resolve_review(db: Session, order_id: int, approve: bool, actor_id: int, note: str) -> str | None:
+    """Duyệt hoặc từ chối đơn đang chờ xác minh. Bên gọi commit. Trả về trạng thái mới (None nếu không đổi).
+
+    Từ chối thì hoàn hàng về kho. Chỉ đơn đang PENDING_REVIEW mới được xử lý.
+    """
+    order = db.scalar(select(m.Order).where(m.Order.id == order_id).with_for_update())
+    if order is None or order.status != m.PENDING_REVIEW:
+        return None
+    order.status = m.CONFIRMED if approve else m.REJECTED
+    if not approve:
+        items = db.scalars(select(m.OrderItem).where(m.OrderItem.order_id == order.id)).all()
+        catalog.release_stock(db, {i.product_id: i.quantity for i in items})
+    db.add(m.ShipmentEvent(order_id=order.id, status=order.status, note=note[:255], actor_id=actor_id))
+    return order.status

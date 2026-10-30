@@ -83,6 +83,21 @@ def login(db: Session, email: str, password: str, ctx: ClientContext) -> tuple[U
     return user, token
 
 
+def accounts_on_device(db: Session, device_id: int) -> list[dict]:
+    """Hàm công khai cho module cases: các tài khoản từng dùng một thiết bị (bằng chứng liên kết)."""
+    rows = db.execute(
+        select(User.id, User.email, User.full_name, User.created_at, UserDevice.last_seen_at)
+        .join(UserDevice, UserDevice.user_id == User.id)
+        .where(UserDevice.device_id == device_id)
+        .order_by(User.created_at)
+    ).all()
+    return [
+        {"user_id": r.id, "email": r.email, "full_name": r.full_name, "created_at": r.created_at,
+         "last_seen_at": r.last_seen_at}
+        for r in rows
+    ]
+
+
 def logout(db: Session, token: str) -> None:
     session = db.scalar(select(AuthSession).where(AuthSession.token_hash == security.hash_token(token)))
     if session and session.revoked_at is None:

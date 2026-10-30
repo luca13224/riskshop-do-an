@@ -6,6 +6,8 @@ import { RequireStaff } from "@/console/RequireStaff"
 import { ConsoleHomePage } from "@/console/pages/ConsoleHomePage"
 import { ConsoleOrdersPage } from "@/console/pages/ConsoleOrdersPage"
 import { LiveMonitorPage } from "@/console/pages/LiveMonitorPage"
+import { CasesPage } from "@/console/pages/CasesPage"
+import { CaseDetailPage } from "@/console/pages/CaseDetailPage"
 import { ShopLayout } from "@/shop/ShopLayout"
 import { CartPage } from "@/shop/pages/CartPage"
 import { CheckoutPage } from "@/shop/pages/CheckoutPage"
@@ -38,6 +40,8 @@ export function App() {
             <Route index element={<ConsoleHomePage />} />
             <Route path="orders" element={<ConsoleOrdersPage />} />
             <Route path="monitor" element={<LiveMonitorPage />} />
+            <Route path="cases" element={<CasesPage />} />
+            <Route path="cases/:code" element={<CaseDetailPage />} />
           </Route>
         </Route>
 

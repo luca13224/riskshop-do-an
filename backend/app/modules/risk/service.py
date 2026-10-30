@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from sqlalchemy import bindparam, select, text
 from sqlalchemy.orm import Session
 
+from app.core import jobs
 from app.core.config import get_settings
 from app.core.time import utcnow
 from app.modules.auth import service as auth_service
@@ -42,6 +43,7 @@ from app.modules.risk.models import (
 log = logging.getLogger("risk")
 
 VOUCHER, COD = "voucher", "cod"
+OPEN_CASE_JOB = "open_case"
 
 MESSAGES = {
     "remove_voucher": "Mã giảm giá không áp dụng được cho đơn hàng này.",
@@ -288,6 +290,10 @@ def record(db: Session, result: RiskResult, order_id: int | None = None) -> str:
             )
         )
     db.flush()
+    if result.actions.get("open_case"):
+        # Mở case BẤT ĐỒNG BỘ: worker làm sau, không làm chậm luồng mua hàng.
+        # Việc được ghi cùng transaction với quyết định, nên không bao giờ "lưu quyết định mà mất việc".
+        jobs.enqueue(db, OPEN_CASE_JOB, {"decision_id": decision.id})
     return decision.public_id
 
 
@@ -298,7 +304,28 @@ def list_recent(db: Session, limit: int = 50, after_id: int | None = None) -> li
     query = select(RiskDecision, User.email, User.full_name).join(User, User.id == RiskDecision.user_id)
     if after_id:
         query = query.where(RiskDecision.id > after_id)
-    rows = db.execute(query.order_by(RiskDecision.id.desc()).limit(limit)).all()
+    return _serialize(db, db.execute(query.order_by(RiskDecision.id.desc()).limit(limit)).all())
+
+
+def decisions_by_ids(db: Session, ids: list[int]) -> list[dict]:
+    """Hàm công khai cho module cases: các quyết định theo id, mới nhất trước."""
+    if not ids:
+        return []
+    query = (
+        select(RiskDecision, User.email, User.full_name)
+        .join(User, User.id == RiskDecision.user_id)
+        .where(RiskDecision.id.in_(ids))
+        .order_by(RiskDecision.id.desc())
+    )
+    return _serialize(db, db.execute(query).all())
+
+
+def decision_info(db: Session, decision_id: int) -> RiskDecision | None:
+    """Hàm công khai cho module cases: đọc một quyết định (chỉ đọc)."""
+    return db.get(RiskDecision, decision_id)
+
+
+def _serialize(db: Session, rows) -> list[dict]:
     ids = [d.id for d, _, _ in rows]
     hits_by_decision: dict[int, list[dict]] = {i: [] for i in ids}
     if ids:
