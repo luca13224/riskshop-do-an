@@ -19,6 +19,12 @@ def kpi(days: int = Query(default=7, ge=1, le=90), db: Session = Depends(get_db)
     return service.kpi(db, days)
 
 
+# Dashboard tổng quan: mọi nhân viên rủi ro đều xem được (email trong danh sách đã che)
+@router.get("/dashboard", dependencies=[Depends(require_roles(*STAFF_ROLES))])
+def dashboard(days: int = Query(default=7, ge=1, le=90), db: Session = Depends(get_db)) -> dict[str, Any]:
+    return service.dashboard(db, days)
+
+
 class AuditOut(BaseModel):
     id: int
     created_at: datetime

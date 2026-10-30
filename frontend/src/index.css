@@ -337,3 +337,18 @@
     opacity: 0.35;
   }
 }
+
+/* ---------- Biểu đồ trong Console (theo skill dataviz) ----------
+   Màu đặt theo vai trò: series-1 cho một chuỗi số liệu; bảng màu trạng thái (cố định, không đổi theo theme)
+   cho các quyết định rủi ro, luôn đi kèm icon + chữ chứ không để màu đứng một mình. */
+.viz {
+  --series-1: #2a78d6;
+  --st-good: #0ca30c;
+  --st-warning: #fab219;
+  --st-serious: #ec835a;
+  --st-critical: #d03b3b;
+  --grid: color-mix(in oklab, var(--foreground) 9%, transparent);
+}
+.dark .viz {
+  --series-1: #3987e5;
+}
