@@ -19,5 +19,7 @@
 - [x] Luca duyệt kịch bản demo
 - [x] Danh sách luật v0 (`docs/RULES_V0.md`), chờ Luca duyệt
 - [x] ERD v1 (`docs/ERD.md`), chờ Luca duyệt
-- [ ] Tạo khung dự án `backend/`, `frontend/` và migration đầu tiên
+- [x] Tạo khung dự án `backend/`, `frontend/` và migration đầu tiên (baseline trống)
+- [ ] Module đầu tiên: auth (đăng ký, đăng nhập, vai trò) cùng các bảng users, devices
+- [ ] Router frontend: hai khu vực Shop (`/`) và Console (`/console`)
 - [ ] Hỏi hạn nộp và yêu cầu của GVHD; chốt 2 nhóm chính sách (voucher tân thủ + COD)

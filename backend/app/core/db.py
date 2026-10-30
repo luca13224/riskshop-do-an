@@ -1,0 +1,42 @@
+"""Kết nối CSDL bằng SQLAlchemy 2.
+
+- `Base`: lớp cha cho mọi model; có quy ước đặt tên ràng buộc để Alembic sinh migration ổn định.
+- `get_db`: dependency của FastAPI, mỗi request nhận một session và tự đóng khi xong.
+"""
+
+from collections.abc import Iterator
+
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+
+from app.core.config import get_settings
+
+NAMING_CONVENTION = {
+    "ix": "ix_%(column_0_label)s",
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s",
+}
+
+
+class Base(DeclarativeBase):
+    metadata = MetaData(naming_convention=NAMING_CONVENTION)
+
+
+def make_engine(url: str) -> Engine:
+    # pool_pre_ping: kiểm tra kết nối trước khi dùng, tránh lỗi khi MariaDB vừa khởi động lại
+    return create_engine(url, pool_pre_ping=True)
+
+
+engine = make_engine(get_settings().database_url)
+SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+
+
+def get_db() -> Iterator[Session]:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

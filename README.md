@@ -2,6 +2,33 @@
 
 Sinh viên: Luca — Hệ thống thông tin quản lý, Trường Đại học Thủy Lợi.
 
+## Cách chạy (môi trường dev trên Windows)
+
+**Cần có:** XAMPP tại `D:\xampp` (dùng MariaDB), Python 3.11, Node.js 24.
+
+1. **Bật MariaDB:** mở `D:\xampp\xampp-control.exe` → bấm **Start** ở dòng MySQL.
+2. **Backend** (lần đầu):
+   ```bash
+   cd backend
+   python -m venv .venv
+   .venv/Scripts/python -m pip install -r requirements-dev.txt
+   cp .env.example .env   # rồi điền mật khẩu CSDL
+   .venv/Scripts/alembic upgrade head
+   ```
+   Chạy: `.venv/Scripts/python -m uvicorn app.main:app --reload --port 8000` → tài liệu API: http://localhost:8000/docs
+   Test: `.venv/Scripts/python -m pytest -q`
+3. **Frontend** (lần đầu `npm install`): `cd frontend && npm run dev` → http://localhost:5173
+
+Trang chủ hiện "Backend và cơ sở dữ liệu đã sẵn sàng" là cả ba phần đã nối với nhau.
+
+## Cấu trúc thư mục
+| Thư mục | Nội dung |
+|---|---|
+| `backend/` | FastAPI: `app/core` (cấu hình, CSDL, lỗi), `app/modules` (các module nghiệp vụ), `migrations` (Alembic), `tests` |
+| `frontend/` | React + Vite + TypeScript + Tailwind + shadcn/ui |
+| `spike/risk-mock/` | Risk API giả từ spike, giữ làm mẫu hợp đồng tích hợp |
+| `docs/` | Tài liệu dự án |
+
 ## Tài liệu dự án
 | File | Nội dung |
 |---|---|

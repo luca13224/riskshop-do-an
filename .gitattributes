@@ -1,0 +1,3 @@
+# Để Git tự chuẩn hóa ký tự xuống dòng, tránh lẫn LF/CRLF giữa các công cụ trên Windows
+* text=auto
+*.sh text eol=lf

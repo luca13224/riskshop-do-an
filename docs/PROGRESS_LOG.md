@@ -2,6 +2,22 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Thiết kế tối thiểu và khung dự án
+**Đã hoàn thành**
+- Kịch bản demo v1, bộ luật v0, ERD v1 (28 bảng); Luca đã duyệt cả ba.
+- Khung backend: FastAPI 0.162.0, SQLAlchemy 2.1.6, Alembic 1.20.1, PyMySQL 1.2.3; cấu hình qua `.env`; định dạng lỗi thống nhất kèm `request_id`; `GET /api/health` kiểm tra CSDL; 6 test qua.
+- CSDL `riskshop` và `riskshop_test` với user riêng `riskshop` (chỉ có quyền trên hai CSDL này); migration baseline đã chạy trên cả hai.
+- Khung frontend: tạo bằng `shadcn init -t vite` (preset Nova, base Radix): Vite 8, React 19, TypeScript, Tailwind 4, TanStack Query 5.105.0; proxy `/api` sang backend; trang kiểm tra kết nối hiển thị đúng cả khi backend chạy và khi backend tắt.
+- 7 skill dự án mới; giọng chat chuyển sang thân thiện, dễ hiểu.
+
+**Ghi chú kỹ thuật**
+- `npm audit`: 3 lỗ hổng low (deepmerge qua CLI shadcn), chấp nhận và theo dõi.
+- Giữ `httpx` cho TestClient (Starlette gợi ý `httpx2`, nhưng gói này mới phát hành vài ngày).
+- Cache pip/npm đặt ở `D:\_cache` (chỉ cho các lệnh trong phiên) để không làm đầy ổ C.
+
+**Bước tiếp theo**
+- Module auth + router frontend hai khu vực.
+
 ## 2026-10-30 — Chốt kiến trúc, dựng môi trường
 **Đã hoàn thành**
 - Spike WooCommerce: viết Risk API giả (`spike/risk-mock/`, FastAPI 0.162.0, 7/7 test qua). Hợp đồng `event → decision + actions + reason_codes` sẽ dùng lại cho Risk module thật.
