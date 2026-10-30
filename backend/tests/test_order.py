@@ -30,7 +30,7 @@ def shop(db):
     db.add_all(
         [
             Product(id=1, sku="P-1", slug="p1", name="Tai nghe", category="audio", price=300_000, stock=5),
-            Product(id=2, sku="P-2", slug="p2", name="Món cuối", category="home", price=250_000, stock=1),
+            Product(id=2, sku="P-2", slug="p2", name="Món cuối", category="gear", price=250_000, stock=1),
             Voucher(id=1, code="TANTHU", discount_type=FIXED, amount=50_000, min_order_value=200_000),
             Voucher(id=2, code="CUOICUNG", discount_type=FIXED, amount=10_000, max_redemptions=1),
         ]

@@ -8,13 +8,14 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base
 from app.core.time import utcnow
 
-# Danh mục cố định cho demo (mã -> tên hiển thị). Đủ để lọc trên trang chủ, chưa cần bảng riêng.
+# Danh mục cố định cho demo (mã -> tên hiển thị). Gian hàng chỉ bán đồ công nghệ (ADR-005).
 CATEGORIES = {
     "audio": "Âm thanh",
-    "computer": "Máy tính & phụ kiện",
-    "home": "Nhà cửa & đời sống",
-    "fashion": "Thời trang",
-    "sport": "Thể thao & du lịch",
+    "laptop": "Laptop & máy tính bảng",
+    "monitor": "Màn hình",
+    "gear": "Bàn phím & chuột",
+    "phone": "Điện thoại & phụ kiện",
+    "smart": "Thiết bị thông minh",
 }
 
 

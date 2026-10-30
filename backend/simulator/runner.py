@@ -166,7 +166,7 @@ def run(session_factory: Callable[[], Session], dataset: str, seed: int, scale: 
         accounts = [a for g in groups for a in g.accounts]
 
         # Lịch sử quá khứ: tạo tài khoản cũ và đơn đã kết thúc (dữ liệu seed)
-        cheap = skus["HM-001"]
+        cheap = skus["SM-002"]
         for a in accounts:
             if a.age_days is not None:
                 u = make_user(db, f"{a.key}@sim.test", a.key, CUSTOMER, PASSWORD, timedelta(days=a.age_days))

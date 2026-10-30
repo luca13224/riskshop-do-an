@@ -1,10 +1,11 @@
 import {
-  Backpack,
   Headphones,
-  Lamp,
+  Keyboard,
   Laptop,
+  Monitor,
   Package,
-  Shirt,
+  Smartphone,
+  Watch,
   type LucideIcon,
 } from "lucide-react"
 
@@ -14,10 +15,11 @@ import { cn } from "@/lib/utils"
 // Ảnh minh họa tự vẽ theo danh mục: demo chạy offline, không phụ thuộc ảnh bên ngoài hay bản quyền ảnh.
 const STYLES: Record<CategoryCode, { icon: LucideIcon; bg: string }> = {
   audio: { icon: Headphones, bg: "from-violet-500/25 to-fuchsia-500/10" },
-  computer: { icon: Laptop, bg: "from-sky-500/25 to-cyan-500/10" },
-  home: { icon: Lamp, bg: "from-amber-500/25 to-orange-500/10" },
-  fashion: { icon: Shirt, bg: "from-rose-500/25 to-pink-500/10" },
-  sport: { icon: Backpack, bg: "from-emerald-500/25 to-lime-500/10" },
+  laptop: { icon: Laptop, bg: "from-sky-500/25 to-cyan-500/10" },
+  monitor: { icon: Monitor, bg: "from-cyan-500/25 to-teal-500/10" },
+  gear: { icon: Keyboard, bg: "from-amber-500/25 to-orange-500/10" },
+  phone: { icon: Smartphone, bg: "from-rose-500/25 to-pink-500/10" },
+  smart: { icon: Watch, bg: "from-emerald-500/25 to-lime-500/10" },
 }
 
 interface ProductImageProps {

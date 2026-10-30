@@ -3,7 +3,13 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { apiFetch } from "./client"
 
 // Kiểu dữ liệu khớp với schema bên backend (app/modules/catalog/schemas.py)
-export type CategoryCode = "audio" | "computer" | "home" | "fashion" | "sport"
+export type CategoryCode =
+  | "audio"
+  | "laptop"
+  | "monitor"
+  | "gear"
+  | "phone"
+  | "smart"
 
 export interface Product {
   id: number

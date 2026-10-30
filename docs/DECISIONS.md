@@ -72,3 +72,26 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 - Quyết định: (2) cho MVP. (3) để Recommended khi dữ liệu lớn.
 - Lý do: không có vòng import; toàn bộ định nghĩa đặc trưng nằm ở một file, dễ đọc và dễ bảo vệ; đúng mô hình thực tế (hệ thống rủi ro đọc dữ liệu giao dịch). Ghi dữ liệu vẫn chỉ qua module sở hữu.
 - Hệ quả / rủi ro: risk phụ thuộc vào TÊN bảng và cột của module khác; đổi cấu trúc các bảng đó phải kiểm tra lại `features.py` (test kịch bản trong `tests/test_risk_scenarios.py` sẽ báo lỗi nếu lệch).
+
+## ADR-005: Hướng giao diện "rạp chiếu phim" và gian hàng chỉ bán đồ công nghệ
+- Ngày: 2026-10-30
+- Trạng thái: Accepted
+- Bối cảnh: Shop hiện dùng nền tối, ảnh sản phẩm chỉ là ô gradient kèm icon, danh mục lẫn lộn (thời trang, gia dụng, thể thao...). Luca muốn demo ấn tượng. Có ba nguồn tham khảo (xem `docs/reviews/2026-10-30_UI_DIRECTION.md`): prompt landing "Vertex", video "10K websites" (trang kể chuyện theo nhịp cuộn), mẫu WooCommerce "Neotek".
+- Các phương án:
+  - (1) Giữ nguyên, chỉ làm đẹp từng chi tiết.
+  - (2) Dùng nguyên theme hoặc mẫu có sẵn (Neotek / WordPress): trái với ADR-003.
+  - (3) Tự xây, kết hợp các nguyên lý: banner tối kiểu Vertex với vòng 3D các danh mục như những màn ảnh trong rạp phim; phần cửa hàng sáng kiểu Neotek; một ẩn dụ chuyển động riêng.
+- Quyết định: (3).
+  - Banner trang chủ tối, có vòng danh mục 3D. Bấm vào một danh mục thì "màn hình chiếu chính" phía trước hiện sản phẩm của danh mục đó. Cuộn xuống thì "đèn rạp bật sáng", chuyển sang phần cửa hàng tông sáng.
+  - Thẻ sản phẩm kiểu Neotek: ảnh tách nền đặt trên nền xám nhạt, rê chuột thì hiện nút thao tác, nút giá nằm trong vết khuyết bo góc ngược.
+  - Màu nhấn: cyan điện cho vùng tối (banner, Risk Console), vàng cho nút mua trên vùng sáng. Không thêm màu nhấn nào khác.
+  - Gian hàng chỉ bán đồ công nghệ, 6 danh mục, 24 sản phẩm.
+  - Ảnh và video được phép tạo bằng AI hoặc lấy từ nền tảng ảnh có giấy phép. Phải đạt chuẩn chất lượng trong `docs/assets/IMAGE_BRIEF.md` và ghi nguồn vào sổ nguồn ảnh.
+- Lý do: banner tạo dấu ấn khi demo; phần cửa hàng sáng giúp khách dễ đọc giá và tạo cảm giác tin cậy; đồ công nghệ giá cao làm kịch bản "COD giá trị cao" (cảnh 5b) tự nhiên hơn.
+- Hệ quả / rủi ro:
+  - Không làm biến thể sản phẩm (màu, dung lượng) có tồn kho riêng ở MVP, vì phải sửa giỏ hàng, đơn hàng và khóa tồn kho.
+  - Không dùng kiến trúc "khung cố định phóng to" của Vertex.
+  - Băng chuyền 3D phải dừng khi rê chuột hoặc focus, và phải có hàng nút danh mục thay thế cho bàn phím và điện thoại.
+  - Tôn trọng `prefers-reduced-motion`.
+  - Kết quả thực nghiệm mô phỏng đã ghi được chạy với danh mục cũ. Bộ luật không đổi nên kết quả vẫn có giá trị, nhưng nếu chạy lại thì phải ghi rõ đó là danh mục v2.
+

@@ -14,7 +14,7 @@ Sinh viên: Luca — Hệ thống thông tin quản lý, Trường Đại học 
    .venv/Scripts/python -m pip install -r requirements-dev.txt
    cp .env.example .env   # rồi điền mật khẩu CSDL
    .venv/Scripts/alembic upgrade head
-   .venv/Scripts/python -m app.modules.catalog.seed     # 16 sản phẩm mẫu (chạy lại an toàn)
+   .venv/Scripts/python -m app.modules.catalog.seed     # 24 sản phẩm công nghệ mẫu (chạy lại an toàn)
    .venv/Scripts/python -m app.modules.promotion.seed   # voucher TANTHU, GIAM10
    .venv/Scripts/python -m app.modules.risk.seed        # bộ luật rủi ro R01–R10 + ngưỡng quyết định
    ```

@@ -8,6 +8,7 @@ from sqlalchemy import func, select
 from app.main import app
 from app.modules.auth.models import User
 from app.modules.catalog.models import Product
+from app.modules.catalog.seed import PRODUCTS
 from app.modules.lab.reset import reset
 from app.modules.order.models import Order
 from app.modules.risk.models import Rule
@@ -30,7 +31,7 @@ def product_id(db, sku: str) -> int:
 def test_reset_creates_baseline(db):
     creds = reset(db)
     assert set(creds) >= {"minh@shop.test", "khang@shop.test", "lan@shop.test", "admin@riskshop.test"}
-    assert db.scalar(select(func.count()).select_from(Product)) == 16
+    assert db.scalar(select(func.count()).select_from(Product)) == len(PRODUCTS)
     assert db.scalar(select(func.count()).select_from(Rule)) == 10
     lan_id = db.scalar(select(User.id).where(User.email == "lan@shop.test"))
     assert db.scalar(select(func.count()).select_from(Order).where(Order.user_id == lan_id)) == 30

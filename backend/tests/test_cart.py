@@ -18,8 +18,8 @@ def shop(db):
     db.add_all(
         [
             Product(id=1, sku="P-1", slug="p1", name="Tai nghe", category="audio", price=150_000, stock=10),
-            Product(id=2, sku="P-2", slug="p2", name="Bàn phím", category="computer", price=400_000, stock=2),
-            Product(id=3, sku="P-3", slug="p3", name="Hết hàng", category="home", price=100_000, stock=0),
+            Product(id=2, sku="P-2", slug="p2", name="Bàn phím", category="monitor", price=400_000, stock=2),
+            Product(id=3, sku="P-3", slug="p3", name="Hết hàng", category="gear", price=100_000, stock=0),
             Voucher(code="TANTHU", discount_type=FIXED, amount=50_000, min_order_value=200_000, new_user_only=True),
             Voucher(code="GIAM10", discount_type=PERCENT, amount=10, max_discount=30_000, min_order_value=0),
             Voucher(code="HETHAN", discount_type=FIXED, amount=10_000, ends_at=utcnow() - timedelta(days=1)),
