@@ -2,6 +2,27 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Chốt kiến trúc, dựng môi trường
+**Đã hoàn thành**
+- Spike WooCommerce: viết Risk API giả (`spike/risk-mock/`, FastAPI 0.162.0, 7/7 test qua). Hợp đồng `event → decision + actions + reason_codes` sẽ dùng lại cho Risk module thật.
+- Cài XAMPP 8.3.36 (PHP 8.3.36, MariaDB 10.11.16), chuyển từ `C:\xampp` sang `D:\xampp`; giới hạn Apache và MariaDB chỉ nhận kết nối từ 127.0.0.1; bật thêm extension PHP gd, intl, sodium, zip (bản sao lưu `php.ini.bak-before-wp`).
+- Tạo thêm skill dự án `ui-design-bar`, `defense-prep`; cập nhật `CLAUDE.md`.
+- Đánh giá skill `10k-websites` (landing page dùng video AI): không cài, vì không hợp kiến trúc, ép dịch vụ trả phí và chèn link affiliate.
+
+**Quyết định đã chốt**
+- ADR-003 (Accepted): tự xây toàn bộ theo modular monolith; React + Vite + TypeScript + Tailwind/shadcn; FastAPI + SQLAlchemy + Alembic; MariaDB; worker dùng bảng jobs; SSE cho realtime.
+- ADR-002 (WooCommerce lai) chuyển sang Superseded.
+- Cách làm việc: sản phẩm và demo trước, báo cáo viết sau; Luca vừa làm vừa học TypeScript.
+
+**Vấn đề còn mở**
+- Script dựng shop WooCommerce đã chạy một phần trước khi dừng, để lại database `wp_shop`, user MariaDB `wp_shop` và thư mục `D:\xampp\htdocs\shop`. Cần dọn.
+- `C:\xampp` (bản cài cũ, khoảng 0,84 GB) chờ Luca tự xóa.
+- Chưa có thời hạn và yêu cầu của GVHD; chưa chốt các loại lạm dụng thuộc MVP.
+
+**Bước tiếp theo**
+- Thiết kế tối thiểu: kịch bản demo → danh sách luật v0 → ERD.
+- Tạo khung dự án `backend/` và `frontend/`.
+
 ## 2026-10-30 — Phản biện đề cương ban đầu
 **Đã hoàn thành**
 - Đọc đề cương `DeCuong_DATN_HaTienLuc_2251162067_64HTTT4.docx`; viết bản tư vấn 11 phần tại `docs/reviews/2026-10-30_INITIAL_REVIEW.md`.

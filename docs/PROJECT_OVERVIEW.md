@@ -1,6 +1,6 @@
 # PROJECT OVERVIEW
 
-> Cập nhật lần cuối: 2026-10-30 · Trạng thái: **Khởi tạo — chưa chốt phạm vi**
+> Cập nhật lần cuối: 2026-10-30 · Trạng thái: **Đã chốt hướng kiến trúc (ADR-003); đang chuẩn bị thiết kế tối thiểu**
 
 ## 1. Đề tài (dự kiến)
 **Xây dựng hệ thống kiểm soát rủi ro và ngăn ngừa lạm dụng chính sách trên sàn thương mại điện tử.**
@@ -32,8 +32,14 @@ Các sàn thương mại điện tử dùng chính sách ưu đãi như voucher 
 ## 5. Hiện trạng
 - [x] Thống nhất vai trò cố vấn và nguyên tắc làm việc
 - [x] Tạo khung tài liệu dự án
-- [ ] Thu thập đề cương, thời hạn, yêu cầu của giảng viên hướng dẫn
-- [ ] Chốt các loại lạm dụng thuộc MVP
+- [x] Đọc và phản biện đề cương (`docs/reviews/2026-10-30_INITIAL_REVIEW.md`)
+- [x] Chốt hướng: tự xây toàn bộ, modular monolith (ADR-003)
+- [x] Cài môi trường: XAMPP (MariaDB) tại `D:\xampp`, Node.js 24, Python 3.11
+- [ ] Hỏi thời hạn và yêu cầu của GVHD
+- [ ] Chốt các loại lạm dụng thuộc MVP (đề xuất: voucher tân thủ + COD)
+- [ ] Thiết kế tối thiểu: kịch bản demo, luật v0, ERD
+
+**Ưu tiên của Luca:** sản phẩm và demo trước; báo cáo đồ án viết sau khi dự án đã chốt.
 
 ## 6. Rủi ro chính đã nhận diện
 | Rủi ro | Ảnh hưởng | Hướng xử lý |

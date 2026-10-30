@@ -24,3 +24,39 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 - Quyết định: A.
 - Lý do: Dễ quản lý phiên bản bằng Git, đặt cạnh mã nguồn, dễ chuyển thành báo cáo sau.
 - Hệ quả: Báo cáo đồ án chính thức (Word/PDF) sẽ được soạn riêng, dựa trên nội dung các file này.
+
+## ADR-002: Kiến trúc lai — WooCommerce làm shop, Risk Service riêng bằng FastAPI
+- Ngày: 2026-10-30
+- Trạng thái: Superseded by ADR-003 (spike dừng trước khi cài WordPress)
+- Bối cảnh: Luca ưu tiên sản phẩm và demo ấn tượng; đã quen PHP/WordPress, biết React ở mức cơ bản. Tự xây shop tốn nhiều thời gian nhưng không phải phần ăn điểm.
+- Các phương án:
+  - (1) Tự xây toàn bộ (React + FastAPI): toàn quyền kiểm soát, nhưng khối lượng lớn nhất.
+  - (2) Lai: WooCommerce làm shop, plugin connector PHP gọi Risk Service (FastAPI), Risk Console bằng React: shop có sẵn, công sức dồn vào lõi rủi ro; rủi ro là khả năng can thiệp hook checkout của WooCommerce.
+  - (3) Làm hết trong WordPress (luật viết bằng PHP, Console trong WP Admin): ít code nhất, nhưng kiến trúc yếu và khó thực nghiệm.
+- Quyết định (dự kiến): (2). Thay MongoDB bằng MySQL 8 hoặc MariaDB dùng chung cho cả WooCommerce và Risk Service (hai database riêng).
+- Lý do: tập trung vào phần lõi; câu chuyện tích hợp "nền tảng rủi ro cắm vào shop có sẵn" sát thực tế; Luca chỉ cần học một hệ quản trị CSDL.
+- Điều kiện chốt: spike 2–3 ngày chứng minh plugin connector làm được 3 việc: gỡ coupon, ẩn COD, chuyển đơn sang On hold, dựa trên phản hồi của Risk Service. Spike thất bại thì quay về (1).
+- Hệ quả / rủi ro: hội đồng sẽ hỏi sâu vào Risk Service và connector; cần nói rõ shop là "hệ thống TMĐT nguồn" dùng WooCommerce; cần hỏi GVHD có chấp nhận dùng WooCommerce không.
+
+## ADR-003: Tự xây dựng toàn bộ hệ thống theo kiến trúc modular monolith
+- Ngày: 2026-10-30
+- Trạng thái: Accepted
+- Bối cảnh: Luca muốn toàn quyền với sản phẩm và để mọi phần code đều do mình hiểu và giải thích được. Phương án lai WooCommerce (ADR-002) phụ thuộc hook checkout của WooCommerce và buộc làm song song PHP với Python.
+- Các phương án:
+  - (1) Tự xây toàn bộ: toàn quyền với luồng voucher, checkout, COD; một ngôn ngữ backend; đổi lại khối lượng giao diện shop lớn hơn.
+  - (2) Lai WooCommerce + Risk Service (ADR-002): shop có sẵn, nhưng rủi ro tích hợp hook và phải dùng hai stack.
+  - (3) Làm hết trong WordPress: kiến trúc yếu, khó thực nghiệm.
+- Quyết định: (1). Một ứng dụng backend FastAPI chia module theo nghiệp vụ; một ứng dụng frontend React gồm hai khu vực Shop (`/`) và Risk Console (`/console`).
+- Stack:
+  - Frontend: React + Vite + TypeScript, Tailwind CSS + shadcn/ui, TanStack Query, TanStack Table, React Hook Form + Zod, Recharts.
+  - Backend: FastAPI + SQLAlchemy 2 + Alembic + Pydantic; pytest.
+  - CSDL: MariaDB (bản trong XAMPP tại `D:\xampp`), sau này có thể chuyển sang MySQL 8 trong Docker. Không dùng MongoDB.
+  - Tác vụ nền: bảng `jobs` + một tiến trình worker Python; không dùng Celery hay Redis ở MVP.
+  - Realtime cho Console: Server-Sent Events (SSE).
+  - Mô phỏng tấn công: Python CLI gọi API thật; Playwright cho bot qua trình duyệt (Recommended).
+- Lý do: chiều sâu kỹ thuật (transaction, race condition, idempotency, luật có phiên bản) nằm hoàn toàn trong code của Luca; một ngôn ngữ backend; dùng lại được hợp đồng API của Risk mock trong spike; MariaDB đã cài và Luca quen MySQL.
+- Ràng buộc để giữ tiến độ:
+  - Shop chỉ làm đủ cho demo: danh sách và chi tiết sản phẩm, giỏ hàng, voucher, checkout COD/trả trước, lịch sử đơn. Không làm đánh giá, chat, tìm kiếm nâng cao, đăng nhập mạng xã hội.
+  - Module `risk` không phụ thuộc module `order`; chỉ nhận ngữ cảnh đánh giá và trả về quyết định cùng `actions`.
+  - Không đổi hướng kiến trúc lần nữa trừ khi có ADR mới với lý do rõ ràng.
+- Hệ quả / rủi ro: khối lượng frontend lớn hơn trong khi Luca chưa học Vite/TypeScript, nên học theo kiểu vừa làm vừa học, có review; Docker hoãn lại vì ổ C còn ít dung lượng.

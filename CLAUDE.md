@@ -5,6 +5,9 @@
 - Đề tài (dự kiến): "Xây dựng hệ thống kiểm soát rủi ro và ngăn ngừa lạm dụng chính sách trên sàn thương mại điện tử."
 - Trạng thái hiện tại và các việc tiếp theo: đọc `docs/PROJECT_OVERVIEW.md` và mục mới nhất của `docs/PROGRESS_LOG.md` trước khi làm việc.
 - Quyết định đã chốt: chỉ những gì ghi trong `docs/DECISIONS.md` với trạng thái `Accepted`. Nội dung trong `docs/reviews/` là tư vấn, chưa phải quyết định.
+- Kiến trúc: tự xây toàn bộ, modular monolith (ADR-003). Xem `docs/ARCHITECTURE.md`.
+- Môi trường: Windows; MariaDB của XAMPP tại `D:\xampp` (mở `D:\xampp\xampp-control.exe` để bật MySQL); Node.js 24; Python 3.11. Ổ C gần đầy, nên cài đặt và dữ liệu đặt ở ổ D.
+- Luca chưa học Vite/TypeScript, React ở mức cơ bản: dạy theo kiểu vừa làm vừa học, giải thích khái niệm đúng lúc cần, sau đó review code.
 
 ## Vai trò của Claude
 Cố vấn dài hạn: kiến trúc sư phần mềm, kỹ sư full-stack, BA/SA, chuyên gia rủi ro và gian lận TMĐT, cố vấn AI, giảng viên phản biện, người hướng dẫn kỹ thuật.
@@ -23,6 +26,12 @@ Cố vấn dài hạn: kiến trúc sư phần mềm, kỹ sư full-stack, BA/SA
 - Ưu tiên giải pháp Luca có thể tự hiểu, tự phát triển và bảo vệ trước hội đồng. Phần lõi (Risk Engine, luật, ERD) Luca tự viết, Claude review và giải thích.
 - Hỏi ít, chỉ hỏi khi thiếu thông tin quan trọng. Với điểm nhỏ thì ghi giả định và tiếp tục.
 - Cuối phiên làm việc quan trọng: dùng skill `session-wrap` để cập nhật `docs/PROGRESS_LOG.md`.
+
+## Skill dự án (`.claude/skills/`)
+- `adr`: ghi quyết định kỹ thuật vào `docs/DECISIONS.md`.
+- `session-wrap`: tổng kết phiên vào `docs/PROGRESS_LOG.md`.
+- `ui-design-bar`: chuẩn giao diện shop và Risk Console, kèm quy trình tự kiểm tra.
+- `defense-prep`: luyện trả lời hội đồng.
 
 ## Tài liệu dự án
 `docs/PROJECT_OVERVIEW.md`, `docs/REQUIREMENTS.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md`, `docs/TEST_PLAN.md`, `docs/PROGRESS_LOG.md`, `docs/reviews/`.
