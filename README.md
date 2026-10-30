@@ -12,6 +12,7 @@ Sinh viên: Luca — Hệ thống thông tin quản lý, Trường Đại học 
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Kế hoạch, milestone |
 | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | Kịch bản demo bảo vệ; phạm vi MVP suy ra từ đây |
 | [docs/RULES_V0.md](docs/RULES_V0.md) | Bộ luật rủi ro v0: đặc trưng, luật, ma trận quyết định |
+| [docs/ERD.md](docs/ERD.md) | Thiết kế CSDL: sơ đồ, index theo đặc trưng, ràng buộc, dữ liệu cá nhân |
 | [docs/TEST_PLAN.md](docs/TEST_PLAN.md) | Chiến lược và kịch bản kiểm thử |
 | [docs/PROGRESS_LOG.md](docs/PROGRESS_LOG.md) | Nhật ký tiến độ |
 | [docs/reviews/](docs/reviews/) | Các bản tư vấn, phản biện (chưa phải quyết định) |
