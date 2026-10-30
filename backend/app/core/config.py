@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     app_env: str = "local"
     database_url: str
     test_database_url: str | None = None
+    sim_database_url: str | None = None  # CSDL riêng cho bộ mô phỏng (simulator)
     # Danh sách origin cho phép gọi API từ trình duyệt, cách nhau bằng dấu phẩy
     cors_origins: str = "http://localhost:5173"
 

@@ -30,7 +30,7 @@
 - [x] Attack Lab: 4 kịch bản demo (farm voucher, gia đình chung Wi-Fi, COD giá trị cao, lịch sử bùng hàng) chạy qua worker, gọi API thật, so sánh kỳ vọng/thực tế
 - [x] Trang Luật rủi ro: xem luật dạng câu dễ đọc, số lần khớp 7 ngày, sửa con số tạo phiên bản mới (chỉ Risk Manager/Admin), lịch sử phiên bản, audit
 - [x] Báo cáo/KPI (tác động nghiệp vụ ước tính, phân bố quyết định, độ trễ p50/p95/p99, case, hiệu quả từng luật kèm giả định) và Audit Log
-- [ ] Simulator cho thực nghiệm dev/test (Live Monitor đã có bản polling; SSE là Recommended)
+- [x] Simulator cho thực nghiệm dev/test (Live Monitor đã có bản polling; SSE là Recommended)
 - [ ] (Recommended) Giới hạn số lần thử đăng nhập (rate limit)
 - [ ] Hỏi hạn nộp và yêu cầu của GVHD; chốt 2 nhóm chính sách (voucher tân thủ + COD)
 

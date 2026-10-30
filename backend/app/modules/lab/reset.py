@@ -53,7 +53,7 @@ def _wipe(db: Session) -> None:
     db.commit()
 
 
-def _user(db: Session, email: str, name: str, role: str, password: str, age: timedelta, phone: str | None = None):
+def make_user(db: Session, email: str, name: str, role: str, password: str, age: timedelta, phone: str | None = None):
     user = User(email=email, full_name=name, role=role, phone=phone,
                 password_hash=security.hash_password(password), created_at=utcnow() - age)
     db.add(user)
@@ -61,7 +61,7 @@ def _user(db: Session, email: str, name: str, role: str, password: str, age: tim
     return user
 
 
-def _history(db: Session, user: User, product: Product, outcomes: list[str]) -> None:
+def add_history(db: Session, user: User, product: Product, outcomes: list[str]) -> None:
     """Tạo lịch sử đơn COD đã kết thúc trong quá khứ (dữ liệu seed, ghi rõ là mô phỏng)."""
     line = f"{secrets.randbelow(300) + 1} Đường Demo {user.id}"
     norm = hashlib.sha256(f"seed-address-{user.id}".encode()).hexdigest()
@@ -100,17 +100,17 @@ def reset(db: Session) -> dict[str, str]:
         return credentials[email]
 
     for email, name, role in STAFF:
-        _user(db, email, name, role, password_for(email), timedelta(days=60))
+        make_user(db, email, name, role, password_for(email), timedelta(days=60))
 
     cheap = db.query(Product).filter(Product.sku == "HM-001").one()  # Bình giữ nhiệt
-    _user(db, "minh@shop.test", "Nguyễn Minh", CUSTOMER, password_for("minh@shop.test"), timedelta(hours=20),
+    make_user(db, "minh@shop.test", "Nguyễn Minh", CUSTOMER, password_for("minh@shop.test"), timedelta(hours=20),
           phone="0901111111")
-    khang = _user(db, "khang@shop.test", "Phạm Khang", CUSTOMER, password_for("khang@shop.test"),
+    khang = make_user(db, "khang@shop.test", "Phạm Khang", CUSTOMER, password_for("khang@shop.test"),
                   timedelta(days=90), phone="0902222222")
-    _history(db, khang, cheap, [DELIVERED] + [DELIVERY_FAILED] * 4)
-    lan = _user(db, "lan@shop.test", "Trần Lan", CUSTOMER, password_for("lan@shop.test"), timedelta(days=365),
+    add_history(db, khang, cheap, [DELIVERED] + [DELIVERY_FAILED] * 4)
+    lan = make_user(db, "lan@shop.test", "Trần Lan", CUSTOMER, password_for("lan@shop.test"), timedelta(days=365),
                 phone="0903333333")
-    _history(db, lan, cheap, [DELIVERED] * 30)
+    add_history(db, lan, cheap, [DELIVERED] * 30)
     db.commit()
     return credentials
 
