@@ -2,6 +2,13 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-30 — Demo reset
+**Đã hoàn thành**
+- `python -m app.modules.lab.reset --yes`: xóa toàn bộ dữ liệu, seed lại 16 sản phẩm, voucher TANTHU/GIAM10, luật v1; tạo nhân viên (analyst, manager, admin) và nhân vật Minh (khách mới hợp lệ), Khang (1 đơn COD thành công, 4 thất bại trong quá khứ), Lan (30 đơn giao thành công); mật khẩu ngẫu nhiên ghi vào `backend/.env.accounts`.
+- Chốt an toàn: từ chối nếu không có `DEMO_MODE=true` hoặc thiếu `--yes`.
+- Test: chạy reset hai lần liên tiếp vẫn ra đúng trạng thái chuẩn; sau reset, Minh dùng được TANTHU, Khang bị ẩn COD, Lan đặt COD 5,49 triệu được xác nhận ngay. 123 test qua.
+- Lịch sử đơn của Khang và Lan là dữ liệu seed ghi trực tiếp vào CSDL (có ghi chú "Dữ liệu seed"), không đi qua API.
+
 ## 2026-10-30 — Báo cáo/KPI và Audit Log (cảnh 7 của kịch bản demo)
 **Đã hoàn thành**
 - Module `reports` (chỉ đọc): KPI theo khoảng 24 giờ / 7 / 30 ngày gồm tác động nghiệp vụ ước tính (giá trị voucher ngăn được, chi phí COD tránh được, đơn bị giữ, khách hợp lệ bị giữ nhầm), phân bố quyết định và theo điểm kiểm soát, độ trễ p50/p95/p99 (nearest-rank, đo ở server), thống kê case, hiệu quả từng luật (số lần khớp, kết luận case, tỷ lệ chính xác); các giả định quy đổi tiền được trả kèm báo cáo.

@@ -149,6 +149,8 @@
 4. Đơn COD giá trị cao từ tài khoản mới (cảnh 5b).
 
 ### Yêu cầu riêng cho buổi demo
+> Đã cài đặt (2026-10-30): `python -m app.modules.lab.reset --yes` tạo lại trạng thái chuẩn gồm Minh (khách mới, đăng ký 20 giờ trước), Khang (5 đơn COD, 4 thất bại), Lan (30 đơn giao thành công), 3 nhân viên analyst / manager / admin; mật khẩu trong `backend/.env.accounts`.
+
 - **Script `demo reset`** đưa CSDL về trạng thái chuẩn trong dưới 1 phút: có sẵn tài khoản Minh, Khang, Lan, nhân viên, sản phẩm, voucher.
 - **Chạy hoàn toàn offline trên laptop**, không phụ thuộc mạng hay API bên ngoài.
 - **Video quay sẵn** toàn bộ kịch bản để dự phòng.

@@ -6,6 +6,7 @@
 import sys
 
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.core.db import SessionLocal
 from app.modules.promotion.models import FIXED, PERCENT, Voucher
@@ -31,9 +32,9 @@ VOUCHERS = [
 ]
 
 
-def seed() -> int:
+def seed(session: Session | None = None) -> int:
     created = 0
-    with SessionLocal() as db:
+    with (session or SessionLocal()) as db:
         for data in VOUCHERS:
             voucher = db.scalar(select(Voucher).where(Voucher.code == data["code"]))
             if voucher is None:

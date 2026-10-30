@@ -11,6 +11,7 @@ import sys
 import unicodedata
 
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.core.db import SessionLocal
 from app.modules.catalog.models import Product
@@ -42,9 +43,9 @@ def slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
 
 
-def seed() -> int:
+def seed(session: Session | None = None) -> int:
     created = 0
-    with SessionLocal() as db:
+    with (session or SessionLocal()) as db:
         for sku, name, category, price, stock, description in PRODUCTS:
             product = db.scalar(select(Product).where(Product.sku == sku))
             if product is None:
