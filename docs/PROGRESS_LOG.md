@@ -2,6 +2,27 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-31 — Tuần 3 (phần 2): Khiếu nại (ADR-006)
+**Đã hoàn thành**
+- Module `appeals`, bảng `appeals` và `risk_allowlist`.
+  - Khách khiếu nại một quyết định hạn chế cụ thể của mình trong 30 ngày gần nhất.
+  - Mỗi chính sách chỉ có một khiếu nại đang mở (`open_key` UNIQUE).
+  - Khách chỉ thấy kết quả, không thấy luật hay điểm.
+- Kết luận chỉ dành cho Risk Manager/Admin; bắt buộc có câu trả lời cho khách; ghi audit `appeal.resolve`. Chấp nhận thì miễn trừ chính sách đó 30 ngày và duyệt đơn nếu đơn đang bị giữ.
+- Risk Engine: `decide(..., exempt)` bỏ qua hành động của chính sách được miễn. Luật vẫn khớp và vẫn ghi lại, `features_snapshot.exempt_policies` cho biết vì sao điểm cao mà vẫn cho phép.
+- Shop:
+  - Trang `/appeals` gồm danh sách những lần bị hạn chế và các khiếu nại đã gửi kèm phản hồi.
+  - Đường dẫn "Gửi khiếu nại" ở giỏ hàng (voucher bị từ chối), ở thanh toán (COD bị tắt) và ở chi tiết đơn (đơn bị giữ hoặc bị từ chối).
+- Console:
+  - Trang danh sách và chi tiết khiếu nại: nội dung khách viết, quyết định kèm luật đã khớp, số khiếu nại khác của cùng khách, liên hệ (có che PII).
+  - Dashboard có ô "Khiếu nại chờ xử lý"; Audit Log có bộ lọc "Khiếu nại".
+- `test_appeals.py` có 6 test, gồm kịch bản người nhà dùng chung máy được gỡ chặn voucher sau khi khiếu nại. Tổng 150 test qua.
+- Đã chạy thử trọn luồng trên trình duyệt: đơn COD 5,49 triệu bị giữ → khách gửi khiếu nại → admin chấp nhận → đơn CONFIRMED, có audit.
+
+**Còn mở**
+- Trên điện thoại, header của shop chưa có mục "Khiếu nại" (vẫn vào được từ giỏ hàng, thanh toán, chi tiết đơn).
+- Đưa khiếu nại vào DEMO_SCRIPT (gợi ý: thêm vào cảnh 5c hoặc một cảnh riêng).
+
 ## 2026-10-31 — Tuần 3 (phần 1): Dashboard tổng quan của Risk Console
 **Đã hoàn thành**
 - `GET /api/console/dashboard?days=7|30` (module reports, SQL chỉ đọc). Một lần gọi trả về:

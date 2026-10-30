@@ -12,6 +12,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, field
+from datetime import timedelta
 
 from sqlalchemy import bindparam, select, text
 from sqlalchemy.orm import Session
@@ -34,6 +35,7 @@ from app.modules.risk.models import (
     SEVERITY,
     VOUCHER_APPLY,
     DecisionPolicy,
+    RiskAllowlist,
     RiskDecision,
     Rule,
     RuleHit,
@@ -124,10 +126,18 @@ def _load_policy(db: Session, context: str) -> DecisionPolicy | None:
     )
 
 
-def decide(context: str, policy_scores: dict[str, int], strong_counts: dict[str, int], thresholds: dict) -> tuple[str, dict]:
+def decide(
+    context: str,
+    policy_scores: dict[str, int],
+    strong_counts: dict[str, int],
+    thresholds: dict,
+    exempt: frozenset[str] = frozenset(),
+) -> tuple[str, dict]:
     """Ma trận quyết định (RULES_V0 mục 4). Hàm thuần, test riêng được.
 
     Mỗi chính sách có điểm riêng; hành động tương ứng theo chính sách đó.
+    `exempt`: các chính sách khách đang được miễn trừ (khiếu nại được chấp nhận, ADR-006): bỏ qua hành động
+    của chính sách đó, nhưng điểm và luật đã khớp vẫn được ghi lại.
     payment_options dùng CÙNG ngưỡng với place_order để giao diện không "nói một đằng, làm một nẻo".
     REVIEW / BLOCK luôn cần luật MẠNH, không bao giờ chỉ vì nhiều tín hiệu yếu cộng lại.
     """
@@ -140,7 +150,7 @@ def decide(context: str, policy_scores: dict[str, int], strong_counts: dict[str,
             decision = new
 
     v = thresholds.get(VOUCHER)
-    if v is not None and VOUCHER in policy_scores:
+    if v is not None and VOUCHER in policy_scores and VOUCHER not in exempt:
         score = policy_scores[VOUCHER]
         if score >= v["restrict"]:
             actions["remove_voucher"] = True
@@ -149,7 +159,7 @@ def decide(context: str, policy_scores: dict[str, int], strong_counts: dict[str,
             actions["open_case"] = True
 
     c = thresholds.get(COD)
-    if c is not None and COD in policy_scores:
+    if c is not None and COD in policy_scores and COD not in exempt:
         score, strong = policy_scores[COD], strong_counts.get(COD, 0)
         if score >= c.get("block", 101) and strong >= 2:
             if context == PLACE_ORDER:
@@ -167,6 +177,24 @@ def decide(context: str, policy_scores: dict[str, int], strong_counts: dict[str,
             actions["disable_cod"] = True
             escalate(ALLOW_WITH_RESTRICTION)
     return decision, actions
+
+
+# ---------- Danh sách miễn trừ (ADR-006) ----------
+
+def active_exemptions(db: Session, user_id: int) -> set[str]:
+    """Các chính sách mà khách đang được miễn trừ (chưa hết hạn)."""
+    return set(db.scalars(
+        select(RiskAllowlist.policy).where(RiskAllowlist.user_id == user_id, RiskAllowlist.expires_at > utcnow())
+    ))
+
+
+def grant_exemption(db: Session, *, user_id: int, policy: str, days: int, reason: str, actor_id: int,
+                    source_ref: str) -> None:
+    """Hàm công khai cho module appeals. Bên gọi commit."""
+    if policy not in (VOUCHER, COD):
+        raise ValueError(f"policy không hợp lệ: {policy}")
+    db.add(RiskAllowlist(user_id=user_id, policy=policy, reason=reason[:255], source_ref=source_ref,
+                         created_by=actor_id, expires_at=utcnow() + timedelta(days=days)))
 
 
 def _customer_message(actions: dict) -> str:
@@ -233,7 +261,12 @@ def _evaluate(db: Session, req: EvaluationRequest) -> RiskResult:
     policy_scores = {p: max(0, min(100, sum(h.points for h in hits if p in h.policies))) for p in active}
     strong_counts = {p: sum(1 for h in hits if p in h.policies and h.strength == "strong") for p in active}
     policy = _load_policy(db, req.context)
-    decision, actions = decide(req.context, policy_scores, strong_counts, policy.thresholds if policy else {})
+    exempt = frozenset(active_exemptions(db, req.user.id) & set(active))
+    if exempt:
+        features["exempt_policies"] = sorted(exempt)  # Console thấy vì sao điểm cao mà vẫn cho phép
+    decision, actions = decide(
+        req.context, policy_scores, strong_counts, policy.thresholds if policy else {}, exempt
+    )
     return RiskResult(
         request=req,
         decision=decision,
@@ -363,3 +396,18 @@ def _serialize(db: Session, rows) -> list[dict]:
         }
         for d, email, name in rows
     ]
+
+
+# ---------- Dành cho module appeals (khiếu nại) ----------
+
+def restrictive_decisions_for_user(db: Session, user_id: int, since) -> list[RiskDecision]:
+    """Các quyết định hạn chế (khác ALLOW) của một khách từ mốc `since`, mới nhất trước."""
+    return list(db.scalars(
+        select(RiskDecision)
+        .where(RiskDecision.user_id == user_id, RiskDecision.decision != ALLOW, RiskDecision.created_at >= since)
+        .order_by(RiskDecision.id.desc())
+    ))
+
+
+def decision_by_public_id(db: Session, public_id: str) -> RiskDecision | None:
+    return db.scalar(select(RiskDecision).where(RiskDecision.public_id == public_id))

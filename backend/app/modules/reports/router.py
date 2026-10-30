@@ -48,7 +48,7 @@ class AuditOut(BaseModel):
 @router.get("/audit", response_model=list[AuditOut], dependencies=[Depends(require_roles(RISK_MANAGER, ADMIN))])
 def audit(
     limit: int = Query(default=100, ge=1, le=500),
-    entity_type: Literal["case", "rule", "lab_run", "user"] | None = None,
+    entity_type: Literal["case", "rule", "lab_run", "user", "appeal"] | None = None,
     db: Session = Depends(get_db),
 ):
     return service.audit_logs(db, limit, entity_type)

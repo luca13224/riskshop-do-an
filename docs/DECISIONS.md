@@ -95,3 +95,22 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
   - Tôn trọng `prefers-reduced-motion`.
   - Kết quả thực nghiệm mô phỏng đã ghi được chạy với danh mục cũ. Bộ luật không đổi nên kết quả vẫn có giá trị, nhưng nếu chạy lại thì phải ghi rõ đó là danh mục v2.
 
+
+## ADR-006: Khiếu nại và danh sách miễn trừ
+- Ngày: 2026-10-31
+- Trạng thái: Accepted
+- Bối cảnh: thực nghiệm (TEST_PLAN mục 3) cho thấy 20–31% khách "hợp lệ nhưng dễ nhầm" bị hạn chế, ví dụ gia đình dùng chung máy hoặc khách mới đặt COD giá trị cao. Hệ thống cần một đường để khách bị chặn nhầm lên tiếng, và để quyết định của nhân viên được ghi nhận lại.
+- Các phương án:
+  - (1) Không có khiếu nại, khách tự liên hệ CSKH bên ngoài: không lưu vết, không đo được.
+  - (2) Khiếu nại xong thì tắt luật cho khách đó: mất khả năng giải thích, khó kiểm tra lại.
+  - (3) Khiếu nại gắn với MỘT quyết định cụ thể; chấp nhận thì miễn trừ HÀNH ĐỘNG của chính sách đó trong 30 ngày, luật vẫn chạy và vẫn ghi lại đã khớp.
+- Quyết định: (3).
+  - Khách chỉ khiếu nại được quyết định hạn chế của chính mình, trong 30 ngày. Mỗi chính sách (voucher/COD) chỉ có một khiếu nại đang mở (`open_key` UNIQUE).
+  - Khách chỉ thấy KẾT QUẢ ("Mã giảm giá không được áp dụng"), không thấy luật hay điểm.
+  - Analyst xem được; chỉ Risk Manager/Admin kết luận (nguyên tắc bốn mắt). Bắt buộc có câu trả lời cho khách; ghi audit `appeal.resolve`.
+  - Chấp nhận thì: thêm bản ghi `risk_allowlist` cho chính sách đó trong 30 ngày, và duyệt đơn nếu đơn đang bị giữ. Từ chối thì không đổi gì.
+  - Risk Engine: `decide(..., exempt)` bỏ qua hành động của chính sách được miễn; `features_snapshot.exempt_policies` ghi lại lý do.
+- Lý do: khép kín vòng xử lý nhầm, có số liệu để đánh giá, giữ được khả năng giải thích, chống lạm dụng quyền của một người.
+- Hệ quả / rủi ro:
+  - Kẻ gian có thể khiếu nại để được miễn trừ. Biện pháp giảm thiểu: người kết luận thấy số khiếu nại khác của cùng khách, miễn trừ có hạn 30 ngày, mọi kết luận đều có audit.
+  - Miễn trừ theo tài khoản, không theo thiết bị.

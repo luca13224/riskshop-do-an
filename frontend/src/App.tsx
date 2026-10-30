@@ -8,11 +8,14 @@ import { ConsoleOrdersPage } from "@/console/pages/ConsoleOrdersPage"
 import { LiveMonitorPage } from "@/console/pages/LiveMonitorPage"
 import { CasesPage } from "@/console/pages/CasesPage"
 import { AttackLabPage } from "@/console/pages/AttackLabPage"
+import { AppealDetailPage } from "@/console/pages/AppealDetailPage"
+import { AppealsPage as ConsoleAppealsPage } from "@/console/pages/AppealsPage"
 import { RulesPage } from "@/console/pages/RulesPage"
 import { ReportsPage } from "@/console/pages/ReportsPage"
 import { AuditLogPage } from "@/console/pages/AuditLogPage"
 import { CaseDetailPage } from "@/console/pages/CaseDetailPage"
 import { ShopLayout } from "@/shop/ShopLayout"
+import { AppealsPage } from "@/shop/pages/AppealsPage"
 import { CartPage } from "@/shop/pages/CartPage"
 import { CheckoutPage } from "@/shop/pages/CheckoutPage"
 import { OrderDetailPage } from "@/shop/pages/OrderDetailPage"
@@ -34,6 +37,7 @@ export function App() {
           <Route path="cart" element={<CartPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="orders" element={<OrdersPage />} />
+          <Route path="appeals" element={<AppealsPage />} />
           <Route path="orders/:code" element={<OrderDetailPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
@@ -46,6 +50,8 @@ export function App() {
             <Route path="monitor" element={<LiveMonitorPage />} />
             <Route path="cases" element={<CasesPage />} />
             <Route path="cases/:code" element={<CaseDetailPage />} />
+            <Route path="appeals" element={<ConsoleAppealsPage />} />
+            <Route path="appeals/:code" element={<AppealDetailPage />} />
             <Route path="lab" element={<AttackLabPage />} />
             <Route path="rules" element={<RulesPage />} />
             <Route path="reports" element={<ReportsPage />} />

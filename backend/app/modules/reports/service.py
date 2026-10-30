@@ -220,6 +220,7 @@ def dashboard(db: Session, days: int) -> dict:
             "SELECT COUNT(*) FROM risk_cases WHERE status = 'OPEN' AND opened_at < :t"
         ), {"t": now - timedelta(hours=STALE_CASE_HOURS)}).scalar()),
         "pending_orders": int(db.execute(text("SELECT COUNT(*) FROM orders WHERE status = 'PENDING_REVIEW'")).scalar()),
+        "open_appeals": int(db.execute(text("SELECT COUNT(*) FROM appeals WHERE status = 'OPEN'")).scalar()),
         "failed_jobs": int(db.execute(text("SELECT COUNT(*) FROM jobs WHERE status = 'failed'")).scalar()),
         "risk_errors": int(db.execute(text(
             "SELECT COUNT(*) FROM risk_decisions WHERE created_at >= :since AND error IS NOT NULL"), {"since": since}).scalar()),

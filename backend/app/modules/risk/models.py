@@ -110,3 +110,23 @@ class RuleHit(Base):
     strength: Mapped[str] = mapped_column(String(10))
     observed: Mapped[dict] = mapped_column(JSON)
     reason_text: Mapped[str] = mapped_column(String(500))
+
+
+class RiskAllowlist(Base):
+    """Miễn trừ một chính sách (voucher/cod) cho một khách trong một khoảng thời gian.
+
+    Sinh ra khi khiếu nại được chấp nhận (ADR-006). Luật vẫn chạy và vẫn ghi lại đã khớp,
+    chỉ có HÀNH ĐỘNG hạn chế của chính sách đó được bỏ qua, nên vẫn giải thích và kiểm tra lại được.
+    """
+
+    __tablename__ = "risk_allowlist"
+    __table_args__ = (Index("ix_risk_allowlist_user_policy_exp", "user_id", "policy", "expires_at"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    policy: Mapped[str] = mapped_column(String(10))  # voucher | cod
+    reason: Mapped[str] = mapped_column(String(255))
+    source_ref: Mapped[str | None] = mapped_column(String(32))  # ví dụ mã khiếu nại
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)

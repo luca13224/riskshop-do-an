@@ -6,6 +6,7 @@ import {
   CircleCheck,
   FolderOpen,
   Hourglass,
+  MessageSquareWarning,
   TriangleAlert,
   type LucideIcon,
 } from "lucide-react"
@@ -245,6 +246,14 @@ function Attention({ data }: { data: Dashboard }) {
       urgent: true,
     },
     {
+      icon: MessageSquareWarning,
+      label: "Khiếu nại chờ xử lý",
+      value: a.open_appeals,
+      to: "/console/appeals",
+      hint: "Khách cho rằng bị hạn chế nhầm",
+      urgent: true,
+    },
+    {
       icon: TriangleAlert,
       label: "Lỗi hệ thống",
       value: a.failed_jobs + a.risk_errors,
@@ -261,7 +270,7 @@ function Attention({ data }: { data: Dashboard }) {
       >
         Cần xử lý ngay
       </h2>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {items.map(({ icon: Icon, label, value, to, hint, urgent }) => {
           const hot = value > 0 && urgent
           return (
