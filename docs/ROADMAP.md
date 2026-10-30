@@ -13,5 +13,10 @@
 | 6. Báo cáo & bảo vệ | Viết báo cáo, slide, demo | Báo cáo, slide | _?_ |
 
 ## Việc tiếp theo
-- [ ] Luca gửi đề cương (bản nháp cũng được), hạn nộp, yêu cầu của GVHD
-- [ ] Chọn 2–3 loại lạm dụng chính sách cho MVP
+- [x] Luca gửi đề cương
+- [x] Chốt hướng kiến trúc (ADR-003)
+- [x] Viết kịch bản demo v1 (`docs/DEMO_SCRIPT.md`)
+- [x] Luca duyệt kịch bản demo
+- [x] Danh sách luật v0 (`docs/RULES_V0.md`), chờ Luca duyệt
+- [ ] ERD v1
+- [ ] Hỏi hạn nộp và yêu cầu của GVHD; chốt 2 nhóm chính sách (voucher tân thủ + COD)
