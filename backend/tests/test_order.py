@@ -245,3 +245,31 @@ def test_address_normalization_matches_variants():
     b = AddressIn(**{**ADDRESS, "line": "so 5 nguyen trai", "ward": "P. Ben Thanh", "district": "Q1",
                      "province": "Hồ Chí Minh"})
     assert normalize_address(a) == normalize_address(b)
+
+
+def test_console_orders_filter_search_and_paginate(minh, admin, shop):
+    codes = []
+    for _ in range(3):
+        minh.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
+        codes.append(checkout(minh).json()["order_code"])
+    ship(admin, codes[0], "SHIPPING")
+
+    body = admin.get("/api/console/orders").json()
+    assert body["total"] == 3 and body["status_counts"] == {"CONFIRMED": 2, "SHIPPING": 1}
+    assert [o["order_code"] for o in body["items"]] == codes[::-1]  # mới nhất trước
+
+    shipping = admin.get("/api/console/orders", params={"status": "SHIPPING"}).json()
+    assert [o["order_code"] for o in shipping["items"]] == [codes[0]]
+    assert shipping["status_counts"]["CONFIRMED"] == 2  # chip vẫn hiện số của trạng thái khác
+
+    found = admin.get("/api/console/orders", params={"q": codes[1]}).json()
+    assert [o["order_code"] for o in found["items"]] == [codes[1]]
+    assert admin.get("/api/console/orders", params={"q": "khong-ton-tai"}).json()["total"] == 0
+
+    page2 = admin.get("/api/console/orders", params={"page": 2, "page_size": 2}).json()
+    assert [o["order_code"] for o in page2["items"]] == [codes[0]]
+
+
+def test_console_orders_rejects_bad_status_and_customers(minh, admin):
+    assert admin.get("/api/console/orders", params={"status": "HACKED"}).status_code == 422
+    assert minh.get("/api/console/orders").status_code == 403

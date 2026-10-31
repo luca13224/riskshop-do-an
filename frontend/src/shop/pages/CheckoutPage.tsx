@@ -56,6 +56,15 @@ export function CheckoutPage() {
       payment_method: "COD",
     },
   })
+  // defaultValues chỉ được đọc ở lần vẽ đầu; nếu lúc đó thông tin khách chưa tải xong thì ô bị trống.
+  // Khi thông tin khách về, điền tên và số điện thoại vào các ô khách CHƯA tự sửa.
+  useEffect(() => {
+    if (!user) return
+    if (!form.getFieldState("recipient_name").isDirty && !form.getValues("recipient_name"))
+      form.setValue("recipient_name", user.full_name)
+    if (!form.getFieldState("phone").isDirty && !form.getValues("phone") && user.phone)
+      form.setValue("phone", user.phone)
+  }, [user, form])
   const { errors, isSubmitting } = form.formState
   const paymentMethod = useWatch({
     control: form.control,

@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
 
 import { apiFetch } from "./client"
 
@@ -73,7 +78,7 @@ export const STATUS_LABELS: Record<OrderStatus, string> = {
 
 export const PAYMENT_LABELS: Record<PaymentMethod, string> = {
   COD: "Thanh toán khi nhận hàng",
-  PREPAID: "Chuyển khoản (giả lập)",
+  PREPAID: "Trả trước (chuyển khoản)",
 }
 
 export function useCheckout() {
@@ -115,10 +120,30 @@ export function useOrder(code: string) {
   })
 }
 
-export function useStaffOrders() {
+export interface StaffOrderPage {
+  items: StaffOrder[]
+  total: number
+  page: number
+  page_size: number
+  status_counts: Partial<Record<OrderStatus, number>> // số đơn theo trạng thái, để chip lọc hiện con số
+}
+
+export interface StaffOrderFilters {
+  status?: OrderStatus
+  q?: string // mã đơn, email hoặc tên khách
+  page?: number
+}
+
+export function useStaffOrders(filters: StaffOrderFilters) {
+  const params = new URLSearchParams()
+  if (filters.status) params.set("status", filters.status)
+  if (filters.q) params.set("q", filters.q)
+  params.set("page", String(filters.page ?? 1))
+  params.set("page_size", "20")
   return useQuery({
-    queryKey: ["console", "orders"],
-    queryFn: () => apiFetch<StaffOrder[]>("/api/console/orders"),
+    queryKey: ["console", "orders", filters],
+    queryFn: () => apiFetch<StaffOrderPage>(`/api/console/orders?${params}`),
+    placeholderData: keepPreviousData, // đổi bộ lọc: giữ bảng cũ (mờ đi) thay vì nháy skeleton
   })
 }
 

@@ -98,3 +98,23 @@ def test_seed_hides_products_no_longer_sold(db):
     db.rollback()
     assert db.query(Product).filter_by(sku="OLD-1").one().is_active is False
     assert db.query(Product).filter(Product.is_active.is_(True)).count() == len(PRODUCTS)
+
+
+def test_sort_by_price(client, products):
+    asc = [p["price"] for p in client.get("/api/products", params={"sort": "price_asc"}).json()["items"]]
+    desc = [p["price"] for p in client.get("/api/products", params={"sort": "price_desc"}).json()["items"]]
+    assert asc == sorted(asc) and desc == sorted(desc, reverse=True) and len(asc) == 3
+
+
+def test_price_range_filter_combines_with_category(client, products):
+    body = client.get("/api/products", params={"category": "audio", "min_price": 400_000}).json()
+    assert [p["sku"] for p in body["items"]] == ["T-1"]
+    body = client.get("/api/products", params={"min_price": 300_000, "max_price": 500_000}).json()
+    assert {p["sku"] for p in body["items"]} == {"T-1", "T-2"}
+
+
+def test_invalid_sort_and_price_range_rejected(client, products):
+    assert client.get("/api/products", params={"sort": "price; DROP"}).status_code == 422
+    resp = client.get("/api/products", params={"min_price": 900_000, "max_price": 100_000})
+    assert resp.status_code == 422 and resp.json()["error"]["code"] == "INVALID_PRICE_RANGE"
+    assert client.get("/api/products", params={"min_price": -1}).status_code == 422

@@ -11,12 +11,13 @@ import secrets
 import string
 import unicodedata
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
+from app.core.search import LIKE_ESCAPE, contains_pattern
 from app.core.time import utcnow
 from app.modules.auth.models import User
 from app.modules.auth.service import ClientContext
@@ -31,6 +32,7 @@ from app.modules.order.schemas import (
     OrderSummaryOut,
     ShipmentEventOut,
     StaffOrderOut,
+    StaffOrderPage,
 )
 from app.modules.promotion import service as promotion
 from app.modules.risk import service as risk
@@ -277,15 +279,39 @@ def list_my_orders(db: Session, user: User) -> list[OrderSummaryOut]:
 
 # ---------- Dành cho nhân viên ----------
 
-def list_recent_orders(db: Session, limit: int = 50) -> list[StaffOrderOut]:
+def list_orders_for_staff(
+    db: Session, *, status: str | None = None, q: str | None = None, page: int = 1, page_size: int = 20
+) -> StaffOrderPage:
+    """Danh sách đơn cho Console: lọc theo trạng thái, tìm theo mã đơn / email / tên khách, mới nhất trước.
+    Email trong kết quả vẫn được che (MaskedEmail): tìm theo email thì nhân viên phải biết trước email đó."""
+    conditions = []
+    if q:
+        pattern = contains_pattern(q)
+        conditions.append(or_(
+            m.Order.order_code.like(pattern, escape=LIKE_ESCAPE),
+            User.email.like(pattern, escape=LIKE_ESCAPE),
+            User.full_name.like(pattern, escape=LIKE_ESCAPE),
+        ))
+    # Đếm theo trạng thái TRƯỚC khi áp bộ lọc trạng thái, để chip nào cũng hiện đúng con số của nó
+    status_counts = dict(db.execute(
+        select(m.Order.status, func.count()).join(User, User.id == m.Order.user_id)
+        .where(*conditions).group_by(m.Order.status)
+    ).all())
+    if status:
+        conditions.append(m.Order.status == status)
+    total = db.scalar(
+        select(func.count()).select_from(m.Order).join(User, User.id == m.Order.user_id).where(*conditions)
+    ) or 0
     rows = db.execute(
         select(m.Order, User.email, User.full_name)
         .join(User, User.id == m.Order.user_id)
+        .where(*conditions)
         .order_by(m.Order.id.desc())
-        .limit(limit)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
     ).all()
     counts = _item_counts(db, [o.id for o, _, _ in rows])
-    return [
+    items = [
         StaffOrderOut(
             order_code=o.order_code,
             status=o.status,
@@ -298,6 +324,7 @@ def list_recent_orders(db: Session, limit: int = 50) -> list[StaffOrderOut]:
         )
         for o, email, name in rows
     ]
+    return StaffOrderPage(items=items, total=total, page=page, page_size=page_size, status_counts=status_counts)
 
 
 def update_shipment(db: Session, actor: User, order_code: str, new_status: str, note: str) -> StaffOrderOut:

@@ -83,6 +83,17 @@ class StaffOrderOut(OrderSummaryOut):
     customer_name: str
 
 
+class StaffOrderPage(BaseModel):
+    """Một trang đơn hàng cho Console. status_counts: số đơn theo từng trạng thái (đã áp từ khóa tìm,
+    chưa áp bộ lọc trạng thái) để các chip lọc hiện con số."""
+
+    items: list[StaffOrderOut]
+    total: int
+    page: int
+    page_size: int
+    status_counts: dict[str, int]
+
+
 class PaymentOptionsOut(BaseModel):
     cod_allowed: bool
     message: str | None

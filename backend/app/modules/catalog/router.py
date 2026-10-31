@@ -22,9 +22,15 @@ def list_products(
     category: str | None = Query(default=None, pattern="^(" + "|".join(CATEGORIES) + ")$"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=12, ge=1, le=48),
+    sort: str = Query(default="new", pattern="^(" + "|".join(service.SORTS) + ")$"),
+    min_price: int | None = Query(default=None, ge=0),
+    max_price: int | None = Query(default=None, ge=0),
     db: Session = Depends(get_db),
 ):
-    return service.list_products(db, q=q.strip() if q else None, category=category, page=page, page_size=page_size)
+    return service.list_products(
+        db, q=q.strip() if q else None, category=category, page=page, page_size=page_size,
+        sort=sort, min_price=min_price, max_price=max_price,
+    )
 
 
 @router.get("/products/{slug}", response_model=ProductOut)

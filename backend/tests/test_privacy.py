@@ -44,7 +44,7 @@ def test_console_apis_never_return_raw_email(shop, db):
     assert checkout(minh).status_code == 201
     manager = staff(db, "manager@riskshop.test", RISK_MANAGER)
 
-    orders = manager.get("/api/console/orders").json()
+    orders = manager.get("/api/console/orders").json()["items"]
     assert orders[0]["customer_email"] == "mi***@example.com"
     decisions = manager.get("/api/console/risk/decisions").json()
     assert decisions and decisions[0]["user_email"] == "mi***@example.com" and decisions[0]["user_id"]

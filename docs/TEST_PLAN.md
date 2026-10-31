@@ -10,7 +10,8 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 - Case, phân quyền, audit log, Attack Lab, trang luật, báo cáo, demo reset.
 - Giới hạn đăng nhập sai, che email trên Console, xem liên hệ có lý do + audit (`test_privacy.py`).
 - Bộ mô phỏng: khoảng tin cậy Wilson, tái lập theo seed, chạy quy mô nhỏ (`test_simulator.py`).
-- Lần chạy gần nhất: **138 test qua** (2026-10-30).
+- Danh sách sản phẩm: sắp xếp theo giá, lọc khoảng giá, từ chối tham số sai (`test_catalog.py`); Console Đơn hàng: lọc trạng thái, tìm mã đơn, phân trang, đếm theo trạng thái (`test_order.py`); robots.txt, sitemap (`test_seo.py`).
+- Lần chạy gần nhất: **164 test qua** (2026-10-31).
 
 ## 2. Thực nghiệm mô phỏng (`backend/simulator`)
 ```
@@ -44,6 +45,22 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Bùng hàng COD chỉ bắt được ~50–67%: kẻ có lịch sử ngắn (dưới 3 đơn) chưa đủ dữ liệu cho luật tỉ lệ thất bại.
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
+
+## 3b. Kiểm thử thủ công giao diện (2026-10-31, sau khi chuyển Shop sang tông navy, ADR-007)
+Chạy trên trình duyệt tích hợp, tài khoản khách Minh (dữ liệu demo), độ rộng 1440 px và 375 px.
+
+| Bước | Kết quả |
+|---|---|
+| Danh mục: lọc 500.000đ – 2 triệu + giá tăng dần | Đúng: 9 sản phẩm, giá tăng dần; chip "Đang lọc" gỡ được từng bộ lọc; không tràn ngang ở 375 px |
+| Thêm giỏ từ thẻ sản phẩm → Giỏ hàng | Đúng, số lượng trên biểu tượng giỏ cập nhật |
+| Thanh toán: bấm Đặt hàng khi để trống | Lỗi hiện tại từng ô, viền đỏ, chữ đọc rõ trên nền tối |
+| Thanh toán: tên và số điện thoại tự điền | **Lỗi, đã sửa**: ô trống khi thông tin khách tải sau lần vẽ đầu của form |
+| Nhãn phương thức trả trước | **Lỗi, đã sửa**: còn chữ "(giả lập)" → "Trả trước (chuyển khoản)" |
+| Đặt hàng COD | Tạo đơn, chuyển sang trang đơn với thông báo thành công |
+| Khiếu nại (375 px) | Trạng thái rỗng hiển thị đúng, không tràn ngang |
+| Console Đơn hàng: lọc "Chờ xác minh" | Ra đúng đơn bị giữ, cột thao tác ghi "Duyệt trong Case" |
+
+Chưa kiểm: luồng bị hạn chế → khiếu nại bằng tài khoản Khang/Lan sau đợt đổi giao diện; độ rộng 768 px.
 
 ## 4. Giới hạn
 - Dữ liệu hoàn toàn mô phỏng; tham số persona là giả định, không khái quát cho sàn thật.

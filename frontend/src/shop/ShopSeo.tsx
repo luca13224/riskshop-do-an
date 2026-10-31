@@ -52,7 +52,8 @@ function CatalogSeo({ code }: { code?: string }) {
   const [params] = useSearchParams()
   const categories = useCategories()
   const category = categories.data?.find((c) => c.code === code)
-  const isListingVariant = params.has("q") || (params.get("page") ?? "1") !== "1"
+  const isListingVariant =
+    ["q", "sort", "gia"].some((k) => params.has(k)) || (params.get("page") ?? "1") !== "1"
   if (code && !category) {
     return <Seo title="Danh mục" path={`/danh-muc/${code}`} noindex={!!categories.data} />
   }

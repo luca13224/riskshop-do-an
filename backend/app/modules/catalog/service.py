@@ -4,6 +4,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
+from app.core.search import LIKE_ESCAPE, contains_pattern
 from app.modules.catalog.models import CATEGORIES, Product
 from app.modules.catalog.schemas import CategoryOut, ProductOut, ProductPage
 
@@ -24,23 +25,45 @@ def _to_out(p: Product) -> ProductOut:
     )
 
 
+# Cách sắp xếp danh sách sản phẩm: mã trên URL -> thứ tự cột (luôn kèm id để thứ tự ổn định khi phân trang)
+SORTS = {
+    "new": (Product.created_at.desc(), Product.id.desc()),
+    "price_asc": (Product.price.asc(), Product.id.asc()),
+    "price_desc": (Product.price.desc(), Product.id.desc()),
+}
+
+
 def list_products(
-    db: Session, *, q: str | None, category: str | None, page: int, page_size: int
+    db: Session,
+    *,
+    q: str | None,
+    category: str | None,
+    page: int,
+    page_size: int,
+    sort: str = "new",
+    min_price: int | None = None,
+    max_price: int | None = None,
 ) -> ProductPage:
+    if min_price is not None and max_price is not None and min_price > max_price:
+        raise AppError("INVALID_PRICE_RANGE", "Giá tối thiểu phải nhỏ hơn hoặc bằng giá tối đa.", 422)
     conditions = [Product.is_active.is_(True)]
     if category:
         conditions.append(Product.category == category)
     if q:
-        # Tìm đơn giản theo tên hoặc mô tả. Collation utf8mb4_unicode_ci không phân biệt hoa thường;
-        # ký tự % và _ được escape để người dùng không chèn ký tự đại diện của LIKE.
-        pattern = "%" + q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
-        conditions.append(or_(Product.name.like(pattern, escape="\\"), Product.description.like(pattern, escape="\\")))
+        # Tìm đơn giản theo tên hoặc mô tả
+        pattern = contains_pattern(q)
+        conditions.append(or_(Product.name.like(pattern, escape=LIKE_ESCAPE),
+                              Product.description.like(pattern, escape=LIKE_ESCAPE)))
+    if min_price is not None:
+        conditions.append(Product.price >= min_price)
+    if max_price is not None:
+        conditions.append(Product.price <= max_price)
 
     total = db.scalar(select(func.count()).select_from(Product).where(*conditions)) or 0
     rows = db.scalars(
         select(Product)
         .where(*conditions)
-        .order_by(Product.created_at.desc(), Product.id.desc())
+        .order_by(*SORTS[sort])
         .offset((page - 1) * page_size)
         .limit(page_size)
     ).all()

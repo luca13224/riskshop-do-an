@@ -34,17 +34,25 @@ export interface Category {
   product_count: number
 }
 
+export type ProductSort = "new" | "price_asc" | "price_desc"
+
 export interface ProductFilters {
   q?: string
   category?: CategoryCode
   page?: number
   pageSize?: number
+  sort?: ProductSort
+  minPrice?: number
+  maxPrice?: number
 }
 
 export function useProducts(filters: ProductFilters) {
   const params = new URLSearchParams()
   if (filters.q) params.set("q", filters.q)
   if (filters.category) params.set("category", filters.category)
+  if (filters.sort && filters.sort !== "new") params.set("sort", filters.sort)
+  if (filters.minPrice != null) params.set("min_price", String(filters.minPrice))
+  if (filters.maxPrice != null) params.set("max_price", String(filters.maxPrice))
   params.set("page", String(filters.page ?? 1))
   params.set("page_size", String(filters.pageSize ?? 12))
 
