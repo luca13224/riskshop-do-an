@@ -29,6 +29,23 @@ export interface RiskDecision {
   user_name: string
   order_code: string | null
   hits: RuleHit[]
+  trust: Trust | null // điểm tin cậy tài khoản lúc quyết định (bộ luật v3); null với quyết định cũ
+}
+
+export type TrustTier = "normal" | "watch" | "restricted" | "review" | "critical"
+
+export interface Trust {
+  score: number
+  tier: TrustTier
+  deductions: { rule_code: string; rule_name: string; points: number }[]
+}
+
+export const TRUST_TIER_LABELS: Record<TrustTier, string> = {
+  normal: "Bình thường",
+  watch: "Theo dõi",
+  restricted: "Hạn chế",
+  review: "Xem xét",
+  critical: "Rất thấp",
 }
 
 export const DECISION_LABELS: Record<Decision, string> = {

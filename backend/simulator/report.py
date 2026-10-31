@@ -31,7 +31,8 @@ def render_markdown(m: dict) -> str:
         "",
         f"> Tạo lúc {utcnow():%Y-%m-%d %H:%M} UTC · Lần chạy #{m['run_id']} · "
         f"Dấu vân tay bộ luật: `{m['rules_fingerprint'][:16]}…`"
-        + (f" · Luật bị tắt: {', '.join(m['disabled_rules'])}" if m.get("disabled_rules") else ""),
+        + (f" · Luật bị tắt: {', '.join(m['disabled_rules'])}" if m.get("disabled_rules") else "")
+        + (" · Tắt lớp điểm tin cậy" if m.get("no_trust") else ""),
         "> **Toàn bộ dữ liệu là mô phỏng.** Kết quả phản ánh giả định của bộ mô phỏng (`backend/simulator/personas.py`),"
         " không chứng minh hiệu quả trên sàn thật.",
         "",

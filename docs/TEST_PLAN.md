@@ -46,6 +46,28 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
 
+## 3d. Bộ luật v3 — Trust Score 2 lớp (2026-10-31, ADR-009)
+Lệnh so sánh trên cùng dân số (tập `test_v2`, seed 4 mới):
+```
+.venv/Scripts/python -m simulator --dataset test_v2 --seed 4 --confirm-test
+.venv/Scripts/python -m simulator --dataset test_v2 --seed 4 --confirm-test --no-trust     --disable-rule PHONE_MULTI_ACCOUNTS --disable-rule ADDRESS_HOPPING --disable-rule VOUCHER_SUBSIDY_HIGH --disable-rule PROFITABLE_CUSTOMER
+```
+
+| Chỉ số (test_v2 seed 4, 425 tài khoản) | v2 | v3 (Trust) |
+|---|---|---|
+| Precision | 72,3% (47/65) | 72,3% (47/65) |
+| Recall | 34,6% (47/136) | 34,6% (47/136) |
+| FPR khách thường / hard negative | 0% / 18,2% | 0% / 18,2% |
+| Request đặt hàng p95 | 41,2 ms | 42,8 ms |
+
+Trung vị điểm tin cậy thấp nhất của mỗi tài khoản, theo nhóm (v3): khách mới bình thường 100 · khách quen 100 · gia đình 70 · nhóm trọ 4G 80 · farm phân tán 70 · farm 50 · **khách mới mua COD giá trị cao 30** · bùng hàng COD 70 · farm chia nhiều điểm nhận 90. Số tài khoản bị kéo xuống < 30 mà chưa bị hạn chế (cảnh báo sớm thêm): **0**. Dữ liệu: [phân bố](experiments/test_v2_seed4_trust_distribution.json).
+
+### Đọc kết quả (trung thực)
+- Lớp Trust **không làm đổi** kết quả trên bộ mô phỏng: ngưỡng khóa mã (< 50) gần trùng ngưỡng gỡ voucher cũ, bậc "Xem xét" chỉ mở case chứ không hạn chế.
+- R12 (chung SĐT), R14 (tỷ lệ trợ giá) chưa có số liệu: bộ mô phỏng không giả định các hành vi này (cố ý, để không "đặt ra đề rồi tự giải"). Chúng được kiểm bằng test kịch bản (`tests/test_trust.py`).
+- Giá trị của lớp Trust ở chỗ khác: một con số và "sổ trừ điểm" cho analyst, cắt quyền lợi theo bậc thay vì chỉ cho/chặn, túi voucher hiển thị rõ cho khách.
+- **Vấn đề thiết kế phát hiện được:** khách mới hợp lệ mua COD giá trị cao có điểm tin cậy ~30, thấp hơn farm, vì luật theo đơn R08 cũng bị tính vào điểm tài khoản. Không sửa trên tập test này; đề xuất v3.1 và đo trên tập test mới.
+
 ## 3c. Bộ luật v2 (R11) trên tập dữ liệu mới (2026-10-31, ADR-008)
 Lệnh:
 ```

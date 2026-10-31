@@ -16,6 +16,8 @@ import {
   type Cart,
 } from "@/lib/api/cart"
 import { formatVND } from "@/lib/format"
+import { useWallet, WALLET_STATUS_LABELS } from "@/lib/api/promotion"
+import { cn } from "@/lib/utils"
 import { ProductImage } from "@/shop/components/ProductImage"
 import { QuantityStepper } from "@/shop/components/QuantityStepper"
 
@@ -198,6 +200,14 @@ function VoucherBox({ cart }: { cart: Cart }) {
             </Button>
           </div>
         ) : (
+          <>
+          <WalletList
+            disabled={apply.isPending}
+            onPick={(c) => {
+              apply.reset()
+              apply.mutate(c)
+            }}
+          />
           <form onSubmit={onSubmit} className="flex gap-2">
             <Input
               value={code}
@@ -213,6 +223,7 @@ function VoucherBox({ cart }: { cart: Cart }) {
               Áp dụng
             </Button>
           </form>
+          </>
         )}
         {apply.isError && (
           <>
@@ -232,6 +243,46 @@ function VoucherBox({ cart }: { cart: Cart }) {
         )}
       </CardContent>
     </Card>
+  )
+}
+
+// Túi voucher: mã shop đã cấp (NGUOIMOI khi tạo tài khoản) + mã công khai. Chạm một lần để áp.
+// Mã "tạm chưa áp dụng" vẫn hiện (mờ) để khách biết mình có mã, nhưng không nói lý do cụ thể.
+function WalletList({ disabled, onPick }: { disabled: boolean; onPick: (code: string) => void }) {
+  const { data: user } = useMe()
+  const wallet = useWallet(user?.role === "customer")
+  if (!wallet.data || wallet.data.length === 0) return null
+  return (
+    <ul className="grid gap-2" aria-label="Túi voucher của bạn">
+      {wallet.data.map((v) => {
+        const usable = v.status === "usable"
+        return (
+          <li key={v.code}>
+            <button
+              type="button"
+              disabled={!usable || disabled}
+              onClick={() => onPick(v.code)}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-lg border border-dashed p-3 text-left transition",
+                usable ? "hover:border-buy hover:bg-buy/5" : "cursor-not-allowed opacity-55"
+              )}
+            >
+              <TicketPercent className={cn("size-5 shrink-0", usable && "text-buy")} />
+              <span className="min-w-0 flex-1">
+                <span className="font-mono font-semibold">{v.code}</span>
+                {v.granted && (
+                  <span className="ml-2 rounded-full bg-buy/15 px-2 py-0.5 text-[11px] text-buy">Quà tặng</span>
+                )}
+                <span className="block truncate text-xs text-muted-foreground">{v.description}</span>
+              </span>
+              <span className="shrink-0 text-xs font-medium">
+                {usable ? "Dùng" : WALLET_STATUS_LABELS[v.status]}
+              </span>
+            </button>
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 

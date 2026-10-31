@@ -1,6 +1,6 @@
 # Kết quả mô phỏng: tập dev_v2 (seed 1, scale 1)
 
-> Tạo lúc 2026-10-31 10:14 UTC · Lần chạy #1 · Dấu vân tay bộ luật: `1d9f87d5a9d57e9a…`
+> Tạo lúc 2026-10-31 12:23 UTC · Lần chạy #1 · Dấu vân tay bộ luật: `a633422d1f15ae41…`
 > **Toàn bộ dữ liệu là mô phỏng.** Kết quả phản ánh giả định của bộ mô phỏng (`backend/simulator/personas.py`), không chứng minh hiệu quả trên sàn thật.
 
 ## Chỉ số chính (đơn vị: tài khoản)
@@ -46,11 +46,11 @@ Một tài khoản bị coi là **bị gắn cờ** nếu có ít nhất một q
 - Đơn COD theo persona và trạng thái: Bùng hàng COD CONFIRMED = 5, Gia đình chung Wi-Fi/địa chỉ CONFIRMED = 13, Khách quen CONFIRMED = 30, Khách mới mua hàng giá trị cao (COD) PENDING_REVIEW = 4, Khách mới bình thường CONFIRMED = 38, Khách quen đặt nhiều đơn liên tiếp CONFIRMED = 24, Nhóm ở trọ chung nhà, mỗi người 4G riêng CONFIRMED = 15
 
 ## Độ trễ
-- Thời gian chấm điểm rủi ro (đo ở server, 528 lượt): p50 8.59 ms · p95 11.64 ms · p99 13.89 ms
-- Toàn bộ request `voucher_apply` (160 lượt, trong cùng tiến trình, không qua mạng): p50 33.39 ms · p95 40.76 ms · p99 42.64 ms
-- Toàn bộ request `place_order` (258 lượt, trong cùng tiến trình, không qua mạng): p50 36.87 ms · p95 44.28 ms · p99 72.55 ms
-- Toàn bộ request `payment_options` (140 lượt, trong cùng tiến trình, không qua mạng): p50 24.42 ms · p95 29.21 ms · p99 31.05 ms
-- Thời gian chạy: 54.4 giây cho 1345 bước; lỗi server: 0
+- Thời gian chấm điểm rủi ro (đo ở server, 528 lượt): p50 15.41 ms · p95 27.7 ms · p99 37.88 ms
+- Toàn bộ request `voucher_apply` (160 lượt, trong cùng tiến trình, không qua mạng): p50 44.42 ms · p95 85.33 ms · p99 104.19 ms
+- Toàn bộ request `place_order` (258 lượt, trong cùng tiến trình, không qua mạng): p50 51.57 ms · p95 98.73 ms · p99 117.59 ms
+- Toàn bộ request `payment_options` (140 lượt, trong cùng tiến trình, không qua mạng): p50 34.39 ms · p95 63.05 ms · p99 76.77 ms
+- Thời gian chạy: 71.8 giây cho 1345 bước; lỗi server: 0
 
 ## Giới hạn
 - Thời gian bị nén: lịch sử quá khứ được tạo sẵn, còn mọi hành vi hiện tại diễn ra trong vài phút chạy.

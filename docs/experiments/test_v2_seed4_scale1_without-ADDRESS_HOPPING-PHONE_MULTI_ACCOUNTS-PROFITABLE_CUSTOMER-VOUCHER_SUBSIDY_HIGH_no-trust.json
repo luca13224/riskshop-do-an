@@ -1,0 +1,240 @@
+{
+  "run_id": 1,
+  "dataset": "test_v2",
+  "seed": 4,
+  "scale": 1.0,
+  "rules_fingerprint": "6349e1ac0798f3e1a65075857748f739420d03263e334d93b616199b767a37f0",
+  "disabled_rules": [
+    "PHONE_MULTI_ACCOUNTS",
+    "ADDRESS_HOPPING",
+    "VOUCHER_SUBSIDY_HIGH",
+    "PROFITABLE_CUSTOMER"
+  ],
+  "no_trust": true,
+  "confusion": {
+    "TP": 47,
+    "FP": 18,
+    "TN": 271,
+    "FN": 89
+  },
+  "precision": {
+    "k": 47,
+    "n": 65,
+    "value": 0.7231,
+    "ci95": [
+      0.6042,
+      0.8171
+    ]
+  },
+  "recall": {
+    "k": 47,
+    "n": 136,
+    "value": 0.3456,
+    "ci95": [
+      0.2709,
+      0.4288
+    ]
+  },
+  "fpr": {
+    "k": 18,
+    "n": 289,
+    "value": 0.0623,
+    "ci95": [
+      0.0398,
+      0.0963
+    ]
+  },
+  "fpr_normal": {
+    "k": 0,
+    "n": 190,
+    "value": 0.0,
+    "ci95": [
+      0.0,
+      0.0198
+    ]
+  },
+  "fpr_hard_negative": {
+    "k": 18,
+    "n": 99,
+    "value": 0.1818,
+    "ci95": [
+      0.1182,
+      0.2692
+    ]
+  },
+  "recall_seen_variants": {
+    "k": 47,
+    "n": 94,
+    "value": 0.5,
+    "ci95": [
+      0.4009,
+      0.5991
+    ]
+  },
+  "recall_unseen_variants": {
+    "k": 0,
+    "n": 42,
+    "value": 0.0,
+    "ci95": [
+      0.0,
+      0.0838
+    ]
+  },
+  "per_persona": {
+    "cod_bomber": {
+      "n": 15,
+      "flagged": 10,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.6667
+    },
+    "cod_hoarder": {
+      "n": 6,
+      "flagged": 0,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.0
+    },
+    "family": {
+      "n": 41,
+      "flagged": 3,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "rate": 0.0732
+    },
+    "farm": {
+      "n": 44,
+      "flagged": 28,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.6364
+    },
+    "farm_multi_drop": {
+      "n": 42,
+      "flagged": 0,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": true,
+      "rate": 0.0
+    },
+    "farm_spread": {
+      "n": 29,
+      "flagged": 9,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.3103
+    },
+    "loyal": {
+      "n": 40,
+      "flagged": 0,
+      "is_abuse": false,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.0
+    },
+    "new_high_value": {
+      "n": 10,
+      "flagged": 10,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "rate": 1.0
+    },
+    "normal_new": {
+      "n": 150,
+      "flagged": 0,
+      "is_abuse": false,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.0
+    },
+    "repeat_buyer": {
+      "n": 10,
+      "flagged": 0,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "rate": 0.0
+    },
+    "roommates_4g": {
+      "n": 38,
+      "flagged": 5,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "rate": 0.1316
+    }
+  },
+  "group_recall": {
+    "cod_bomber": {
+      "caught": 10,
+      "groups": 15
+    },
+    "cod_hoarder": {
+      "caught": 0,
+      "groups": 6
+    },
+    "farm_multi_drop": {
+      "caught": 0,
+      "groups": 5
+    },
+    "farm": {
+      "caught": 8,
+      "groups": 8
+    },
+    "farm_spread": {
+      "caught": 5,
+      "groups": 5
+    }
+  },
+  "business": {
+    "vouchers_redeemed_by_abuse": 78,
+    "vouchers_redeemed_by_legit": 116,
+    "cod_orders_by_persona": {
+      "cod_bomber:CONFIRMED": 5,
+      "cod_hoarder:CONFIRMED": 20,
+      "family:CONFIRMED": 21,
+      "loyal:CONFIRMED": 40,
+      "new_high_value:PENDING_REVIEW": 7,
+      "normal_new:CONFIRMED": 75,
+      "repeat_buyer:CONFIRMED": 40,
+      "roommates_4g:CONFIRMED": 16
+    }
+  },
+  "risk_latency_ms": {
+    "n": 937,
+    "p50": 9.32,
+    "p95": 13.05,
+    "p99": 16.68
+  },
+  "runtime": {
+    "seconds": 75.0,
+    "steps": 2237,
+    "server_errors": []
+  },
+  "request_ms": {
+    "payment_options": {
+      "n": 237,
+      "p50": 22.16,
+      "p95": 29.41,
+      "p99": 32.46
+    },
+    "place_order": {
+      "n": 461,
+      "p50": 32.66,
+      "p95": 41.24,
+      "p99": 48.82
+    },
+    "voucher_apply": {
+      "n": 283,
+      "p50": 29.98,
+      "p95": 37.41,
+      "p99": 44.03
+    }
+  }
+}

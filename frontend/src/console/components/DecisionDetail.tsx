@@ -1,4 +1,10 @@
-import { ACTION_LABELS, type RiskDecision } from "@/lib/api/risk"
+import {
+  ACTION_LABELS,
+  TRUST_TIER_LABELS,
+  type RiskDecision,
+  type Trust,
+  type TrustTier,
+} from "@/lib/api/risk"
 import { cn } from "@/lib/utils"
 
 const STRENGTH_LABELS = {
@@ -8,11 +14,70 @@ const STRENGTH_LABELS = {
   positive: "Tích cực",
 }
 
+// Màu theo bậc dùng bảng trạng thái .viz (index.css); luôn kèm nhãn chữ, không chỉ dựa vào màu
+const TIER_COLOR: Record<TrustTier, string> = {
+  normal: "var(--st-good)",
+  watch: "var(--st-warning)",
+  restricted: "var(--st-serious)",
+  review: "var(--st-critical)",
+  critical: "var(--st-critical)",
+}
+
+// Lớp 1: điểm tin cậy tài khoản lúc quyết định + "sổ trừ điểm" (luật nào trừ bao nhiêu)
+function TrustPanel({ trust }: { trust: Trust }) {
+  const pct = Math.max(0, Math.min(100, trust.score))
+  return (
+    <div className="viz grid gap-2 rounded-lg border p-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <span className="text-xs text-muted-foreground">Điểm tin cậy tài khoản</span>
+        <span className="flex items-baseline gap-2">
+          <span className="text-lg font-semibold tabular-nums">{trust.score}</span>
+          <span className="text-xs text-muted-foreground">/ 100</span>
+          <span
+            className="rounded-full px-2 py-0.5 text-xs font-medium"
+            style={{ color: TIER_COLOR[trust.tier], background: `color-mix(in oklab, ${TIER_COLOR[trust.tier]} 15%, transparent)` }}
+          >
+            {TRUST_TIER_LABELS[trust.tier]}
+          </span>
+        </span>
+      </div>
+      <div
+        className="h-1.5 overflow-hidden rounded-full bg-muted"
+        role="meter"
+        aria-label="Điểm tin cậy"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={trust.score}
+      >
+        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: TIER_COLOR[trust.tier] }} />
+      </div>
+      {trust.deductions.length > 0 && (
+        <ul className="grid gap-1 text-xs">
+          {trust.deductions.map((x) => (
+            <li key={x.rule_code} className="flex gap-3">
+              <span
+                className={cn(
+                  "w-10 shrink-0 text-right font-semibold tabular-nums",
+                  x.points < 0 && "text-emerald-600 dark:text-emerald-400"
+                )}
+              >
+                {x.points > 0 ? `−${x.points}` : `+${-x.points}`}
+              </span>
+              <span className="text-muted-foreground">{x.rule_name}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 // Phần "vì sao" của một quyết định: điểm theo chính sách, hành động, từng luật khớp kèm giá trị thực tế
 export function DecisionDetail({ decision: d }: { decision: RiskDecision }) {
   const actions = Object.entries(d.actions).filter(([, on]) => on)
   return (
     <div className="grid gap-3">
+      {d.trust && <TrustPanel trust={d.trust} />}
       {d.error && (
         <p className="text-sm text-destructive">
           Risk Engine lỗi, đã dùng phương án dự phòng: {d.error}

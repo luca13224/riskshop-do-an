@@ -147,3 +147,21 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 - Hệ quả / rủi ro:
   - Hard negative mới: nhóm ở trọ dùng 4G riêng bị gỡ voucher nhầm 14,6% (6/41) trên tập test; đặc trưng mạng không phân biệt được nhóm này với farm. Giảm thiểu: chỉ gỡ voucher, khiếu nại (ADR-006).
   - Farm gom hàng về nhiều điểm nhận vẫn lọt 100% (0/40): kẻ gian chỉ cần chia nhỏ cụm. Đây là giới hạn của luật theo ngưỡng.
+
+## ADR-009: Mô hình rủi ro 2 lớp — Trust Score tài khoản + chấm điểm giao dịch (bộ luật v3)
+- Ngày: 2026-10-31
+- Trạng thái: Accepted
+- Bối cảnh: Luca đề xuất "mỗi tài khoản 100 điểm, bất thường thì trừ dần, điểm thấp thì cắt dần mã giảm giá, về 0 thì hạn chế thanh toán và cắm cờ". Đề cương ban đầu cũng có Trust Score; bộ luật v1/v2 chỉ chấm theo từng giao dịch.
+- Các phương án:
+  - (1) Thay hẳn bộ luật bằng một "số dư tin cậy" cộng trừ dồn qua thời gian: dễ trừ trùng, khó giải thích, khó sửa khi trừ nhầm.
+  - (2) Hai lớp: lớp 1 tính điểm tin cậy từ hiện trạng (mọi luật khớp, mỗi luật một lần, cửa sổ thời gian tự hồi điểm); lớp 2 giữ ma trận quyết định theo giao dịch. Lớp 1 chỉ **thêm** hạn chế theo bậc.
+- Quyết định: (2).
+  - Bậc: ≥ 70 Bình thường; 50–69 Theo dõi; 30–49 Hạn chế; < 30 Xem xét (mở case lúc đặt hàng); ≤ 0 Rất thấp (tắt COD).
+  - Khóa mã theo `min_trust` của từng mã (NGUOIMOI 50, GIAM10 70): danh sách mã "co lại" dần khi điểm giảm.
+  - Không chặn thanh toán chỉ vì điểm thấp; BLOCK vẫn cần ≥ 2 luật mạnh. Không hiển thị điểm cho khách.
+  - Thêm R12–R15 (SĐT nhận hàng ở nhiều địa chỉ, đổi địa chỉ liên tục, tỷ lệ trợ giá voucher, luật tích cực khách mua đều).
+  - Đổi mã TANTHU → NGUOIMOI, túi voucher (`user_vouchers`), cấp NGUOIMOI khi đăng ký.
+- Lý do: một con số dễ hiểu cho Console, phản ứng theo bậc thay vì cho/chặn, bám đề cương, thêm góc nhìn tiền bạc (tỷ lệ trợ giá).
+- Hệ quả / rủi ro:
+  - Trên bộ mô phỏng, v3 cho kết quả **trùng hoàn toàn** với v2 (TEST_PLAN mục 3d): không bắt thêm, không nhầm thêm. Bộ mô phỏng không có hành vi chung SĐT hay "săn sale" nên R12, R14 chưa được đo.
+  - Phát hiện trên tập test: luật theo đơn (R08 COD giá trị cao) kéo điểm tin cậy của khách mới hợp lệ xuống ~30. Đề xuất v3.1: chỉ tính các luật "về tài khoản" vào lớp 1; muốn đổi phải đo lại trên tập test mới.

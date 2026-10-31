@@ -17,6 +17,11 @@ Những điểm dưới đây được điều chỉnh khi lập trình Risk Eng
 - Thêm **F12** `new_accounts_on_address_7d`, **F13** `address_ip_diversity_7d` và luật **R11** `ADDR_VOUCHER_RING` (mục 2, 3).
 - Thiết kế, hiệu chỉnh và lý do chọn ngưỡng: `docs/reviews/2026-10-31_RISK_V2_DESIGN.md`. Kết quả: `TEST_PLAN.md` mục 3c.
 
+## 0c. Bộ luật v3 — Trust Score (2026-10-31, ADR-009)
+- Lớp 1: điểm tin cậy tài khoản = min(100, 100 − tổng điểm mọi luật khớp), bậc Bình thường / Theo dõi / Hạn chế / Xem xét / Rất thấp.
+- Thêm F14–F16 và R12–R15 (mục 2, 3). Mã TANTHU đổi thành **NGUOIMOI**, cấp sẵn vào túi voucher khi đăng ký.
+- Thiết kế: `docs/reviews/2026-10-31_TRUST_SCORE_DESIGN.md`. Kết quả: `TEST_PLAN.md` mục 3d.
+
 ## 1. Ba điểm kiểm soát (evaluation context)
 
 | Context | Khi nào gọi | Quyết định có thể trả | Ghi chú |
@@ -43,6 +48,9 @@ Mọi đặc trưng được tính **tại thời điểm đánh giá**, chỉ t
 | F10 | `open_cod_orders` | Số đơn COD đang chờ giao (chưa kết thúc, chưa hủy) | |
 | F11 | `order_value` | Tổng giá trị đơn (VND) sau giảm giá | |
 | F12 | `new_accounts_on_address_7d` (v2) | Số tài khoản khách **mới (< 7 ngày)** có địa chỉ chuẩn hóa trùng địa chỉ đơn này trong 7 ngày, tính cả hiện tại | Chỉ có ở `place_order` |
+| F14 | `accounts_on_phone_30d`, `addresses_on_phone_30d` (v3) | Một SĐT nhận hàng: bao nhiêu tài khoản, ở bao nhiêu địa chỉ, trong 30 ngày | Chỉ có ở `place_order` |
+| F15 | `distinct_addresses_7d` (v3) | Số địa chỉ khác nhau tài khoản này dùng trong 7 ngày | |
+| F16 | `voucher_subsidy_ratio_90d` (v3) | Tổng tiền giảm ÷ tổng tiền hàng các đơn hợp lệ 90 ngày (cần ≥ 3 đơn) | Thay cho "lãi/lỗ" vì không có giá vốn |
 | F13 | `address_ip_diversity_7d` (v2) | Số IP khác nhau các tài khoản ở F12 đã dùng trong 7 ngày ÷ F12 | Gần 1: mỗi người một mạng; thấp: chung Wi-Fi. **Không phân biệt** được nhóm dùng 4G riêng với farm |
 
 ## 3. Danh sách luật
@@ -63,6 +71,10 @@ Mọi đặc trưng được tính **tại thời điểm đánh giá**, chỉ t
 | R08 | `COD_HIGH_VALUE_LOW_HISTORY` | place_order (COD) | F11 ≥ 3.000.000đ **và** F09 < 2 → +40; F11 ≥ 5.000.000đ **và** F09 < 2 → +70 | +40 / +70 | M / **S** (bậc 5 triệu) | Đơn COD giá trị cao từ người chưa có lịch sử: thiệt hại lớn nếu bùng | Khách mới mua món đắt thật (được giữ đơn và gọi xác minh, không bị chặn) |
 | R09 | `GOOD_HISTORY` (luật tích cực) | payment_options, place_order | F09 ≥ 10 **và** tỷ lệ thất bại thực ≤ 5% | **−30** | — | Ghi nhận khách uy tín, giảm chặn nhầm | — (đây là luật giảm chặn nhầm cho **V5.2, V5.3**) |
 | R11 | `ADDR_VOUCHER_RING` (v2) | place_order | Voucher tân thủ **và** F12 ≥ 5 **và** F13 ≥ 0,75 | +25 | M | Farm phân tán: nhiều tài khoản mới cùng nhà nhưng mỗi người một mạng | **Nhóm ở trọ dùng 4G riêng** (≈15% bị gỡ voucher trên tập test v2); giảm thiểu: chỉ gỡ voucher, khiếu nại được |
+| R12 | `PHONE_MULTI_ACCOUNTS` (v3) | place_order | F14: SĐT ở ≥ 2 địa chỉ **và** ≥ 3 tài khoản → +15; ≥ 5 → +25 | 15 / 25 | M | Farm chia nhiều điểm nhận nhưng một người đi nhận | Người nhận hộ bạn bè ở nhiều nơi (cả nhà chung SĐT ở **một** địa chỉ thì không trừ) |
+| R13 | `ADDRESS_HOPPING` (v3) | place_order | F15 ≥ 3 → +10 | 10 | W | Đổi địa chỉ liên tục | Người hay gửi quà |
+| R14 | `VOUCHER_SUBSIDY_HIGH` (v3) | voucher_apply, place_order | F16 ≥ 15% → +10; ≥ 25% → +20 | 10 / 20 | M | Sàn bù quá nhiều tiền cho một tài khoản | Khách chỉ mua khi có khuyến mãi |
+| R15 | `PROFITABLE_CUSTOMER` (v3, tích cực) | voucher_apply, place_order | F09 ≥ 3 **và** F16 < 10% | **−15** | — | Hồi điểm cho khách mua đều, ít phụ thuộc voucher | — |
 | R10 | `COD_OPEN_ORDERS` | payment_options, place_order (COD) | F10 ≥ 3 | +25 | M | "Treo" nhiều đơn COD cùng lúc (từ kịch bản 4 của đề cương) | Khách mua nhiều đợt khuyến mãi liền nhau |
 
 Ngưỡng tiền (3 triệu, 5 triệu) là **giả định** cho shop mô phỏng [XM], cấu hình được.

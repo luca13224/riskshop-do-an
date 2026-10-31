@@ -34,6 +34,7 @@ from app.modules.catalog import seed as catalog_seed
 from app.modules.catalog.models import Product
 from app.modules.order.models import COD, DELIVERED, DELIVERY_FAILED, Address, Order, OrderItem, ShipmentEvent
 from app.modules.promotion import seed as promotion_seed
+from app.modules.promotion import service as promotion
 from app.modules.risk.seed import seed_rules
 
 ACCOUNTS_FILE = BACKEND_DIR / ".env.accounts"
@@ -103,8 +104,10 @@ def reset(db: Session) -> dict[str, str]:
         make_user(db, email, name, role, password_for(email), timedelta(days=60))
 
     cheap = db.query(Product).filter(Product.sku == "SM-002").one()  # Ổ cắm thông minh (món rẻ)
-    make_user(db, "minh@shop.test", "Nguyễn Minh", CUSTOMER, password_for("minh@shop.test"), timedelta(hours=20),
-          phone="0901111111")
+    minh = make_user(db, "minh@shop.test", "Nguyễn Minh", CUSTOMER, password_for("minh@shop.test"), timedelta(hours=20),
+                 phone="0901111111")
+    db.flush()
+    promotion.grant(db, minh, promotion_seed.WELCOME_CODE)  # như khi đăng ký qua API: có sẵn NGUOIMOI trong túi
     khang = make_user(db, "khang@shop.test", "Phạm Khang", CUSTOMER, password_for("khang@shop.test"),
                   timedelta(days=90), phone="0902222222")
     add_history(db, khang, cheap, [DELIVERED] + [DELIVERY_FAILED] * 4)

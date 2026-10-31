@@ -12,6 +12,20 @@ class HitOut(BaseModel):
     reason_text: str
 
 
+class TrustDeductionOut(BaseModel):
+    rule_code: str
+    rule_name: str
+    points: int  # dương: bị trừ; âm: được cộng lại
+
+
+class TrustOut(BaseModel):
+    """Điểm tin cậy tài khoản tại thời điểm quyết định (lớp 1, bộ luật v3) và "sổ trừ điểm"."""
+
+    score: int
+    tier: str
+    deductions: list[TrustDeductionOut]
+
+
 class DecisionOut(BaseModel):
     id: int
     public_id: str
@@ -28,6 +42,7 @@ class DecisionOut(BaseModel):
     user_name: str
     order_code: str | None
     hits: list[HitOut]
+    trust: TrustOut | None = None  # None: quyết định trước bộ luật v3
 
 
 class RuleVersionOut(BaseModel):

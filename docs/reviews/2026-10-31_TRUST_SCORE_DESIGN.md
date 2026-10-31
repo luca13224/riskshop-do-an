@@ -1,6 +1,6 @@
 # Thiết kế Trust Score — mô hình rủi ro 2 lớp (bộ luật v3)
 
-> Trạng thái: **Luca duyệt hướng (2026-10-31), đang cài đặt**. Con số là lập luận chuyên gia [ĐX], hiệu chỉnh trên tập dev.
+> Trạng thái: **đã cài đặt (2026-10-31), ADR-009**. Kết quả đo: TEST_PLAN mục 3d. Con số là lập luận chuyên gia [ĐX], hiệu chỉnh trên tập dev.
 > Ý tưởng gốc: Luca ("mỗi tài khoản 100 điểm, có bất thường thì trừ dần, điểm thấp thì cắt dần mã giảm giá, về 0 thì hạn chế thanh toán và cắm cờ").
 > Đây cũng là "Trust Score" trong đề cương ban đầu.
 
@@ -75,3 +75,9 @@
 - Không dùng điểm tin cậy để chặn thanh toán trực tiếp (mục 3).
 - Không hiển thị con số Trust cho khách: tránh bị dò ngưỡng.
 - Không lưu Trust thành một "số dư" cộng trừ dồn qua thời gian: khó giải thích, dễ trừ trùng, khó sửa khi trừ nhầm.
+
+## 8. Kết quả và đề xuất v3.1
+
+- Trên tập test_v2 seed 4, v3 cho kết quả trùng hoàn toàn với v2 (TEST_PLAN mục 3d). Lớp Trust không bắt thêm, không nhầm thêm.
+- Phát hiện: luật theo **đơn hàng** (R08 COD giá trị cao, R06 tốc độ giống bot) đang kéo điểm tin cậy **tài khoản** xuống, nên khách mới hợp lệ mua đồ đắt có điểm ~30, thấp hơn farm (50).
+- **Đề xuất v3.1:** gắn nhãn mỗi luật là "về tài khoản" hay "về giao dịch"; lớp 1 chỉ cộng luật về tài khoản (R01–R05, R07, R09–R15), lớp 2 vẫn dùng tất cả. Phải đo lại trên một tập test mới vì phát hiện này đến từ tập test seed 4.

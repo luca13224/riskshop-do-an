@@ -37,6 +37,8 @@ def main() -> int:
     parser.add_argument("--confirm-test", action="store_true", help="xác nhận đã khóa luật trước khi chạy tập test")
     parser.add_argument("--disable-rule", action="append", default=[], metavar="CODE",
                         help="tắt một luật theo mã (lặp lại được), ví dụ để chạy bộ luật v1 trên tập test_v2")
+    parser.add_argument("--no-trust", action="store_true",
+                        help="tắt lớp điểm tin cậy (bậc Trust và min_trust của mã), để so với bộ luật v3")
     args = parser.parse_args()
 
     url = get_settings().sim_database_url
@@ -49,12 +51,15 @@ def main() -> int:
         return 1
 
     session_factory = sessionmaker(bind=make_engine(url), autoflush=False, expire_on_commit=False)
-    result = run(session_factory, args.dataset, args.seed, args.scale, disable_rules=tuple(args.disable_rule))
+    result = run(session_factory, args.dataset, args.seed, args.scale, disable_rules=tuple(args.disable_rule),
+                 no_trust=args.no_trust)
 
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     stem = f"{args.dataset}_seed{args.seed}_scale{args.scale:g}"
     if args.disable_rule:
         stem += "_without-" + "-".join(sorted(args.disable_rule))
+    if args.no_trust:
+        stem += "_no-trust"
     (REPORT_DIR / f"{stem}.json").write_text(json.dumps(result, ensure_ascii=False, indent=2, default=str),
                                              encoding="utf-8")
     (REPORT_DIR / f"{stem}.md").write_text(render_markdown(result), encoding="utf-8")

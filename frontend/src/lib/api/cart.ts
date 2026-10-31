@@ -44,6 +44,8 @@ function useCartMutation<TInput>(request: (input: TInput) => Promise<Cart>) {
   return useMutation({
     mutationFn: request,
     onSuccess: (cart) => queryClient.setQueryData(CART_KEY, cart),
+    // Áp/bỏ mã (kể cả bị từ chối) có thể đổi trạng thái các mã trong túi voucher
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["wallet"] }),
   })
 }
 

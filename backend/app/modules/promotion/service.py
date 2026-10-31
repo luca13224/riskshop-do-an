@@ -162,4 +162,6 @@ def wallet(db: Session, user: User, trust: int | None) -> list[dict]:
             status = USABLE
         items.append({"code": v.code, "description": v.description, "min_order_value": v.min_order_value,
                       "granted": v.id in granted, "status": status})
+    # Mã shop tặng riêng lên đầu, rồi mã dùng được trước mã đang khóa / đã dùng
+    items.sort(key=lambda i: (not i["granted"], i["status"] != USABLE))
     return items

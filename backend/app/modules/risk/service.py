@@ -421,6 +421,16 @@ def _serialize(db: Session, rows) -> list[dict]:
             hits_by_decision[h.decision_id].append(
                 {"rule_code": h.rule_code, "points": h.points, "strength": h.strength, "reason_text": h.reason_text}
             )
+    rule_names = dict(db.execute(select(Rule.code, Rule.name)).all())
+
+    def trust_of(d) -> dict | None:
+        snap = d.features_snapshot or {}
+        if "trust_score" not in snap:
+            return None
+        items = sorted(snap.get("trust_deductions", {}).items(), key=lambda kv: -kv[1])
+        return {"score": snap["trust_score"], "tier": snap.get("trust_tier") or trust_tier(snap["trust_score"]),
+                "deductions": [{"rule_code": c, "rule_name": rule_names.get(c, c), "points": p} for c, p in items]}
+
     order_codes = {}
     order_ids = [d.order_id for d, _, _ in rows if d.order_id]
     if order_ids:
@@ -447,6 +457,7 @@ def _serialize(db: Session, rows) -> list[dict]:
             "user_name": name,
             "order_code": order_codes.get(d.order_id),
             "hits": hits_by_decision[d.id],
+            "trust": trust_of(d),
         }
         for d, email, name in rows
     ]
