@@ -28,6 +28,12 @@ Những điểm dưới đây được điều chỉnh khi lập trình Risk Eng
 - Gỡ: khiếu nại được chấp nhận, hoặc Risk Manager/Admin (bắt buộc lý do ≥ 10 ký tự, audit `account.unrestrict`).
 - Đây là quy tắc thực thi theo **hành vi lặp lại**, không phải luật chấm điểm, nên không làm thay đổi nguyên tắc "REVIEW/BLOCK theo điểm cần luật mạnh" ở mục 4.
 
+## 0e. Né lệnh khóa bằng tài khoản mới (2026-10-31, ADR-011)
+- **F17** `banned_link_types_90d`: số loại điểm chung (thiết bị, SĐT nhận hàng, địa chỉ) với tài khoản **đang bị khóa vô thời hạn** trong 90 ngày. IP không tính. Chỉ tài khoản bị ban làm nguồn (không lây dây chuyền).
+- **R16** `LINKED_TO_BANNED` (voucher + COD, mọi context): F17 ≥ 1 → +45; ≥ 2 → +60. Độ mạnh vừa.
+- Khóa thanh toán (ngoài ma trận điểm): F17 ≥ 2, **hoặc** F17 ≥ 1 **và** đang thử mã người mới với F05 ≥ 2 lần/10 phút → khóa 30 ngày, đã từng bị khóa do liên kết → 60 ngày. F17 = 1 mà không spam → chỉ R16 + mở case.
+- Đồ thị liên kết đánh dấu tài khoản đang bị khóa. Risk Manager khóa vô thời hạn thủ công được (sau khi xem case).
+
 ## 1. Ba điểm kiểm soát (evaluation context)
 
 | Context | Khi nào gọi | Quyết định có thể trả | Ghi chú |

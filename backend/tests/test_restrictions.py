@@ -7,7 +7,7 @@ from sqlalchemy import select
 from app.core.jobs import Job
 from app.core.time import utcnow
 from app.modules.audit.models import AuditLog
-from app.modules.auth.models import ANALYST, RISK_MANAGER
+from app.modules.auth.models import ANALYST, RISK_MANAGER, User
 from app.modules.order.models import COD, PREPAID
 from app.modules.risk.models import PURCHASE_BAN, PURCHASE_COOLDOWN, AccountRestriction, RiskDecision
 from tests.test_privacy import staff
@@ -108,3 +108,31 @@ def test_accepted_appeal_lifts_restriction(shop, db):
     assert manager.post(f"/api/console/appeals/{code}/resolve", json=resolve).status_code == 200
     assert all(r.lifted_at is not None for r in restrictions(db))
     assert checkout(c, PREPAID).status_code == 201
+
+
+def test_manager_can_ban_permanently_with_reason(shop, db):
+    c = bad_cod_customer(db)
+    db.rollback()
+    user_id = db.scalar(select(User.id).where(User.email == "khang@example.com"))
+    body = {"reason": "Xác minh case: cùng người với cụm farm đã kết luận."}
+    analyst = staff(db, "an@riskshop.test", ANALYST)
+    assert analyst.post(f"/api/console/risk/users/{user_id}/restriction/ban", json=body).status_code == 403
+    manager = staff(db, "manager@riskshop.test", RISK_MANAGER)
+    r = manager.post(f"/api/console/risk/users/{user_id}/restriction/ban", json=body)
+    assert r.status_code == 200 and r.json()["kind"] == PURCHASE_BAN and r.json()["until"] is None
+    assert checkout(c, PREPAID).status_code == 403
+    db.rollback()
+    assert db.scalar(select(AuditLog.action).where(AuditLog.action == "account.ban"))
+
+
+def test_restriction_lifted_by_staff_does_not_count_as_prior_offence(shop, db):
+    c = bad_cod_customer(db)
+    for _ in range(4):
+        checkout(c, COD)
+    (first,) = restrictions(db)
+    first.lifted_at = utcnow()  # nhân viên xác định là nhầm và gỡ
+    db.commit()
+    for _ in range(4):
+        checkout(c, COD)
+    latest = restrictions(db)[-1]
+    assert latest.kind == PURCHASE_COOLDOWN  # vẫn chỉ khóa 24 giờ, không thành ban vô thời hạn

@@ -16,6 +16,7 @@
 | 4 | Gia đình chung Wi-Fi (hard negative) | 1:00 | Kiểm soát chặn nhầm | MVP |
 | 5 | Bùng hàng COD và khách quen | 1:30 | Quyết định theo chính sách; giữ đơn chờ duyệt | MVP |
 | 5c | Cố tình đặt lặp → khóa mua hàng tự động | 0:45 | Quyết định CHẶN duy nhất trong demo; tự động nhưng gỡ được (ADR-010) | MVP |
+| 5e | Né lệnh khóa bằng tài khoản mới | 0:45 | Truy vết qua thiết bị/SĐT/địa chỉ; gia đình chung máy không bị khóa oan (ADR-011) | Recommended |
 | 5d | Khiếu nại khi bị chặn nhầm | 1:00 | Khách có đường lên tiếng; xét lại bốn mắt; miễn trừ có kiểm soát | MVP |
 | 6 | Quản lý luật | 1:00 | Cấu hình được, có phiên bản, phân quyền | MVP (cơ bản) |
 | 7 | Kết quả thực nghiệm | 1:00 | Đã kiểm chứng bằng số liệu | MVP |
@@ -91,6 +92,12 @@
 - Gửi 4 lần (công cụ API hoặc script): 3 lần đầu bị từ chối "Đơn hàng này hỗ trợ thanh toán trước"; lần thứ 4 bị **chặn** và tài khoản **tạm khóa mua hàng 24 giờ**; tái phạm trong 30 ngày thì khóa vô thời hạn.
 - Console: case tự mở, dải đỏ "Tạm khóa mua hàng", khung "Quyền mua hàng" có nút Gỡ khóa (chỉ Risk Manager, bắt buộc lý do, ghi audit).
 - Điểm nhấn: hoàn toàn tự động nhưng không có quyết định nào "không thể đảo ngược"; khách vẫn đăng nhập và khiếu nại được (chuyển sang cảnh 5d).
+
+## Cảnh 5e — Né lệnh khóa bằng tài khoản mới (0:45)
+- Manager mở Case của Khang → **Khóa vô thời hạn** (ghi lý do).
+- Chạy `scripts/demo_attack.py evade`: tạo tài khoản mới trên cùng máy, áp NGUOIMOI lần 1 (bị gỡ mã, điểm tin cậy tụt nhưng chưa khóa), lần 2 (spam) → **khóa thanh toán 30 ngày**; đặt hàng trả trước cũng bị chặn.
+- Console: case mới, lý do "Liên kết với tài khoản đang bị khóa #… qua thiết bị"; đồ thị liên kết có vòng đỏ đặc ở Khang.
+- Điểm nhấn khi bị hỏi: con dùng chung máy của bố bị khóa thì chỉ bị trừ điểm và mở case, không bị khóa (test `test_family_member_on_shared_device_is_not_locked`); chung IP không bao giờ tính.
 
 ## Cảnh 5d — Khiếu nại khi bị chặn nhầm (1:00)
 - **Bên trái:** tài khoản mới ở cảnh 5b (đơn đang bị giữ) mở trang **Khiếu nại**.

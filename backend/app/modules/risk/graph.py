@@ -116,6 +116,10 @@ def link_graph(db: Session, root_user_id: int) -> dict | None:
             "JOIN risk_decisions d ON d.id = cd.decision_id WHERE c.status = 'CONFIRMED_ABUSE' AND d.user_id IN :us",
         us=users)}
 
+    banned = {uid for (uid,) in _rows(
+        db, "SELECT DISTINCT user_id FROM account_restrictions WHERE kind = 'purchase_ban' AND lifted_at IS NULL "
+            "AND user_id IN :us", us=users)}
+
     nodes = []
     for uid in sorted(users):
         age_days = (now - info[uid]["created_at"]).total_seconds() / 86400
@@ -125,6 +129,7 @@ def link_graph(db: Session, root_user_id: int) -> dict | None:
             "root": uid == root_user_id, "age_days": round(age_days, 1), "is_new": age_days < 7,
             "worst_decision": decision if uid in worst else None, "max_score": score,
             "confirmed_abuse": uid in confirmed,
+            "banned": uid in banned,  # đang bị khóa mua hàng vô thời hạn (ADR-010/011)
         })
     for eid in sorted(keep):
         e = entities[eid]
@@ -141,6 +146,7 @@ def link_graph(db: Session, root_user_id: int) -> dict | None:
             "new_accounts": sum(n["is_new"] for n in accounts),
             "restricted_accounts": sum(1 for n in accounts if n["worst_decision"] not in (None, "ALLOW")),
             "confirmed_abuse": sum(n["confirmed_abuse"] for n in accounts),
+            "banned": sum(n["banned"] for n in accounts),
             "shared_points": sum(1 for eid in keep if degree[eid] >= 2),
             "window_days": WINDOW_DAYS,
         },

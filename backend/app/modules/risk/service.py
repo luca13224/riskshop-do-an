@@ -34,6 +34,7 @@ from app.modules.risk.models import (
     PLACE_ORDER,
     PURCHASE_BAN,
     PURCHASE_COOLDOWN,
+    PURCHASE_LINKED,
     REVIEW,
     SEVERITY,
     VOUCHER_APPLY,
@@ -68,6 +69,14 @@ REFUSAL_LIMIT = 3
 REFUSAL_WINDOW = timedelta(hours=24)
 COOLDOWN = timedelta(hours=24)
 REPEAT_WINDOW = timedelta(days=30)
+
+# ---------- Né lệnh khóa bằng tài khoản mới (ADR-011) ----------
+# Khóa thanh toán khi: chung >= 2 loại điểm mạnh với tài khoản đang bị ban, HOẶC chung 1 loại VÀ đang "spam" mã
+# người mới (>= SPAM_ATTEMPTS lần thử mã trên cùng thiết bị trong 10 phút). Chung 1 loại mà không spam: chỉ trừ điểm
+# tin cậy (R16) và mở case, vì có thể là người nhà dùng chung máy.
+LINKED_LOCK_FIRST = timedelta(days=30)
+LINKED_LOCK_REPEAT = timedelta(days=60)  # đã từng bị khóa do liên kết
+SPAM_ATTEMPTS = 2
 
 # Đơn COD từ mức này trở lên: nếu Risk Engine lỗi thì KHÔNG cho COD (fail-closed). Còn lại fail-open.
 FAIL_CLOSED_COD_VALUE = 3_000_000
@@ -272,7 +281,7 @@ def evaluate(db: Session, req: EvaluationRequest) -> RiskResult:
     """Chấm điểm. Không bao giờ ném lỗi ra ngoài: nếu engine lỗi thì trả kết quả dự phòng (fail-open/closed)."""
     started = time.perf_counter()
     try:
-        restriction = active_restriction(db, req.user.id) if req.context == PLACE_ORDER else None
+        restriction = active_restriction(db, req.user.id) if req.context in (PLACE_ORDER, VOUCHER_APPLY) else None
         result = _restricted(req, restriction) if restriction else _evaluate(db, req)
     except Exception as exc:  # noqa: BLE001 - lỗi engine không được làm sập luồng mua hàng
         log.exception("Risk engine error context=%s user=%s", req.context, req.user.id)
@@ -297,10 +306,12 @@ def restriction_info(r: AccountRestriction) -> dict:
 
 
 def _restricted(req: EvaluationRequest, r: AccountRestriction) -> RiskResult:
-    """Tài khoản đang bị khóa mua hàng: chặn ngay, không chấm điểm (không cần luật nào khớp)."""
-    actions = {"remove_voucher": False, "disable_cod": False, "hold_order": False, "block": True,
+    """Tài khoản đang bị khóa mua hàng: không chấm điểm. Lúc áp mã thì gỡ mã; lúc đặt hàng thì chặn đơn."""
+    at_order = req.context == PLACE_ORDER
+    actions = {"remove_voucher": not at_order, "disable_cod": False, "hold_order": False, "block": at_order,
                "open_case": False, "restrict_account": True}
-    return RiskResult(request=req, decision=BLOCK, score=0, policy_scores={}, actions=actions,
+    return RiskResult(request=req, decision=BLOCK if at_order else ALLOW_WITH_RESTRICTION, score=0,
+                      policy_scores={}, actions=actions,
                       customer_message=MESSAGES["restrict_account"],
                       features={"account_restriction": restriction_info(r), "enforced": True})
 
@@ -320,8 +331,10 @@ def _auto_restrict(db: Session, result: RiskResult, decision: RiskDecision) -> N
         if not (d.actions or {}).get("restrict_account")]
     if len(refused) <= REFUSAL_LIMIT:
         return
+    # "Tái phạm": từng bị khóa tự động trong 30 ngày mà KHÔNG được người gỡ (gỡ = đã xác định là nhầm, không tính)
     prior = db.scalar(select(AccountRestriction.id).where(
         AccountRestriction.user_id == user_id, AccountRestriction.source == "auto",
+        AccountRestriction.lifted_at.is_(None),
         AccountRestriction.created_at >= now - REPEAT_WINDOW).limit(1))
     kind = PURCHASE_BAN if prior else PURCHASE_COOLDOWN
     restriction = AccountRestriction(
@@ -344,6 +357,20 @@ def _auto_restrict(db: Session, result: RiskResult, decision: RiskDecision) -> N
                  note=restriction.reason)
 
 
+def ban(db: Session, user_id: int, actor_id: int, reason: str) -> AccountRestriction:
+    """Nhân viên khóa mua hàng vô thời hạn (sau khi xem case). Bên gọi commit."""
+    current = active_restriction(db, user_id)
+    if current is not None and current.kind == PURCHASE_BAN:
+        return current
+    r = AccountRestriction(user_id=user_id, kind=PURCHASE_BAN, source="staff", reason=reason[:255],
+                           created_at=utcnow(), expires_at=None)
+    db.add(r)
+    db.flush()
+    audit.record(db, actor_id=actor_id, action="account.ban", entity_type="user", entity_id=str(user_id),
+                 before={"kind": current.kind} if current else None, after={"kind": PURCHASE_BAN}, note=reason)
+    return r
+
+
 def lift_restrictions(db: Session, user_id: int, actor_id: int, reason: str) -> int:
     """Gỡ mọi khóa đang hiệu lực của tài khoản. Bên gọi commit. Trả về số khóa đã gỡ."""
     now = utcnow()
@@ -355,6 +382,50 @@ def lift_restrictions(db: Session, user_id: int, actor_id: int, reason: str) -> 
         audit.record(db, actor_id=actor_id, action="account.unrestrict", entity_type="user", entity_id=str(user_id),
                      before={"kind": r.kind}, after={"lifted": True}, note=reason)
     return len(active)
+
+
+def _linked_enforcement(req: EvaluationRequest, features: dict, decision: str, actions: dict) -> tuple[str, str | None]:
+    """Né lệnh khóa (ADR-011). Chỉ quyết định hành động ở đây; dòng khóa được ghi trong record()."""
+    links = features.get("banned_link_types_90d") or 0
+    if not links or req.context not in (VOUCHER_APPLY, PLACE_ORDER):
+        return decision, None
+    actions["open_case"] = True  # có liên kết với tài khoản bị ban: luôn để analyst xem
+    spam = req.voucher_new_user is True and (features.get("voucher_attempts_device_10m") or 0) >= SPAM_ATTEMPTS
+    if links < 2 and not spam:
+        return decision, None
+    features["linked_lock"] = True
+    actions["restrict_account"] = True
+    if req.context == PLACE_ORDER:
+        actions["block"] = True
+        return BLOCK, MESSAGES["restrict_account"]
+    actions["remove_voucher"] = True
+    if SEVERITY[decision] < SEVERITY[ALLOW_WITH_RESTRICTION]:
+        decision = ALLOW_WITH_RESTRICTION
+    return decision, MESSAGES["restrict_account"]
+
+
+def _create_linked_restriction(db: Session, result: RiskResult, decision: RiskDecision) -> None:
+    """Ghi khóa thanh toán do liên kết (30 ngày; đã từng bị khóa do liên kết thì 60 ngày) + audit."""
+    if active_restriction(db, decision.user_id) is not None:
+        return
+    now = utcnow()
+    repeat = db.scalar(select(AccountRestriction.id).where(AccountRestriction.user_id == decision.user_id,
+                                                           AccountRestriction.kind == PURCHASE_LINKED).limit(1))
+    links = result.features.get("banned_links", {})
+    banned_ids = sorted({uid for ids in links.values() for uid in ids})
+    reason = (f"Liên kết với tài khoản đang bị khóa #{', #'.join(map(str, banned_ids))} qua {', '.join(links)}"
+              + (" (tái phạm)" if repeat else ""))
+    restriction = AccountRestriction(
+        user_id=decision.user_id, kind=PURCHASE_LINKED, source="auto", decision_id=decision.id, created_at=now,
+        expires_at=now + (LINKED_LOCK_REPEAT if repeat else LINKED_LOCK_FIRST), reason=reason[:255],
+    )
+    db.add(restriction)
+    db.flush()
+    decision.features_snapshot = {**(decision.features_snapshot or {}),
+                                  "account_restriction": restriction_info(restriction)}
+    audit.record(db, actor_id=None, action="account.restrict", entity_type="user", entity_id=str(decision.user_id),
+                 before=None, after={"kind": PURCHASE_LINKED, "until": restriction_info(restriction)["until"],
+                                     "linked_to": banned_ids}, note=restriction.reason)
 
 
 def _evaluate(db: Session, req: EvaluationRequest) -> RiskResult:
@@ -414,13 +485,14 @@ def _evaluate(db: Session, req: EvaluationRequest) -> RiskResult:
         req.context, policy_scores, strong_counts, policy.thresholds if policy else {}, exempt,
         trust=trust, voucher_min_trust=req.voucher_min_trust,
     )
+    decision, message = _linked_enforcement(req, features, decision, actions)
     return RiskResult(
         request=req,
         decision=decision,
         score=max(policy_scores.values(), default=0),
         policy_scores=policy_scores,
         actions=actions,
-        customer_message=_customer_message(actions),
+        customer_message=message or _customer_message(actions),
         hits=hits,
         features=features,
         policy_id=policy.id if policy else None,
@@ -475,6 +547,8 @@ def record(db: Session, result: RiskResult, order_id: int | None = None) -> str:
     refused = order_id is None and result.decision != ALLOW and not result.actions.get("restrict_account")
     if result.request.context == PLACE_ORDER and refused:
         _auto_restrict(db, result, decision)
+    if result.features.get("linked_lock"):
+        _create_linked_restriction(db, result, decision)
     if result.actions.get("open_case"):
         # Mở case BẤT ĐỒNG BỘ: worker làm sau, không làm chậm luồng mua hàng.
         # Việc được ghi cùng transaction với quyết định, nên không bao giờ "lưu quyết định mà mất việc".

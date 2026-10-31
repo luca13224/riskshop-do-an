@@ -65,6 +65,21 @@ def user_restriction(user_id: int, db: Session = Depends(get_db)):
     return service.restriction_info(r) if r else None
 
 
+@router.post("/users/{user_id}/restriction/ban", response_model=RestrictionOut)
+def ban_user(
+    user_id: int,
+    data: LiftRestrictionIn,  # cùng ràng buộc: bắt buộc lý do 10–255 ký tự
+    user: User = Depends(require_roles(RISK_MANAGER, ADMIN)),
+    db: Session = Depends(get_db),
+):
+    target = db.get(User, user_id)
+    if target is None or target.role != "customer":
+        raise AppError("USER_NOT_FOUND", "Không tìm thấy khách hàng.", 404)
+    r = service.ban(db, user_id, user.id, data.reason)
+    db.commit()
+    return service.restriction_info(r)
+
+
 @router.post("/users/{user_id}/restriction/lift", response_model=RestrictionOut | None)
 def lift_user_restriction(
     user_id: int,

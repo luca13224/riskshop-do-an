@@ -318,6 +318,10 @@ function AccountDot({ n }: { n: GraphNode }) {
           strokeWidth={1.5}
         />
       )}
+      {n.banned && (
+        // Đang bị khóa mua hàng vô thời hạn: vòng đỏ ĐẶC, đậm (khác vòng nét đứt "đã kết luận lạm dụng")
+        <circle r={r + 6} fill="none" stroke="var(--st-critical)" strokeWidth={3} />
+      )}
       {n.confirmed_abuse && (
         <circle
           r={r + 3.5}
@@ -391,6 +395,9 @@ function HoverCard({ n }: { n: GraphNode }) {
           {n.confirmed_abuse && (
             <p className="mt-1 text-[#f87171]">Đã được kết luận lạm dụng</p>
           )}
+          {n.banned && (
+            <p className="mt-1 font-medium text-[#f87171]">Đang bị khóa mua hàng vô thời hạn</p>
+          )}
         </>
       ) : (
         <>
@@ -453,6 +460,10 @@ function Legend() {
           aria-hidden
         />{" "}
         Đã kết luận lạm dụng
+      </li>
+      <li className="flex items-center gap-1.5">
+        <span className="size-2.5 rounded-full border-[3px] border-[#d03b3b]" aria-hidden /> Đang bị
+        khóa mua hàng
       </li>
       {Object.values(ENTITY).map(({ icon: Icon, label }) => (
         <li key={label} className="flex items-center gap-1.5">

@@ -4,6 +4,8 @@ Sinh viên: Luca — Hệ thống thông tin quản lý, Trường Đại học 
 
 ## Cách chạy (môi trường dev trên Windows)
 
+> **Thông tin demo (link, tài khoản, các cảnh): xem [00-BAT-DAU-TU-DAY.md](00-BAT-DAU-TU-DAY.md).**
+
 **Cần có:** XAMPP tại `D:\xampp` (dùng MariaDB), Python 3.11, Node.js 24.
 
 1. **Bật MariaDB:** mở `D:\xampp\xampp-control.exe` → bấm **Start** ở dòng MySQL.

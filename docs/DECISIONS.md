@@ -182,3 +182,17 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 - Hệ quả / rủi ro:
   - Khách thật bấm lặp do lỗi có thể bị khóa 24 giờ; giảm thiểu: thông điệp hướng dẫn khiếu nại, Risk Manager gỡ được.
   - Kẻ gian có thể tạo tài khoản mới sau khi bị khóa: khóa theo tài khoản, chưa theo thiết bị (hướng phát triển: đưa "thiết bị từng gắn với tài khoản bị khóa" thành dấu hiệu trừ điểm tin cậy).
+
+## ADR-011: Truy vết và khóa tài khoản mới né lệnh khóa
+- Ngày: 2026-10-31
+- Trạng thái: Accepted
+- Bối cảnh: tài khoản bị khóa vô thời hạn (ADR-010) có thể tạo tài khoản mới để tiếp tục spam mã người mới. Luca đề xuất khóa thanh toán 1–2 tháng cho tài khoản mới có dấu hiệu này và truy vết qua thiết bị, SĐT, thẻ/tài khoản ngân hàng.
+- Các phương án:
+  - (1) Khóa mọi tài khoản dùng chung bất kỳ điểm nào với tài khoản bị ban: bắt oan người nhà dùng chung máy, quán net, Wi-Fi công cộng.
+  - (2) Theo mức liên kết: chung IP không tính; chung 1 điểm mạnh → trừ điểm tin cậy + mở case; chung ≥ 2 điểm, hoặc 1 điểm + spam mã người mới → khóa thanh toán có thời hạn.
+- Quyết định: (2). Khóa 30 ngày, tái phạm 60 ngày; chỉ tài khoản đang bị ban làm nguồn (không lây dây chuyền); cửa sổ 90 ngày (SĐT có thể bị nhà mạng cấp lại). Thêm khóa vô thời hạn thủ công cho Risk Manager/Admin (bắt buộc lý do, audit `account.ban`).
+- Lý do: kết hợp liên kết với hành vi thay vì chỉ liên kết; đúng nguyên tắc "không chặn chỉ dựa vào IP hoặc chỉ dựa vào thiết bị"; lý do khóa ghi rõ tài khoản và loại điểm chung để giải thích và khiếu nại.
+- Hệ quả / rủi ro:
+  - Thẻ / tài khoản ngân hàng: chưa làm được vì thanh toán là giả lập. Hướng phát triển: dùng "dấu vân tay thẻ" (fingerprint) do cổng thanh toán trả về, không bao giờ lưu số thẻ (PCI DSS).
+  - Kẻ gian đổi cả máy, SĐT và địa chỉ thì không truy vết được bằng luật; chỉ còn đồ thị liên kết và hành vi.
+  - Sửa kèm: lệnh khóa đã được người gỡ (xác định nhầm) không còn tính là "tái phạm" khi xét khóa vô thời hạn.

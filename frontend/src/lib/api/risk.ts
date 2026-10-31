@@ -155,6 +155,7 @@ export interface GraphNode {
   worst_decision?: Decision | null
   max_score?: number
   confirmed_abuse?: boolean
+  banned?: boolean // đang bị khóa mua hàng vô thời hạn (ADR-010/011)
   // Chỉ có ở nút điểm chung: số tài khoản nối tới
   accounts?: number
 }
@@ -169,6 +170,7 @@ export interface LinkGraph {
     new_accounts: number
     restricted_accounts: number
     confirmed_abuse: number
+    banned: number
     shared_points: number
     window_days: number
   }
@@ -184,7 +186,7 @@ export function useLinkGraph(userId: number | undefined) {
 
 // ---------- Khóa quyền mua hàng (ADR-010) ----------
 
-export type RestrictionKind = "purchase_cooldown" | "purchase_ban"
+export type RestrictionKind = "purchase_cooldown" | "purchase_ban" | "purchase_linked"
 
 export interface Restriction {
   kind: RestrictionKind
@@ -196,6 +198,7 @@ export interface Restriction {
 export const RESTRICTION_LABELS: Record<RestrictionKind, string> = {
   purchase_cooldown: "Tạm khóa mua hàng",
   purchase_ban: "Khóa mua hàng vô thời hạn",
+  purchase_linked: "Khóa thanh toán do liên kết với tài khoản bị khóa",
 }
 
 export function useRestriction(userId: number) {
@@ -210,6 +213,19 @@ export function useLiftRestriction(userId: number) {
   return useMutation({
     mutationFn: (reason: string) =>
       apiFetch<null>(`/api/console/risk/users/${userId}/restriction/lift`, {
+        method: "POST",
+        body: JSON.stringify({ reason }),
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["console", "risk", "restriction", userId] }),
+  })
+}
+
+export function useBanUser(userId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (reason: string) =>
+      apiFetch<Restriction>(`/api/console/risk/users/${userId}/restriction/ban`, {
         method: "POST",
         body: JSON.stringify({ reason }),
       }),

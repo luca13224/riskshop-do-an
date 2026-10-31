@@ -119,6 +119,28 @@ def compute(db: Session, f: FeatureInput) -> dict:
         u=f.user_id, t7=now - timedelta(days=7),
     )
 
+    # F17 (ADR-011): liên kết với tài khoản ĐANG BỊ KHÓA VÔ THỜI HẠN (né lệnh khóa bằng tài khoản mới).
+    # Đếm số LOẠI điểm chung trong 90 ngày: thiết bị, SĐT nhận hàng, địa chỉ. IP cố ý KHÔNG tính (Wi-Fi công cộng,
+    # NAT nhà mạng). Chỉ tài khoản bị ban làm nguồn lây (không tính khóa tạm / khóa do liên kết) để tránh lây dây chuyền.
+    t90 = now - timedelta(days=90)
+    banned_sql = """SELECT user_id FROM account_restrictions WHERE kind = 'purchase_ban' AND lifted_at IS NULL"""
+    links: dict[str, list[int]] = {}
+    if f.device_id:
+        links["thiết bị"] = [r[0] for r in db.execute(text(
+            f"""SELECT DISTINCT user_id FROM user_devices WHERE device_id = :d AND user_id <> :u
+                AND last_seen_at >= :t90 AND user_id IN ({banned_sql})"""), {"d": f.device_id, "u": f.user_id, "t90": t90})]
+    if f.address_phone:
+        links["SĐT nhận hàng"] = [r[0] for r in db.execute(text(
+            f"""SELECT DISTINCT user_id FROM addresses WHERE phone = :p AND user_id <> :u
+                AND created_at >= :t90 AND user_id IN ({banned_sql})"""), {"p": f.address_phone, "u": f.user_id, "t90": t90})]
+    if f.address_hash:
+        links["địa chỉ"] = [r[0] for r in db.execute(text(
+            f"""SELECT DISTINCT user_id FROM addresses WHERE norm_hash = :h AND user_id <> :u
+                AND created_at >= :t90 AND user_id IN ({banned_sql})"""), {"h": f.address_hash, "u": f.user_id, "t90": t90})]
+    linked = {k: v for k, v in links.items() if v}
+    features["banned_link_types_90d"] = len(linked)  # F17
+    features["banned_links"] = {k: v[:3] for k, v in linked.items()}  # để giải thích: loại điểm chung -> tài khoản bị ban
+
     # F04: số tài khoản mới dùng cùng IP trong 24 giờ (tín hiệu yếu)
     features["new_accounts_on_ip_24h"] = (
         _scalar(

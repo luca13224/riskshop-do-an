@@ -103,6 +103,16 @@ RULES = [
                                 {"feature": "voucher_subsidy_ratio_90d", "op": "lt", "value": 0.10}], "points": -15},
          reason_template="Khách mua đều: {delivered_orders} đơn giao thành công, ít phụ thuộc voucher",
          note="Bộ luật v3: hồi điểm tin cậy cho khách mang lại doanh thu"),
+    # ---- ADR-011: né lệnh khóa bằng tài khoản mới ----
+    # Một điểm chung mạnh với tài khoản đang bị ban: trừ đủ mạnh để mã người mới bị khóa (tin cậy < 50) và mở case,
+    # nhưng KHÔNG tự khóa thanh toán (bố bị ban, con dùng chung máy). Khóa thanh toán xử lý riêng ở service.
+    dict(code="LINKED_TO_BANNED", name="R16 · Dùng chung thiết bị / SĐT / địa chỉ với tài khoản đang bị khóa",
+         rule_type="count_threshold_tiers", strength="medium", policies=[V, C],
+         contexts=[VOUCHER_APPLY, PAYMENT_OPTIONS, PLACE_ORDER],
+         params={"feature": "banned_link_types_90d", "tiers": [{"gte": 2, "points": 60}, {"gte": 1, "points": 45}]},
+         reason_template="Dùng chung {value} loại điểm (thiết bị, SĐT, địa chỉ) với tài khoản đang bị khóa "
+                         "(ngưỡng {threshold})",
+         note="ADR-011: né lệnh khóa bằng tài khoản mới"),
 ]
 
 # Bậc điểm tin cậy (bộ luật v3): dưới case_below thì mở case lúc đặt hàng; từ cod_off_at_or_below trở xuống thì tắt COD.

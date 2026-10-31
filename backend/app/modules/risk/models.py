@@ -135,6 +135,7 @@ class RiskAllowlist(Base):
 # Loại khóa tài khoản (ADR-010)
 PURCHASE_COOLDOWN = "purchase_cooldown"  # tạm khóa mua hàng có thời hạn
 PURCHASE_BAN = "purchase_ban"  # khóa mua hàng vô thời hạn (chỉ gỡ khi có người xem xét lại)
+PURCHASE_LINKED = "purchase_linked"  # khóa thanh toán có thời hạn vì liên kết với tài khoản bị ban (ADR-011)
 
 
 class AccountRestriction(Base):
@@ -149,7 +150,7 @@ class AccountRestriction(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    kind: Mapped[str] = mapped_column(String(20))  # purchase_cooldown | purchase_ban
+    kind: Mapped[str] = mapped_column(String(20))  # purchase_cooldown | purchase_ban | purchase_linked
     reason: Mapped[str] = mapped_column(String(255))
     source: Mapped[str] = mapped_column(String(10), default="auto")  # auto | staff
     decision_id: Mapped[int | None] = mapped_column(ForeignKey("risk_decisions.id"))  # quyết định kích hoạt
