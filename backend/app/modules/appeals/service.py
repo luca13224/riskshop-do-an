@@ -19,6 +19,7 @@ from app.modules.audit import service as audit
 from app.modules.auth.models import User
 from app.modules.order import service as order_service
 from app.modules.risk import service as risk
+from app.modules.risk.models import RiskDecision
 
 APPEAL_WINDOW_DAYS = 30  # chỉ khiếu nại được các quyết định trong 30 ngày gần nhất
 EXEMPT_DAYS = 30  # chấp nhận khiếu nại -> miễn trừ chính sách đó 30 ngày
@@ -45,6 +46,8 @@ def _policies(actions: dict) -> list[tuple[str, str | None]]:
 
 
 def _label(policy: str, actions: dict) -> str:
+    if policy == "cod" and actions.get("restrict_account"):
+        return "Tài khoản tạm thời chưa thể đặt hàng"
     for p, key in _policies(actions):
         if p == policy:
             return _LABELS[(p, key)]
@@ -177,6 +180,10 @@ def resolve(db: Session, staff: User, code: str, outcome: str, response: str) ->
         risk.grant_exemption(db, user_id=a.user_id, policy=a.policy, days=EXEMPT_DAYS,
                              reason=f"Chấp nhận khiếu nại {a.appeal_code}", actor_id=staff.id,
                              source_ref=a.appeal_code)
+        # Quyết định khóa quyền mua hàng (ADR-010): chấp nhận khiếu nại thì gỡ khóa luôn
+        d = db.get(RiskDecision, a.decision_id)
+        if d is not None and (d.actions or {}).get("restrict_account"):
+            risk.lift_restrictions(db, a.user_id, staff.id, f"Chấp nhận khiếu nại {a.appeal_code}")
         if a.order_id:  # đơn đang bị giữ chờ duyệt thì duyệt luôn (đơn ở trạng thái khác: không đổi)
             order_status = order_service.resolve_review(
                 db, a.order_id, approve=True, actor_id=staff.id, note=f"Chấp nhận khiếu nại {a.appeal_code}"

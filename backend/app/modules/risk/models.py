@@ -130,3 +130,31 @@ class RiskAllowlist(Base):
     created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
     expires_at: Mapped[datetime] = mapped_column(DateTime)
+
+
+# Loại khóa tài khoản (ADR-010)
+PURCHASE_COOLDOWN = "purchase_cooldown"  # tạm khóa mua hàng có thời hạn
+PURCHASE_BAN = "purchase_ban"  # khóa mua hàng vô thời hạn (chỉ gỡ khi có người xem xét lại)
+
+
+class AccountRestriction(Base):
+    """Khóa QUYỀN MUA HÀNG của một tài khoản (vẫn đăng nhập, xem đơn, gửi khiếu nại được).
+
+    Sinh tự động khi tài khoản cố đặt hàng lặp lại sau nhiều lần bị từ chối (ADR-010), hoặc do nhân viên.
+    Không bao giờ xóa: gỡ khóa là ghi lifted_at / lifted_by / lift_reason, để truy vết và kiểm toán.
+    """
+
+    __tablename__ = "account_restrictions"
+    __table_args__ = (Index("ix_account_restrictions_user_created", "user_id", "created_at"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    kind: Mapped[str] = mapped_column(String(20))  # purchase_cooldown | purchase_ban
+    reason: Mapped[str] = mapped_column(String(255))
+    source: Mapped[str] = mapped_column(String(10), default="auto")  # auto | staff
+    decision_id: Mapped[int | None] = mapped_column(ForeignKey("risk_decisions.id"))  # quyết định kích hoạt
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime)  # NULL: vô thời hạn
+    lifted_at: Mapped[datetime | None] = mapped_column(DateTime)
+    lifted_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    lift_reason: Mapped[str | None] = mapped_column(String(255))

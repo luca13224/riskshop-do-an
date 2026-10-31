@@ -26,6 +26,19 @@ class TrustOut(BaseModel):
     deductions: list[TrustDeductionOut]
 
 
+class RestrictionOut(BaseModel):
+    """Khóa quyền mua hàng đang hiệu lực (ADR-010). until = None: vô thời hạn."""
+
+    kind: str  # purchase_cooldown | purchase_ban
+    since: str
+    until: str | None
+    reason: str
+
+
+class LiftRestrictionIn(BaseModel):
+    reason: str = Field(min_length=10, max_length=255)
+
+
 class DecisionOut(BaseModel):
     id: int
     public_id: str
@@ -43,6 +56,7 @@ class DecisionOut(BaseModel):
     order_code: str | None
     hits: list[HitOut]
     trust: TrustOut | None = None  # None: quyết định trước bộ luật v3
+    restriction: RestrictionOut | None = None  # quyết định này kích hoạt hoặc bị chặn vì khóa tài khoản
 
 
 class RuleVersionOut(BaseModel):

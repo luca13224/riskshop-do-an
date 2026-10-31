@@ -6,7 +6,14 @@ from app.modules.auth.deps import require_roles
 from app.modules.auth.models import ADMIN, RISK_MANAGER, STAFF_ROLES, User
 from app.core.errors import AppError
 from app.modules.risk import graph, rules_admin, service
-from app.modules.risk.schemas import DecisionOut, NewVersionIn, RuleOut, RuleVersionOut
+from app.modules.risk.schemas import (
+    DecisionOut,
+    LiftRestrictionIn,
+    NewVersionIn,
+    RestrictionOut,
+    RuleOut,
+    RuleVersionOut,
+)
 
 router = APIRouter(prefix="/console/risk", tags=["risk"], dependencies=[Depends(require_roles(*STAFF_ROLES))])
 
@@ -49,3 +56,24 @@ def link_graph(user_id: int, db: Session = Depends(get_db)) -> dict:
         raise AppError("USER_NOT_FOUND", "Không tìm thấy khách hàng.", 404)
     return result
 
+
+
+# ---------- Khóa quyền mua hàng (ADR-010) ----------
+@router.get("/users/{user_id}/restriction", response_model=RestrictionOut | None)
+def user_restriction(user_id: int, db: Session = Depends(get_db)):
+    r = service.active_restriction(db, user_id)
+    return service.restriction_info(r) if r else None
+
+
+@router.post("/users/{user_id}/restriction/lift", response_model=RestrictionOut | None)
+def lift_user_restriction(
+    user_id: int,
+    data: LiftRestrictionIn,
+    # Gỡ khóa là quyết định nhạy cảm: chỉ Risk Manager / Admin, bắt buộc lý do, có audit
+    user: User = Depends(require_roles(RISK_MANAGER, ADMIN)),
+    db: Session = Depends(get_db),
+):
+    if service.lift_restrictions(db, user_id, user.id, data.reason) == 0:
+        raise AppError("NO_ACTIVE_RESTRICTION", "Tài khoản không có khóa nào đang hiệu lực.", 409)
+    db.commit()
+    return None

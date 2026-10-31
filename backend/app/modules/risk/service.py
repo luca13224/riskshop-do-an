@@ -22,6 +22,7 @@ from app.core.config import get_settings
 from app.core.time import utcnow
 from app.modules.auth import service as auth_service
 from app.modules.auth.models import User
+from app.modules.audit import service as audit
 from app.modules.auth.security import hash_ip
 from app.modules.risk import features as feature_store
 from app.modules.risk import rules as rule_types
@@ -31,9 +32,12 @@ from app.modules.risk.models import (
     BLOCK,
     PAYMENT_OPTIONS,
     PLACE_ORDER,
+    PURCHASE_BAN,
+    PURCHASE_COOLDOWN,
     REVIEW,
     SEVERITY,
     VOUCHER_APPLY,
+    AccountRestriction,
     DecisionPolicy,
     RiskAllowlist,
     RiskDecision,
@@ -51,7 +55,19 @@ MESSAGES = {
     "remove_voucher": "Mã giảm giá không áp dụng được cho đơn hàng này.",
     "disable_cod": "Đơn hàng này hỗ trợ thanh toán trước.",
     "block": "Hiện chưa thể xử lý đơn hàng. Vui lòng liên hệ bộ phận hỗ trợ.",
+    "restrict_account": "Tài khoản của bạn tạm thời chưa thể đặt hàng. "
+                        "Nếu bạn cho rằng có nhầm lẫn, vui lòng gửi khiếu nại để được xem xét.",
 }
+
+# ---------- Khóa quyền mua hàng tự động (ADR-010) ----------
+# Lần đặt hàng bị từ chối thứ (REFUSAL_LIMIT + 1) trong REFUSAL_WINDOW -> tạm khóa COOLDOWN.
+# Đã từng bị khóa tự động trong REPEAT_WINDOW mà lại vượt ngưỡng -> khóa vô thời hạn.
+# Giao diện ẩn COD / gỡ mã ngay khi bị từ chối, nên gửi lại đúng thứ đã bị từ chối nhiều lần là dấu hiệu
+# cố tình (thường là gọi API trực tiếp). Luôn gỡ được: khiếu nại được chấp nhận hoặc Risk Manager gỡ có lý do.
+REFUSAL_LIMIT = 3
+REFUSAL_WINDOW = timedelta(hours=24)
+COOLDOWN = timedelta(hours=24)
+REPEAT_WINDOW = timedelta(days=30)
 
 # Đơn COD từ mức này trở lên: nếu Risk Engine lỗi thì KHÔNG cho COD (fail-closed). Còn lại fail-open.
 FAIL_CLOSED_COD_VALUE = 3_000_000
@@ -256,12 +272,89 @@ def evaluate(db: Session, req: EvaluationRequest) -> RiskResult:
     """Chấm điểm. Không bao giờ ném lỗi ra ngoài: nếu engine lỗi thì trả kết quả dự phòng (fail-open/closed)."""
     started = time.perf_counter()
     try:
-        result = _evaluate(db, req)
+        restriction = active_restriction(db, req.user.id) if req.context == PLACE_ORDER else None
+        result = _restricted(req, restriction) if restriction else _evaluate(db, req)
     except Exception as exc:  # noqa: BLE001 - lỗi engine không được làm sập luồng mua hàng
         log.exception("Risk engine error context=%s user=%s", req.context, req.user.id)
         result = _fallback(req, f"{type(exc).__name__}: {exc}"[:255])
     result.latency_ms = round((time.perf_counter() - started) * 1000, 2)
     return result
+
+
+def active_restriction(db: Session, user_id: int) -> AccountRestriction | None:
+    now = utcnow()
+    return db.scalar(
+        select(AccountRestriction)
+        .where(AccountRestriction.user_id == user_id, AccountRestriction.lifted_at.is_(None),
+               (AccountRestriction.expires_at.is_(None)) | (AccountRestriction.expires_at > now))
+        .order_by(AccountRestriction.id.desc()).limit(1)
+    )
+
+
+def restriction_info(r: AccountRestriction) -> dict:
+    return {"kind": r.kind, "since": r.created_at.isoformat(timespec="seconds"),
+            "until": r.expires_at.isoformat(timespec="seconds") if r.expires_at else None, "reason": r.reason}
+
+
+def _restricted(req: EvaluationRequest, r: AccountRestriction) -> RiskResult:
+    """Tài khoản đang bị khóa mua hàng: chặn ngay, không chấm điểm (không cần luật nào khớp)."""
+    actions = {"remove_voucher": False, "disable_cod": False, "hold_order": False, "block": True,
+               "open_case": False, "restrict_account": True}
+    return RiskResult(request=req, decision=BLOCK, score=0, policy_scores={}, actions=actions,
+                      customer_message=MESSAGES["restrict_account"],
+                      features={"account_restriction": restriction_info(r), "enforced": True})
+
+
+def _auto_restrict(db: Session, result: RiskResult, decision: RiskDecision) -> None:
+    """Gọi sau khi ghi một lần đặt hàng BỊ TỪ CHỐI (đơn không được tạo). Vượt ngưỡng thì khóa và đổi quyết
+    này thành BLOCK, mở case, ghi audit. Các lần bị chặn VÌ đang bị khóa không được đếm (tránh vòng lặp)."""
+    now = utcnow()
+    user_id = decision.user_id
+    last = db.scalar(select(AccountRestriction).where(AccountRestriction.user_id == user_id)
+                     .order_by(AccountRestriction.id.desc()).limit(1))
+    since = max(now - REFUSAL_WINDOW, last.created_at) if last else now - REFUSAL_WINDOW
+    refused = [d for d in db.scalars(
+        select(RiskDecision).where(RiskDecision.user_id == user_id, RiskDecision.context == PLACE_ORDER,
+                                   RiskDecision.order_id.is_(None), RiskDecision.decision != ALLOW,
+                                   RiskDecision.created_at >= since))
+        if not (d.actions or {}).get("restrict_account")]
+    if len(refused) <= REFUSAL_LIMIT:
+        return
+    prior = db.scalar(select(AccountRestriction.id).where(
+        AccountRestriction.user_id == user_id, AccountRestriction.source == "auto",
+        AccountRestriction.created_at >= now - REPEAT_WINDOW).limit(1))
+    kind = PURCHASE_BAN if prior else PURCHASE_COOLDOWN
+    restriction = AccountRestriction(
+        user_id=user_id, kind=kind, source="auto", decision_id=decision.id, created_at=now,
+        expires_at=None if kind == PURCHASE_BAN else now + COOLDOWN,
+        reason=f"{len(refused)} lần đặt hàng bị từ chối trong 24 giờ" + (" (tái phạm trong 30 ngày)" if prior else ""),
+    )
+    db.add(restriction)
+    db.flush()
+    # Lần đặt hàng kích hoạt khóa chính là quyết định CHẶN
+    result.decision = BLOCK
+    result.actions.update(block=True, restrict_account=True, open_case=True)
+    result.customer_message = MESSAGES["restrict_account"]
+    decision.decision = BLOCK
+    decision.actions = dict(result.actions)  # gán dict mới để SQLAlchemy nhận ra cột JSON đã đổi
+    decision.features_snapshot = {**(decision.features_snapshot or {}),
+                                  "account_restriction": restriction_info(restriction)}
+    audit.record(db, actor_id=None, action="account.restrict", entity_type="user", entity_id=str(user_id),
+                 before=None, after={"kind": kind, "until": restriction_info(restriction)["until"]},
+                 note=restriction.reason)
+
+
+def lift_restrictions(db: Session, user_id: int, actor_id: int, reason: str) -> int:
+    """Gỡ mọi khóa đang hiệu lực của tài khoản. Bên gọi commit. Trả về số khóa đã gỡ."""
+    now = utcnow()
+    active = list(db.scalars(select(AccountRestriction).where(
+        AccountRestriction.user_id == user_id, AccountRestriction.lifted_at.is_(None),
+        (AccountRestriction.expires_at.is_(None)) | (AccountRestriction.expires_at > now))))
+    for r in active:
+        r.lifted_at, r.lifted_by, r.lift_reason = now, actor_id, reason[:255]
+        audit.record(db, actor_id=actor_id, action="account.unrestrict", entity_type="user", entity_id=str(user_id),
+                     before={"kind": r.kind}, after={"lifted": True}, note=reason)
+    return len(active)
 
 
 def _evaluate(db: Session, req: EvaluationRequest) -> RiskResult:
@@ -357,8 +450,9 @@ def record(db: Session, result: RiskResult, order_id: int | None = None) -> str:
         score=result.score,
         policy_scores=result.policy_scores,
         decision=result.decision,
-        actions=result.actions,
-        features_snapshot=result.features,
+        # Bản sao: nếu dùng chung dict với result, sửa tại chỗ rồi gán lại thì SQLAlchemy không thấy thay đổi
+        actions=dict(result.actions),
+        features_snapshot=dict(result.features),
         policy_id=result.policy_id,
         latency_ms=result.latency_ms,
         error=result.error,
@@ -378,6 +472,9 @@ def record(db: Session, result: RiskResult, order_id: int | None = None) -> str:
             )
         )
     db.flush()
+    refused = order_id is None and result.decision != ALLOW and not result.actions.get("restrict_account")
+    if result.request.context == PLACE_ORDER and refused:
+        _auto_restrict(db, result, decision)
     if result.actions.get("open_case"):
         # Mở case BẤT ĐỒNG BỘ: worker làm sau, không làm chậm luồng mua hàng.
         # Việc được ghi cùng transaction với quyết định, nên không bao giờ "lưu quyết định mà mất việc".
@@ -458,6 +555,7 @@ def _serialize(db: Session, rows) -> list[dict]:
             "order_code": order_codes.get(d.order_id),
             "hits": hits_by_decision[d.id],
             "trust": trust_of(d),
+            "restriction": (d.features_snapshot or {}).get("account_restriction"),
         }
         for d, email, name in rows
     ]
