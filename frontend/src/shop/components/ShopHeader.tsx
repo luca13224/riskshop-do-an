@@ -239,7 +239,7 @@ function CategoriesPanel({
           />
           <p className="text-xs tracking-widest text-white/60 uppercase">Khách mới</p>
           <p className="mt-2 text-lg leading-snug font-semibold">
-            Nhập <span className="text-cyan-300">TANTHU</span> giảm 50.000đ cho đơn đầu tiên
+            Nhập <span className="text-cyan-300">NGUOIMOI</span> giảm 50.000đ cho đơn đầu tiên
           </p>
           <Link
             to="/danh-muc"

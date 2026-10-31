@@ -24,7 +24,7 @@ def test_kpi_after_lab_runs(lab_shop, admin, db):
     k = admin.get("/api/console/reports/kpi?days=7").json()
     assert k["decisions"]["total"] > 0 and k["decisions"]["by_decision"]["REVIEW"] == 1
     assert k["latency_ms"]["p50"] is not None and k["latency_ms"]["p50"] <= k["latency_ms"]["p95"] <= k["latency_ms"]["p99"]
-    # 4 tài khoản farm bị gỡ TANTHU (50.000đ mỗi tài khoản)
+    # 4 tài khoản farm bị gỡ NGUOIMOI (50.000đ mỗi tài khoản)
     assert k["impact"]["voucher_blocked_accounts"] == 4 and k["impact"]["voucher_saved_vnd"] == 200_000
     assert k["impact"]["orders_held"] == 1
     assert k["cases"]["by_status"]["OPEN"] == 2

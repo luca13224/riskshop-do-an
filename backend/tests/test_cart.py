@@ -20,7 +20,7 @@ def shop(db):
             Product(id=1, sku="P-1", slug="p1", name="Tai nghe", category="audio", price=150_000, stock=10),
             Product(id=2, sku="P-2", slug="p2", name="Bàn phím", category="monitor", price=400_000, stock=2),
             Product(id=3, sku="P-3", slug="p3", name="Hết hàng", category="gear", price=100_000, stock=0),
-            Voucher(code="TANTHU", discount_type=FIXED, amount=50_000, min_order_value=200_000, new_user_only=True),
+            Voucher(code="NGUOIMOI", discount_type=FIXED, amount=50_000, min_order_value=200_000, new_user_only=True),
             Voucher(code="GIAM10", discount_type=PERCENT, amount=10, max_discount=30_000, min_order_value=0),
             Voucher(code="HETHAN", discount_type=FIXED, amount=10_000, ends_at=utcnow() - timedelta(days=1)),
             Voucher(code="HETLUOT", discount_type=FIXED, amount=10_000, max_redemptions=5, redeemed_count=5),
@@ -98,8 +98,8 @@ def apply(client, code):
 
 def test_apply_fixed_voucher_case_insensitive(customer):
     add(customer, 2)  # 400.000
-    body = apply(customer, " tanthu ").json()
-    assert body["voucher"]["code"] == "TANTHU"
+    body = apply(customer, " nguoimoi ").json()
+    assert body["voucher"]["code"] == "NGUOIMOI"
     assert body["discount"] == 50_000 and body["total"] == 350_000
 
 
@@ -126,7 +126,7 @@ def test_invalid_vouchers(customer, code, error):
 
 def test_min_order_value(customer):
     add(customer, 1)  # 150.000 < 200.000
-    resp = apply(customer, "TANTHU")
+    resp = apply(customer, "NGUOIMOI")
     assert resp.json()["error"]["code"] == "VOUCHER_MIN_ORDER"
     assert "200.000đ" in resp.json()["error"]["message"]
 
@@ -135,7 +135,7 @@ def test_new_user_only(customer, db):
     db.query(User).update({User.created_at: utcnow() - timedelta(days=31)})
     db.commit()
     add(customer, 2)
-    assert apply(customer, "TANTHU").json()["error"]["code"] == "VOUCHER_NEW_USER_ONLY"
+    assert apply(customer, "NGUOIMOI").json()["error"]["code"] == "VOUCHER_NEW_USER_ONLY"
 
 
 def test_cannot_apply_voucher_to_empty_cart(customer):
@@ -144,21 +144,21 @@ def test_cannot_apply_voucher_to_empty_cart(customer):
 
 def test_voucher_auto_removed_when_cart_drops_below_minimum(customer):
     add(customer, 2)
-    apply(customer, "TANTHU")
+    apply(customer, "NGUOIMOI")
     customer.delete("/api/cart/items/2")
     add(customer, 1)  # còn 150.000
     body = customer.get("/api/cart").json()
     assert body["voucher"] is None and body["discount"] == 0
     # thông báo đã được trả về ở lần xem giỏ ngay sau khi giỏ thay đổi
-    assert body["notice"] is None or "TANTHU" in body["notice"]
+    assert body["notice"] is None or "NGUOIMOI" in body["notice"]
 
 
 def test_auto_remove_notice(customer):
     add(customer, 1, 2)  # 300.000
-    apply(customer, "TANTHU")
+    apply(customer, "NGUOIMOI")
     body = customer.patch("/api/cart/items/1", json={"quantity": 1}).json()  # còn 150.000
     assert body["voucher"] is None
-    assert "TANTHU" in body["notice"]
+    assert "NGUOIMOI" in body["notice"]
 
 
 def test_remove_voucher(customer):

@@ -50,10 +50,10 @@ def assert_demo_personas(db, creds: dict[str, str]) -> None:
     """Ba nhân vật của kịch bản demo cho ra đúng kết quả (dùng lại sau khi sinh lịch sử mô phỏng)."""
     aria, viewpro = product_id(db, "AU-001"), product_id(db, "CP-003")
 
-    # Cảnh 1: Minh (khách mới hợp lệ) dùng TANTHU được
+    # Cảnh 1: Minh (khách mới hợp lệ) dùng NGUOIMOI được
     minh = login("minh@shop.test", creds["minh@shop.test"], "device-minh-demo")
     minh.post("/api/cart/items", json={"product_id": aria, "quantity": 1})
-    assert minh.post("/api/cart/voucher", json={"code": "TANTHU"}).status_code == 200
+    assert minh.post("/api/cart/voucher", json={"code": "NGUOIMOI"}).status_code == 200
 
     # Cảnh 5a: Khang (4/5 đơn COD thất bại) không được COD
     khang = login("khang@shop.test", creds["khang@shop.test"], "device-khang-demo")

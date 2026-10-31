@@ -90,6 +90,7 @@ def apply_voucher(db: Session, user: User, code: str, client: ClientContext) -> 
         result = risk.evaluate(db, risk.EvaluationRequest(
             context=VOUCHER_APPLY, user=user, client=client, order_value=subtotal,
             voucher_code=applied.code, voucher_new_user=applied.new_user_only,
+            voucher_min_trust=applied.min_trust,
         ))
         risk.record(db, result)
         if result.actions["remove_voucher"]:

@@ -423,7 +423,7 @@ function SafeSteps() {
 
 // ---------- Chương 5: ưu đãi — thẻ kính trên nền có các mảng màu trôi chậm ----------
 const VOUCHERS = [
-  { code: "TANTHU", value: "−50.000đ", cond: "Khách mới, đơn từ 200.000đ" },
+  { code: "NGUOIMOI", value: "−50.000đ", cond: "Khách mới, đơn từ 200.000đ" },
   { code: "GIAM10", value: "−10%", cond: "Tối đa 100.000đ, đơn từ 500.000đ" },
 ]
 

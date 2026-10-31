@@ -27,7 +27,7 @@ export function ShopLayout() {
             isHome ? "border-b border-white/5 bg-background text-white/70" : "bg-buy text-buy-foreground"
           )}
         >
-          Khách mới nhập mã <b className={isHome ? "text-cyan-300" : undefined}>TANTHU</b> giảm 50.000đ cho
+          Khách mới nhập mã <b className={isHome ? "text-cyan-300" : undefined}>NGUOIMOI</b> giảm 50.000đ cho
           đơn từ 200.000đ
         </p>
 

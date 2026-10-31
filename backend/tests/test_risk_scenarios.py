@@ -29,7 +29,7 @@ def shop(db):
         Product(id=1, sku="P-1", slug="tai-nghe", name="Tai nghe", category="audio", price=300_000, stock=100),
         Product(id=2, sku="P-2", slug="loa", name="Loa", category="audio", price=3_500_000, stock=100),
         Product(id=3, sku="P-3", slug="man-hinh", name="Màn hình", category="monitor", price=5_490_000, stock=100),
-        Voucher(code="TANTHU", discount_type=FIXED, amount=50_000, min_order_value=200_000,
+        Voucher(code="NGUOIMOI", discount_type=FIXED, amount=50_000, min_order_value=200_000,
                 new_user_only=True, risk_checked=True),
     ])
     db.commit()
@@ -85,8 +85,8 @@ def add_history(db, email: str, *, cod_delivered=0, cod_failed=0, days_old=90) -
 def test_new_customer_voucher_allowed(shop, db):
     minh = customer("minh@example.com", "device-minh-0001")
     minh.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-    r = minh.post("/api/cart/voucher", json={"code": "TANTHU"})
-    assert r.status_code == 200 and r.json()["voucher"]["code"] == "TANTHU"
+    r = minh.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
+    assert r.status_code == 200 and r.json()["voucher"]["code"] == "NGUOIMOI"
     d = last_decision(db, "minh@example.com")
     assert d.decision == "ALLOW" and d.score == 10 and hit_codes(db, d) == {"VCH_NEW_ACCOUNT"}
 
@@ -98,7 +98,7 @@ def test_voucher_farm_on_one_device_is_restricted(shop, db):
     for i in range(1, 4):
         c = customer(f"farm{i}@example.com", "device-farm-0001")
         c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-        results.append(c.post("/api/cart/voucher", json={"code": "TANTHU"}))
+        results.append(c.post("/api/cart/voucher", json={"code": "NGUOIMOI"}))
     assert [r.status_code for r in results] == [200, 200, 409]
     err = results[2].json()["error"]
     assert err["code"] == "VOUCHER_NOT_APPLICABLE"
@@ -115,7 +115,7 @@ def test_family_sharing_wifi_and_address_is_allowed(shop, db):
         c = customer(f"giadinh{i}@example.com", f"device-giadinh-{i:04d}", ip="198.51.100.7")
         browse(c)
         c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-        assert c.post("/api/cart/voucher", json={"code": "TANTHU"}).status_code == 200
+        assert c.post("/api/cart/voucher", json={"code": "NGUOIMOI"}).status_code == 200
         assert checkout(c, PREPAID).status_code == 201
     d = last_decision(db, "giadinh4@example.com")
     # Người thứ 4: R01 (+10) + R04 cùng IP (+10) + R03 cùng địa chỉ (+20) = 40 < 50
@@ -129,7 +129,7 @@ def spread_member(i: int) -> TestClient:
     c = customer(f"spread{i}@example.com", f"device-spread-{i:04d}", ip=f"192.0.2.{10 + i}")
     browse(c)
     c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-    assert c.post("/api/cart/voucher", json={"code": "TANTHU"}).status_code == 200  # lúc áp mã chưa có địa chỉ
+    assert c.post("/api/cart/voucher", json={"code": "NGUOIMOI"}).status_code == 200  # lúc áp mã chưa có địa chỉ
     return c
 
 
@@ -167,7 +167,7 @@ def test_family_low_network_diversity_not_hit_by_spread_rule(shop, db):
         c = customer(f"nha{i}@example.com", f"device-nha-{i:04d}", ip="198.51.100.9")
         browse(c)
         c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-        c.post("/api/cart/voucher", json={"code": "TANTHU"})
+        c.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
         # Người 1–4 đặt được; người thứ 5 bị gỡ voucher (409) bởi luật v1, không phải R11
         assert checkout(c, PREPAID).status_code == (201 if i < 5 else 409)
     d = last_decision(db, "nha5@example.com")
@@ -262,7 +262,7 @@ def test_engine_failure_fail_open_for_voucher(shop, db, monkeypatch):
     monkeypatch.setattr(feature_store, "compute", broken)
     c = customer("loi@example.com", "device-loi-0001")
     c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-    assert c.post("/api/cart/voucher", json={"code": "TANTHU"}).status_code == 200  # fail-open
+    assert c.post("/api/cart/voucher", json={"code": "NGUOIMOI"}).status_code == 200  # fail-open
     d = last_decision(db, "loi@example.com")
     assert d.decision == "ALLOW" and "feature store down" in d.error
 
@@ -279,7 +279,7 @@ def test_engine_failure_fail_closed_for_high_value_cod(shop, db, monkeypatch):
 def test_console_lists_decisions_with_reasons(shop, db):
     c = customer("minh@example.com", "device-minh-0001")
     c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-    c.post("/api/cart/voucher", json={"code": "TANTHU"})
+    c.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
     assert c.get("/api/console/risk/decisions").status_code == 403  # khách không xem được
 
     auth_service.create_user(db, email="an@riskshop.test", password="matkhau123", full_name="An", role=ANALYST)

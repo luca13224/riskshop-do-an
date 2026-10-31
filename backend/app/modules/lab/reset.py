@@ -6,7 +6,7 @@ XÓA TOÀN BỘ dữ liệu rồi tạo lại: sản phẩm, voucher, bộ luậ
 Chỉ chạy khi DEMO_MODE=true. Mật khẩu sinh ngẫu nhiên, ghi vào backend/.env.accounts (không commit).
 
 Nhân vật:
-- Minh: khách mới hợp lệ, đăng ký hôm qua (cảnh 1: dùng TANTHU được).
+- Minh: khách mới hợp lệ, đăng ký hôm qua (cảnh 1: dùng NGUOIMOI được).
 - Khang: khách cũ, 5 đơn COD trong quá khứ, 4 đơn giao thất bại (cảnh 5a: không được COD).
 - Lan: khách thân thiết, 30 đơn giao thành công (cảnh 5c: COD giá trị cao vẫn được).
 - analyst / manager / admin: nhân viên các vai trò.

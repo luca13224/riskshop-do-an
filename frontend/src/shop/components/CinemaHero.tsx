@@ -172,7 +172,7 @@ export function CinemaHero({
             to="/register"
             className="flex h-13 items-center rounded-[13px] border border-white/15 px-6 text-base text-white/85 transition hover:bg-white/5"
           >
-            Nhận mã TANTHU
+            Nhận mã NGUOIMOI
           </Link>
         </div>
       </div>

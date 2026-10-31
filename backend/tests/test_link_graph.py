@@ -14,7 +14,7 @@ def test_farm_on_one_device_forms_one_cluster(shop, db):
     for i in range(1, 5):
         c = customer(f"farm{i}@example.com", "device-farm-0001")
         c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-        c.post("/api/cart/voucher", json={"code": "TANTHU"})
+        c.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
     customer("doclap@example.com", "device-solo-0001", ip="198.51.100.99")  # khách không liên quan
 
     analyst = staff(db, "an@riskshop.test", ANALYST)

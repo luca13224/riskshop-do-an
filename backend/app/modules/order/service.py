@@ -116,6 +116,7 @@ def checkout(
             voucher_code=applied.code if applied else None,
             voucher_new_user=applied.new_user_only if applied else None,
             payment_method=data.payment_method, address_hash=address_hash(data.address),
+            address_phone=data.address.phone, voucher_min_trust=applied.min_trust if applied else None,
         ))
         actions = result.actions
         if actions["block"] or actions["disable_cod"] or actions["remove_voucher"]:

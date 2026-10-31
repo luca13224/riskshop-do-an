@@ -31,7 +31,7 @@ def shop(db):
         [
             Product(id=1, sku="P-1", slug="p1", name="Tai nghe", category="audio", price=300_000, stock=5),
             Product(id=2, sku="P-2", slug="p2", name="Món cuối", category="gear", price=250_000, stock=1),
-            Voucher(id=1, code="TANTHU", discount_type=FIXED, amount=50_000, min_order_value=200_000),
+            Voucher(id=1, code="NGUOIMOI", discount_type=FIXED, amount=50_000, min_order_value=200_000),
             Voucher(id=2, code="CUOICUNG", discount_type=FIXED, amount=10_000, max_redemptions=1),
         ]
     )
@@ -66,13 +66,13 @@ def minh(shop):
 
 def test_checkout_creates_order_and_clears_cart(minh, db):
     minh.post("/api/cart/items", json={"product_id": 1, "quantity": 2})
-    minh.post("/api/cart/voucher", json={"code": "TANTHU"})
+    minh.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
     resp = checkout(minh)
     assert resp.status_code == 201
     order = resp.json()
     assert order["status"] == "CONFIRMED" and order["payment_status"] == "UNPAID"
     assert order["subtotal"] == 600_000 and order["discount"] == 50_000 and order["total"] == 550_000
-    assert order["items"][0]["unit_price"] == 300_000 and order["voucher_code"] == "TANTHU"
+    assert order["items"][0]["unit_price"] == 300_000 and order["voucher_code"] == "NGUOIMOI"
     assert minh.get("/api/cart").json()["items"] == []
     assert db.get(Product, 1).stock == 3
     assert db.get(Voucher, 1).redeemed_count == 1
@@ -138,10 +138,10 @@ def test_failed_checkout_changes_nothing(minh, db):
 
 def test_voucher_once_per_user(minh):
     minh.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-    minh.post("/api/cart/voucher", json={"code": "TANTHU"})
+    minh.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
     checkout(minh)
     minh.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-    assert minh.post("/api/cart/voucher", json={"code": "TANTHU"}).json()["error"]["code"] == "VOUCHER_ALREADY_USED"
+    assert minh.post("/api/cart/voucher", json={"code": "NGUOIMOI"}).json()["error"]["code"] == "VOUCHER_ALREADY_USED"
 
 
 # ---------- Race condition: hai khách đặt hàng CÙNG LÚC ----------

@@ -37,7 +37,7 @@ def farm_attack(n: int, device: str = "device-farm-case-01") -> None:
     for i in range(1, n + 1):
         c = customer(f"farm{i}.{device}@example.com", device)
         c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-        c.post("/api/cart/voucher", json={"code": "TANTHU"})
+        c.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
 
 
 def review_order(email: str) -> str:
@@ -59,7 +59,7 @@ def test_farm_opens_one_cluster_case_and_attaches_more(shop, db):
 
     c = customer("farm6.device-farm-case-01@example.com", "device-farm-case-01")
     c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-    c.post("/api/cart/voucher", json={"code": "TANTHU"})
+    c.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
     run_jobs(db)
     db.rollback()
     assert db.scalar(select(func.count()).select_from(RiskCase)) == 1  # gom vào case cũ, không mở case mới
@@ -145,7 +145,7 @@ def test_closed_case_frees_cluster_for_new_case(shop, db):
                json={"outcome": "CONFIRMED_ABUSE", "note": "Cụm farm voucher rõ ràng"})
     c = customer("farm9.device-farm-case-01@example.com", "device-farm-case-01")  # tái phạm
     c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-    c.post("/api/cart/voucher", json={"code": "TANTHU"})
+    c.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
     run_jobs(db)
     db.rollback()
     assert db.scalar(select(func.count()).select_from(RiskCase)) == 2

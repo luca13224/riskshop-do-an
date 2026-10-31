@@ -137,7 +137,7 @@ def build_population(dataset: str, rng: random.Random, scale: float, actions) ->
             lambda a=a: actions.register(a),
             *[lambda a=a: actions.view(a, rng.choice(CHEAP + MID)) for _ in range(rng.randint(1, 3))],
             lambda a=a: actions.add(a, rng.choice(CHEAP + MID), 1),
-            *([lambda a=a: actions.voucher(a, "TANTHU")] if voucher else []),
+            *([lambda a=a: actions.voucher(a, "NGUOIMOI")] if voucher else []),
             lambda a=a, cod=cod: actions.checkout(a, _address(rng, a.key), cod=cod, abandon_if_no_cod=False),
         ]
         groups.append(grp)
@@ -165,7 +165,7 @@ def build_population(dataset: str, rng: random.Random, scale: float, actions) ->
         for a in members:
             grp.steps += [lambda a=a: actions.register(a), lambda a=a: actions.view(a, rng.choice(CHEAP)),
                           lambda a=a: actions.add(a, rng.choice(CHEAP), 1),
-                          lambda a=a: actions.voucher(a, "TANTHU"),
+                          lambda a=a: actions.voucher(a, "NGUOIMOI"),
                           lambda a=a, ad=addr: actions.checkout(a, ad, cod=rng.random() < 0.5, abandon_if_no_cod=False)]
         groups.append(grp)
 
@@ -205,7 +205,7 @@ def build_population(dataset: str, rng: random.Random, scale: float, actions) ->
             addr = {**_address(rng, "Farm"), "district": "Ba Đình", "province": "Hà Nội", "ward": "Thành Công",
                     "line": rng.choice(variants) if p["address_variants"] else variants[0]}
             grp.steps += [lambda a=a: actions.register(a), lambda a=a: actions.add(a, "AU-001", 1),
-                          lambda a=a: actions.voucher(a, "TANTHU"),
+                          lambda a=a: actions.voucher(a, "NGUOIMOI"),
                           lambda a=a, ad=addr: actions.checkout_if_voucher(a, ad)]
         groups.append(grp)
 
@@ -234,7 +234,7 @@ def build_population(dataset: str, rng: random.Random, scale: float, actions) ->
                 addr = {**_address(rng, "Farm"), "district": "Thanh Xuân", "province": "Hà Nội", "ward": "Khương Mai",
                         "line": rng.choice(variants)}
                 grp.steps += [lambda a=a: actions.register(a), lambda a=a: actions.view(a, "AU-001"),
-                              lambda a=a: actions.add(a, "AU-001", 1), lambda a=a: actions.voucher(a, "TANTHU"),
+                              lambda a=a: actions.add(a, "AU-001", 1), lambda a=a: actions.voucher(a, "NGUOIMOI"),
                               lambda a=a, ad=addr: actions.checkout_if_voucher(a, ad)]
             groups.append(grp)
     if "cod_hoarder" in cfg:
@@ -257,7 +257,7 @@ def build_population(dataset: str, rng: random.Random, scale: float, actions) ->
             for a in members:
                 grp.steps += [lambda a=a: actions.register(a), lambda a=a: actions.view(a, rng.choice(CHEAP)),
                               lambda a=a: actions.add(a, rng.choice(CHEAP), 1),
-                              lambda a=a: actions.voucher(a, "TANTHU"),
+                              lambda a=a: actions.voucher(a, "NGUOIMOI"),
                               lambda a=a, ad=addr: actions.checkout(a, ad, cod=rng.random() < 0.5,
                                                                     abandon_if_no_cod=False)]
             groups.append(grp)
@@ -272,7 +272,7 @@ def build_population(dataset: str, rng: random.Random, scale: float, actions) ->
                 addr = {**_address(rng, "Farm"), "district": "Hoàng Mai", "province": "Hà Nội", "ward": "Mai Động",
                         "line": drops[i % len(drops)]}
                 grp.steps += [lambda a=a: actions.register(a), lambda a=a: actions.view(a, "AU-001"),
-                              lambda a=a: actions.add(a, "AU-001", 1), lambda a=a: actions.voucher(a, "TANTHU"),
+                              lambda a=a: actions.add(a, "AU-001", 1), lambda a=a: actions.voucher(a, "NGUOIMOI"),
                               lambda a=a, ad=addr: actions.checkout_if_voucher(a, ad)]
             groups.append(grp)
 

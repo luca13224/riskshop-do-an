@@ -78,12 +78,41 @@ RULES = [
          reason_template="{new_accounts_on_address_7d} tài khoản mới cùng địa chỉ giao hàng trong 7 ngày, "
                          "độ phân tán mạng {address_ip_diversity_7d}",
          note="Bộ luật v2: cụm tài khoản mới quanh một địa chỉ"),
+    # ---- Bộ luật v3 (2026-10-31): dấu hiệu mới cho điểm tin cậy tài khoản (docs/reviews/2026-10-31_TRUST_SCORE_DESIGN.md) ----
+    # Chỉ khi một SĐT nhận hàng ở >= 2 địa chỉ: cả nhà chung SĐT ở một địa chỉ thì không trừ (tránh trừ trùng với R03)
+    dict(code="PHONE_MULTI_ACCOUNTS", name="R12 · Một SĐT nhận hàng cho nhiều tài khoản ở nhiều địa chỉ", rule_type="compound",
+         strength="medium", policies=[V], contexts=[PLACE_ORDER],
+         params={"conditions": [{"feature": "addresses_on_phone_30d", "op": "gte", "value": 2}],
+                 "tiers": {"feature": "accounts_on_phone_30d", "levels": [{"gte": 5, "points": 25}, {"gte": 3, "points": 15}]}},
+         reason_template="{value} tài khoản dùng chung số điện thoại nhận hàng ở {addresses_on_phone_30d} địa chỉ "
+                         "trong 30 ngày (ngưỡng {threshold})",
+         note="Bộ luật v3: SĐT nhận hàng dùng chung"),
+    dict(code="ADDRESS_HOPPING", name="R13 · Đổi địa chỉ giao hàng liên tục", rule_type="count_threshold_tiers",
+         strength="weak", policies=[V], contexts=[PLACE_ORDER],
+         params={"feature": "distinct_addresses_7d", "tiers": [{"gte": 3, "points": 10}]},
+         reason_template="Dùng {value} địa chỉ giao hàng khác nhau trong 7 ngày (ngưỡng {threshold})",
+         note="Bộ luật v3: đổi địa chỉ liên tục"),
+    dict(code="VOUCHER_SUBSIDY_HIGH", name="R14 · Sàn bù voucher quá nhiều", rule_type="count_threshold_tiers",
+         strength="medium", policies=[V], contexts=[VOUCHER_APPLY, PLACE_ORDER],
+         params={"feature": "voucher_subsidy_ratio_90d", "tiers": [{"gte": 0.25, "points": 20}, {"gte": 0.15, "points": 10}]},
+         reason_template="Tiền giảm bằng voucher bằng {value} tổng tiền hàng trong 90 ngày (ngưỡng {threshold})",
+         note="Bộ luật v3: tỷ lệ trợ giá thay cho lãi/lỗ"),
+    dict(code="PROFITABLE_CUSTOMER", name="R15 · Khách mua đều, ít phụ thuộc voucher (luật tích cực)", rule_type="compound",
+         strength="positive", policies=[V], contexts=[VOUCHER_APPLY, PLACE_ORDER],
+         params={"conditions": [{"feature": "delivered_orders", "op": "gte", "value": 3},
+                                {"feature": "voucher_subsidy_ratio_90d", "op": "lt", "value": 0.10}], "points": -15},
+         reason_template="Khách mua đều: {delivered_orders} đơn giao thành công, ít phụ thuộc voucher",
+         note="Bộ luật v3: hồi điểm tin cậy cho khách mang lại doanh thu"),
 ]
 
+# Bậc điểm tin cậy (bộ luật v3): dưới case_below thì mở case lúc đặt hàng; từ cod_off_at_or_below trở xuống thì tắt COD.
+# Mã giảm giá bị khóa theo min_trust của từng mã (bảng vouchers). Bỏ khóa "trust" là tắt cả lớp 1 (dùng cho thực nghiệm).
+TRUST = {"case_below": 30, "cod_off_at_or_below": 0}
+
 POLICIES = {
-    VOUCHER_APPLY: {V: {"restrict": 50, "open_case": 80}},
-    PAYMENT_OPTIONS: {C: {"restrict": 40, "review": 70, "block": 90}},
-    PLACE_ORDER: {V: {"restrict": 50, "open_case": 80}, C: {"restrict": 40, "review": 70, "block": 90}},
+    VOUCHER_APPLY: {V: {"restrict": 50, "open_case": 80}, "trust": TRUST},
+    PAYMENT_OPTIONS: {C: {"restrict": 40, "review": 70, "block": 90}, "trust": TRUST},
+    PLACE_ORDER: {V: {"restrict": 50, "open_case": 80}, C: {"restrict": 40, "review": 70, "block": 90}, "trust": TRUST},
 }
 
 

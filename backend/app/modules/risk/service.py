@@ -67,6 +67,8 @@ class EvaluationRequest:
     voucher_new_user: bool | None = None
     payment_method: str | None = None  # COD | PREPAID
     address_hash: str | None = None
+    address_phone: str | None = None
+    voucher_min_trust: int | None = None  # điểm tin cậy tối thiểu của mã đang áp (None: không xét)
 
 
 @dataclass
@@ -109,13 +111,44 @@ def _active_policies(req: EvaluationRequest) -> list[str]:
     return policies
 
 
-def _load_rules(db: Session, context: str) -> list[tuple[Rule, RuleVersion]]:
+def _load_rules(db: Session, context: str | None) -> list[tuple[Rule, RuleVersion]]:
+    """Luật đang bật. context=None: lấy mọi luật (dùng để tính điểm tin cậy tài khoản)."""
     rows = db.execute(
         select(Rule, RuleVersion)
         .join(RuleVersion, RuleVersion.id == Rule.active_version_id)
         .where(RuleVersion.enabled.is_(True))
     ).all()
-    return [(r, v) for r, v in rows if context in v.contexts]
+    return [(r, v) for r, v in rows if context is None or context in v.contexts]
+
+
+# ---------- Điểm tin cậy tài khoản (Trust Score, lớp 1, bộ luật v3) ----------
+# Trust = min(100, 100 - tổng điểm của MỌI luật khớp), không lọc theo context, mỗi luật tính một lần ở bậc cao nhất.
+# Luật tích cực (điểm âm) cộng lại điểm. Có thể âm. Xem docs/reviews/2026-10-31_TRUST_SCORE_DESIGN.md.
+TRUST_MAX = 100
+TRUST_TIERS = [(70, "normal"), (50, "watch"), (30, "restricted"), (1, "review")]  # dưới 1 (<= 0): "critical"
+
+
+def trust_tier(score: int) -> str:
+    for floor, name in TRUST_TIERS:
+        if score >= floor:
+            return name
+    return "critical"
+
+
+def _trust(db: Session, features: dict) -> tuple[int, dict[str, int]]:
+    deductions: dict[str, int] = {}
+    for rule, version in _load_rules(db, None):
+        match = rule_types.evaluate(rule.rule_type, version.params, features)
+        if match is not None and match.points:
+            deductions[rule.code] = match.points
+    return min(TRUST_MAX, TRUST_MAX - sum(deductions.values())), deductions
+
+
+def latest_trust(db: Session, user_id: int) -> int | None:
+    """Điểm tin cậy ở lần chấm gần nhất của tài khoản (None nếu chưa từng chấm). Dùng cho túi voucher, Console."""
+    snap = db.scalar(select(RiskDecision.features_snapshot).where(RiskDecision.user_id == user_id)
+                     .order_by(RiskDecision.id.desc()).limit(1))
+    return (snap or {}).get("trust_score")
 
 
 def _load_policy(db: Session, context: str) -> DecisionPolicy | None:
@@ -132,6 +165,8 @@ def decide(
     strong_counts: dict[str, int],
     thresholds: dict,
     exempt: frozenset[str] = frozenset(),
+    trust: int | None = None,
+    voucher_min_trust: int | None = None,
 ) -> tuple[str, dict]:
     """Ma trận quyết định (RULES_V0 mục 4). Hàm thuần, test riêng được.
 
@@ -176,6 +211,19 @@ def decide(
         elif score >= c["restrict"]:
             actions["disable_cod"] = True
             escalate(ALLOW_WITH_RESTRICTION)
+
+    # Bậc điểm tin cậy (lớp 1). Chỉ thêm hạn chế, không bao giờ tự giữ hay chặn đơn: REVIEW/BLOCK vẫn cần luật mạnh.
+    t = thresholds.get("trust")
+    if t is not None and trust is not None:
+        if (voucher_min_trust is not None and VOUCHER in policy_scores and VOUCHER not in exempt
+                and trust < voucher_min_trust):
+            actions["remove_voucher"] = True  # mã này "tạm chưa áp dụng" với mức tin cậy hiện tại
+            escalate(ALLOW_WITH_RESTRICTION)
+        if trust <= t["cod_off_at_or_below"] and COD in policy_scores and COD not in exempt:
+            actions["disable_cod"] = True
+            escalate(ALLOW_WITH_RESTRICTION)
+        if trust < t["case_below"] and context == PLACE_ORDER:
+            actions["open_case"] = True  # cắm cờ: analyst xem cả tài khoản / cụm thiết bị
     return decision, actions
 
 
@@ -229,6 +277,7 @@ def _evaluate(db: Session, req: EvaluationRequest) -> RiskResult:
             device_id=device_id,
             ip_hash=ip_hash,
             address_hash=req.address_hash,
+            address_phone=req.address_phone,
             voucher_new_user=req.voucher_new_user,
             payment_cod=None if req.payment_method is None else req.payment_method == "COD",
             order_value=req.order_value,
@@ -264,8 +313,13 @@ def _evaluate(db: Session, req: EvaluationRequest) -> RiskResult:
     exempt = frozenset(active_exemptions(db, req.user.id) & set(active))
     if exempt:
         features["exempt_policies"] = sorted(exempt)  # Console thấy vì sao điểm cao mà vẫn cho phép
+    trust, deductions = _trust(db, features)
+    features["trust_score"] = trust
+    features["trust_tier"] = trust_tier(trust)
+    features["trust_deductions"] = deductions  # "sổ trừ điểm": mã luật -> điểm
     decision, actions = decide(
-        req.context, policy_scores, strong_counts, policy.thresholds if policy else {}, exempt
+        req.context, policy_scores, strong_counts, policy.thresholds if policy else {}, exempt,
+        trust=trust, voucher_min_trust=req.voucher_min_trust,
     )
     return RiskResult(
         request=req,

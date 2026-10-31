@@ -9,6 +9,8 @@ from app.modules.auth import service
 from app.modules.auth.deps import get_client_context, get_current_user, require_roles
 from app.modules.auth.models import ADMIN, RISK_MANAGER, User
 from app.modules.auth.schemas import ContactOut, LoginIn, RegisterIn, RevealContactIn, UserOut
+from app.modules.promotion import seed as promotion_seed
+from app.modules.promotion import service as promotion
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 console_router = APIRouter(prefix="/console/users", tags=["auth"])
@@ -35,6 +37,9 @@ def register(
     ctx: service.ClientContext = Depends(get_client_context),
 ):
     user, token = service.register_customer(db, data, ctx)
+    # Shop cấp sẵn mã người mới vào túi voucher (bộ luật v3)
+    promotion.grant(db, user, promotion_seed.WELCOME_CODE)
+    db.commit()
     _set_session_cookie(response, token)
     return user
 

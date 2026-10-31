@@ -66,7 +66,7 @@ def test_new_version_takes_effect_immediately(shop, db):
     for i in range(1, 3):
         c = customer(f"farm{i}@example.com", "device-farm-rule-01")
         c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-        results.append(c.post("/api/cart/voucher", json={"code": "TANTHU"}).status_code)
+        results.append(c.post("/api/cart/voucher", json={"code": "NGUOIMOI"}).status_code)
     assert results == [200, 409]  # với luật v1, tài khoản thứ 2 vẫn được dùng (10 điểm)
 
 
@@ -78,7 +78,7 @@ def test_disable_rule(shop, db):
     for i in range(1, 4):
         c = customer(f"farm{i}@example.com", "device-farm-rule-02")
         c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-        last = c.post("/api/cart/voucher", json={"code": "TANTHU"})
+        last = c.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
     assert last.status_code == 200  # không còn luật thiết bị: 10 + 10 = 20 điểm
 
 
@@ -118,7 +118,7 @@ def test_change_note_required_and_no_op_rejected(shop, db):
 def test_hit_counts(shop, db):
     c = customer("minh@example.com", "device-minh-rule")
     c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-    c.post("/api/cart/voucher", json={"code": "TANTHU"})
+    c.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
     analyst = login(db, "an@riskshop.test", ANALYST)
     rules = {r["code"]: r["hit_count_7d"] for r in analyst.get("/api/console/risk/rules").json()}
     assert rules["VCH_NEW_ACCOUNT"] == 1 and rules["DEV_MULTI_NEW_ACCOUNTS"] == 0

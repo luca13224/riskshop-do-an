@@ -15,7 +15,7 @@ Sinh viên: Luca — Hệ thống thông tin quản lý, Trường Đại học 
    cp .env.example .env   # rồi điền mật khẩu CSDL
    .venv/Scripts/alembic upgrade head
    .venv/Scripts/python -m app.modules.catalog.seed     # 24 sản phẩm công nghệ mẫu (chạy lại an toàn)
-   .venv/Scripts/python -m app.modules.promotion.seed   # voucher TANTHU, GIAM10
+   .venv/Scripts/python -m app.modules.promotion.seed   # voucher NGUOIMOI, GIAM10
    .venv/Scripts/python -m app.modules.risk.seed        # bộ luật rủi ro R01–R10 + ngưỡng quyết định
    ```
    Chạy: `.venv/Scripts/python -m uvicorn app.main:app --port 8000` (sửa code backend xong thì dừng và chạy lại; `--reload` hay bị kẹt trên Windows) → tài liệu API: http://localhost:8000/docs

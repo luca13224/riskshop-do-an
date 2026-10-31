@@ -22,6 +22,7 @@ from app.modules.catalog.router import router as catalog_router
 from app.modules.catalog.seo import router as seo_router
 from app.modules.lab.router import router as lab_router
 from app.modules.order.router import router as order_router
+from app.modules.promotion.router import router as promotion_router
 from app.modules.reports.router import router as reports_router
 from app.modules.risk.router import router as risk_router
 
@@ -54,6 +55,7 @@ def create_app() -> FastAPI:
     app.include_router(lab_router, prefix="/api")
     app.include_router(reports_router, prefix="/api")
     app.include_router(appeals_router, prefix="/api")
+    app.include_router(promotion_router, prefix="/api")
     app.include_router(seo_router)  # /robots.txt, /sitemap.xml ở gốc, không có tiền tố /api
     return app
 

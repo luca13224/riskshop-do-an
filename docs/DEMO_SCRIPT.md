@@ -42,7 +42,7 @@
 - **Lưu ý trung thực:** dữ liệu lịch sử là mô phỏng (email @sim.test), ghi rõ ở cuối trang.
 
 ## Cảnh 1 — Khách hàng bình thường (1:00)
-- **Bên trái (Shop):** khách mới hợp lệ "Minh" (đăng ký hôm qua, nên được dùng voucher tân thủ) duyệt trang chủ → chi tiết sản phẩm → thêm vào giỏ → áp mã `TANTHU` → checkout COD → **đặt hàng thành công**.
+- **Bên trái (Shop):** khách mới hợp lệ "Minh" (đăng ký hôm qua, nên được dùng voucher tân thủ) duyệt trang chủ → chi tiết sản phẩm → thêm vào giỏ → áp mã `NGUOIMOI` → checkout COD → **đặt hàng thành công**.
 - **Bên phải (Console):** trang **Live Monitor** hiện hai dòng quyết định `ALLOW` (áp voucher, checkout), mỗi dòng có **thời gian xử lý (ms)**.
 - **Chứng minh:** người dùng hợp lệ không gặp trở ngại; mọi giao dịch đều được chấm điểm và ghi nhận.
 - **Cần có:** Shop (trang chủ, chi tiết, giỏ, checkout, kết quả), Live Monitor, luồng đánh giá đồng bộ, ghi `risk_decision`.
@@ -53,7 +53,7 @@
   - 4 tài khoản đầu: `ALLOW`, vì chưa đủ tín hiệu (hệ thống thật cũng vậy).
   - Từ tài khoản thứ 5 (5 tài khoản trên cùng địa chỉ): `ALLOW_WITH_RESTRICTION` (voucher bị gỡ). Từ tài khoản thứ 7 (3 tài khoản mới trên cùng thiết bị): điểm vượt 80. Phép tính xem `RULES_V0.md` mục 5.
   - Một **cảnh báo cụm** hiện lên: *"Cụm 20 tài khoản liên kết qua 3 thiết bị và 1 địa chỉ"* → mở **case** mới.
-- **Bên trái:** Luca đăng nhập thủ công một tài khoản của farm trên trình duyệt, áp `TANTHU` → shop báo *"Mã giảm giá không áp dụng được cho đơn hàng này"*. **Không nói lý do**, để kẻ gian không học được luật.
+- **Bên trái:** Luca đăng nhập thủ công một tài khoản của farm trên trình duyệt, áp `NGUOIMOI` → shop báo *"Mã giảm giá không áp dụng được cho đơn hàng này"*. **Không nói lý do**, để kẻ gian không học được luật.
 - **Chứng minh:** phát hiện theo thời gian thực; hành động **mềm** (gỡ voucher, vẫn cho mua giá gốc) thay vì chặn; thông điệp không lộ luật.
 - **Cần có:** Attack Lab (gọi Simulator), SSE, luật liên kết tài khoản qua thiết bị và địa chỉ, ma trận quyết định ngữ cảnh voucher, tạo case tự động (worker).
 - **Recommended:** bot chạy bằng Playwright trên chính giao diện shop, để khán giả *thấy* trình duyệt tự thao tác.

@@ -92,7 +92,7 @@ def test_voucher_exemption_after_accepted_appeal(shop, db):
     for i in range(1, 4):
         c = customer(f"nha{i}@example.com", "device-chung-0001")
         c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
-        last = c.post("/api/cart/voucher", json={"code": "TANTHU"})
+        last = c.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
     assert last.status_code == 409
     item = c.get("/api/appeals/eligible").json()[0]
     assert item["policy"] == "voucher" and item["label"] == "Mã giảm giá không được áp dụng"
@@ -102,7 +102,7 @@ def test_voucher_exemption_after_accepted_appeal(shop, db):
     manager = staff(db, "manager@riskshop.test", RISK_MANAGER)
     manager.post(f"/api/console/appeals/{code}/resolve",
                  json={"outcome": "ACCEPTED", "response": "Đã xác minh, bạn dùng được mã tân thủ."})
-    assert c.post("/api/cart/voucher", json={"code": "TANTHU"}).status_code == 200
+    assert c.post("/api/cart/voucher", json={"code": "NGUOIMOI"}).status_code == 200
 
 
 def test_rejected_appeal_gives_no_exemption_and_frees_slot(shop, db):

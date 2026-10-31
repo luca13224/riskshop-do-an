@@ -34,7 +34,7 @@ def lab_shop(db):
                 price=5_490_000, stock=50),
         Product(sku="SM-002", slug="o-cam-plug", name="Ổ cắm thông minh Plug", category="smart",
                 price=249_000, stock=500),
-        Voucher(code="TANTHU", discount_type=FIXED, amount=50_000, min_order_value=200_000,
+        Voucher(code="NGUOIMOI", discount_type=FIXED, amount=50_000, min_order_value=200_000,
                 new_user_only=True, risk_checked=True),
     ])
     db.commit()

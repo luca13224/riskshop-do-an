@@ -63,7 +63,7 @@ export function ShopFooter() {
         <FooterCol title="Ưu đãi">
           <li>
             <Link to="/#uu-dai" className="group block transition hover:text-white">
-              <span className="font-mono font-semibold text-buy">TANTHU</span>
+              <span className="font-mono font-semibold text-buy">NGUOIMOI</span>
               <span className="block text-xs">Giảm 50.000đ cho khách mới</span>
             </Link>
           </li>

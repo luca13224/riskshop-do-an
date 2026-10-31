@@ -1,4 +1,4 @@
-"""Tính đặc trưng F01–F13 (docs/RULES_V0.md, mục 2; F12–F13 thêm ở bộ luật v2).
+"""Tính đặc trưng F01–F16 (docs/RULES_V0.md, mục 2; F12–F13 thêm ở bộ luật v2, F14–F16 ở v3).
 
 Đây là lớp "feature store" của Risk Engine: ĐỌC (chỉ đọc) các bảng của module khác bằng SQL thuần,
 không import code của cart/order, nên không tạo vòng phụ thuộc. Lý do: ADR-004.
@@ -15,6 +15,8 @@ from sqlalchemy.orm import Session
 
 # Tham số làm mượt tỷ lệ COD thất bại: (thất bại + A) / (đã kết thúc + A + B), tỷ lệ nền A/(A+B) = 10%
 SMOOTH_A, SMOOTH_B = 1, 9
+# F16: số đơn tối thiểu trong 90 ngày mới tính tỷ lệ trợ giá
+SUBSIDY_MIN_ORDERS = 3
 
 
 @dataclass(frozen=True)
@@ -24,6 +26,7 @@ class FeatureInput:
     device_id: int | None
     ip_hash: str | None
     address_hash: str | None
+    address_phone: str | None  # SĐT nhận hàng của đơn này (chỉ có lúc đặt hàng)
     voucher_new_user: bool | None  # None: không có voucher
     payment_cod: bool | None  # None: chưa biết phương thức thanh toán
     order_value: int
@@ -91,6 +94,31 @@ def compute(db: Session, f: FeatureInput) -> dict:
         features["new_accounts_on_address_7d"] = None
         features["address_ip_diversity_7d"] = None
 
+    # F14 (v3): một SĐT nhận hàng được bao nhiêu tài khoản dùng, ở bao nhiêu địa chỉ khác nhau, trong 30 ngày.
+    # Cả nhà dùng chung SĐT của một người ở MỘT địa chỉ là bình thường (đã có R03 đếm); SĐT nhận hàng cho nhiều
+    # tài khoản ở NHIỀU địa chỉ mới đáng ngờ (farm chia hàng về nhiều điểm nhận nhưng một người đi nhận).
+    # SĐT đã được kiểm định dạng (10 chữ số) khi nhập nên so khớp trực tiếp. Index: addresses(phone, created_at).
+    if f.address_phone:
+        ph = db.execute(
+            text(
+                """SELECT COUNT(DISTINCT a.user_id) AS accounts, COUNT(DISTINCT a.norm_hash) AS addrs
+                   FROM addresses a JOIN users u ON u.id = a.user_id
+                   WHERE a.phone = :p AND a.created_at >= :t30 AND u.role = 'customer'"""
+            ),
+            {"p": f.address_phone, "t30": now - timedelta(days=30)},
+        ).one()
+        features["accounts_on_phone_30d"] = int(ph.accounts)
+        features["addresses_on_phone_30d"] = int(ph.addrs)
+    else:
+        features["accounts_on_phone_30d"] = None
+        features["addresses_on_phone_30d"] = None
+
+    # F15 (v3): số địa chỉ khác nhau chính tài khoản này đã dùng trong 7 ngày (đổi địa chỉ liên tục)
+    features["distinct_addresses_7d"] = _scalar(
+        db, "SELECT COUNT(DISTINCT norm_hash) FROM addresses WHERE user_id = :u AND created_at >= :t7",
+        u=f.user_id, t7=now - timedelta(days=7),
+    )
+
     # F04: số tài khoản mới dùng cùng IP trong 24 giờ (tín hiệu yếu)
     features["new_accounts_on_ip_24h"] = (
         _scalar(
@@ -146,4 +174,20 @@ def compute(db: Session, f: FeatureInput) -> dict:
     finished_all = delivered + failed_all
     features["fail_rate_raw"] = round(failed_all / finished_all, 4) if finished_all else 0.0
     features["open_cod_orders"] = int(row.open_cod)  # F10
+
+    # F16 (v3): tỷ lệ "trợ giá" bằng voucher trong 90 ngày = tổng tiền giảm / tổng tiền hàng của các đơn hợp lệ.
+    # Thay cho "lãi/lỗ" vì hệ thống không có giá vốn. Cần ít nhất SUBSIDY_MIN_ORDERS đơn, tránh khách mới
+    # có 1 đơn dùng mã người mới bị tính tỷ lệ cao.
+    sub = db.execute(
+        text(
+            """SELECT COUNT(*) AS n, COALESCE(SUM(discount), 0) AS disc, COALESCE(SUM(subtotal), 0) AS gross
+               FROM orders WHERE user_id = :u AND created_at >= :t90 AND created_at <= :now
+               AND status NOT IN ('REJECTED', 'CANCELLED')"""
+        ),
+        {"u": f.user_id, "t90": now - timedelta(days=90), "now": now},
+    ).one()
+    features["orders_90d"] = int(sub.n)
+    features["voucher_subsidy_ratio_90d"] = (
+        round(int(sub.disc) / int(sub.gross), 4) if int(sub.n) >= SUBSIDY_MIN_ORDERS and int(sub.gross) else None
+    )
     return features

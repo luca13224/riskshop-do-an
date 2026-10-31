@@ -205,7 +205,7 @@ function VoucherBox({ cart }: { cart: Cart }) {
                 setCode(e.target.value)
                 apply.reset()
               }}
-              placeholder="Nhập mã, ví dụ TANTHU"
+              placeholder="Nhập mã, ví dụ NGUOIMOI"
               aria-label="Mã giảm giá"
               className="uppercase placeholder:normal-case"
             />

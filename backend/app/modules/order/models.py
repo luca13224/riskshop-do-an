@@ -26,6 +26,7 @@ class Address(Base):
     __tablename__ = "addresses"
     __table_args__ = (
         Index("ix_addresses_norm_hash_created", "norm_hash", "created_at"),
+        Index("ix_addresses_phone_created", "phone", "created_at"),  # F14: tài khoản dùng chung SĐT nhận hàng
         UniqueConstraint("user_id", "norm_hash", name="uq_addresses_user_norm_hash"),
     )
 

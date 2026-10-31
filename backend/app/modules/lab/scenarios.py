@@ -81,15 +81,15 @@ def farm_voucher(r: Runner) -> str:
         c = r.customer(name, "may-farm-01")  # cùng một thiết bị
         item = r.product(c, "Aria")
         c.post("/cart/items", json={"product_id": item["id"], "quantity": 1})
-        res = c.post("/cart/voucher", json={"code": "TANTHU"})
+        res = c.post("/cart/voucher", json={"code": "NGUOIMOI"})
         outcome = _outcome(res)
         if outcome == "VOUCHER_NOT_APPLICABLE":
             restricted += 1
             expected_ok = i >= 3
-            r.step(name, "Áp mã TANTHU", "Bị gỡ voucher (thông điệp chung chung)", "Tài khoản 1–2 được dùng, từ thứ 3 bị gỡ",
+            r.step(name, "Áp mã NGUOIMOI", "Bị gỡ voucher (thông điệp chung chung)", "Tài khoản 1–2 được dùng, từ thứ 3 bị gỡ",
                    expected_ok)
             continue
-        r.step(name, "Áp mã TANTHU", "Được dùng voucher", "Tài khoản 1–2 được dùng, từ thứ 3 bị gỡ", i <= 2)
+        r.step(name, "Áp mã NGUOIMOI", "Được dùng voucher", "Tài khoản 1–2 được dùng, từ thứ 3 bị gỡ", i <= 2)
         res = r.checkout(c, ADDRESS_FARM, "PREPAID")
         r.step(name, "Đặt hàng (trả trước, cùng địa chỉ farm)", _outcome(res))
     return f"{restricted}/6 tài khoản farm bị gỡ voucher; case cụm theo thiết bị sẽ được mở."
@@ -105,9 +105,9 @@ def family_wifi(r: Runner) -> str:
         item = r.product(c, "Aria")
         c.get(f"/products/{item['slug']}")  # người thật xem sản phẩm trước khi mua
         c.post("/cart/items", json={"product_id": item["id"], "quantity": 1})
-        res = c.post("/cart/voucher", json={"code": "TANTHU"})
+        res = c.post("/cart/voucher", json={"code": "NGUOIMOI"})
         ok_voucher = res.status_code == 200
-        r.step(name, "Áp mã TANTHU (cùng Wi-Fi)", "Được dùng voucher" if ok_voucher else _outcome(res),
+        r.step(name, "Áp mã NGUOIMOI (cùng Wi-Fi)", "Được dùng voucher" if ok_voucher else _outcome(res),
                "Được dùng voucher", ok_voucher)
         res = r.checkout(c, ADDRESS_FAMILY, "PREPAID")
         ok_order = res.status_code == 201
@@ -166,7 +166,7 @@ SCENARIOS: dict[str, Scenario] = {
     s.code: s
     for s in [
         Scenario("farm_voucher", "Farm voucher", "Cảnh 2",
-                 "6 tài khoản mới trên CÙNG một thiết bị lần lượt áp mã tân thủ TANTHU rồi đặt hàng về cùng địa chỉ.",
+                 "6 tài khoản mới trên CÙNG một thiết bị lần lượt áp mã tân thủ NGUOIMOI rồi đặt hàng về cùng địa chỉ.",
                  "Tài khoản 1–2 được dùng voucher; từ tài khoản thứ 3 bị gỡ voucher; mở case cụm.", farm_voucher),
         Scenario("family_wifi", "Gia đình chung Wi-Fi", "Cảnh 4",
                  "4 người trong một nhà, mỗi người một điện thoại, cùng Wi-Fi và cùng địa chỉ, mỗi người dùng 1 voucher.",
