@@ -122,3 +122,43 @@ export function useCreateRuleVersion() {
       queryClient.invalidateQueries({ queryKey: ["console", "rules"] }),
   })
 }
+
+// ---------- Đồ thị liên kết tài khoản ----------
+export interface GraphNode {
+  id: string
+  type: "account" | "device" | "ip" | "address"
+  label: string // email đã che / IP đã che / "phường, quận"
+  // Chỉ có ở nút tài khoản
+  user_id?: number
+  root?: boolean
+  age_days?: number
+  is_new?: boolean
+  worst_decision?: Decision | null
+  max_score?: number
+  confirmed_abuse?: boolean
+  // Chỉ có ở nút điểm chung: số tài khoản nối tới
+  accounts?: number
+}
+
+export interface LinkGraph {
+  root: string
+  nodes: GraphNode[]
+  edges: { source: string; target: string }[]
+  truncated: boolean
+  summary: {
+    accounts: number
+    new_accounts: number
+    restricted_accounts: number
+    confirmed_abuse: number
+    shared_points: number
+    window_days: number
+  }
+}
+
+export function useLinkGraph(userId: number | undefined) {
+  return useQuery({
+    queryKey: ["console", "risk", "graph", userId],
+    queryFn: () => apiFetch<LinkGraph>(`/api/console/risk/graph/${userId}`),
+    enabled: userId !== undefined,
+  })
+}

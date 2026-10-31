@@ -1,4 +1,4 @@
-import { ArrowLeft, ShieldCheck, ShieldX } from "lucide-react"
+import { ArrowLeft, Share2, ShieldCheck, ShieldX } from "lucide-react"
 import { useState } from "react"
 import { Link, useParams } from "react-router"
 
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ContactPanel } from "@/console/components/ContactPanel"
 import { DecisionBadge, ScoreBar } from "@/console/components/DecisionBadge"
+import { LinkGraphPanel } from "@/console/components/LinkGraph"
 import { DecisionDetail } from "@/console/components/DecisionDetail"
 import {
   POLICY_LABELS,
@@ -74,6 +75,23 @@ export function AppealDetailPage() {
                   khả năng lạm dụng kênh khiếu nại.
                 </p>
               )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Share2 className="size-5 text-primary" /> Mạng liên kết tài
+                khoản
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Giúp phân biệt gia đình dùng chung máy (vài tài khoản lâu năm,
+                ít bị hạn chế) với farm (nhiều tài khoản mới tinh cùng một điểm
+                chung).
+              </p>
+            </CardHeader>
+            <CardContent>
+              <LinkGraphPanel userId={a.user_id} />
             </CardContent>
           </Card>
 

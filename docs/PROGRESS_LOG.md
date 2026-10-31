@@ -2,6 +2,20 @@
 
 Ghi mới nhất ở trên cùng.
 
+## 2026-10-31 (ngày 2) — Đồ thị liên kết tài khoản
+**Đã hoàn thành**
+- `GET /api/console/risk/graph/{user_id}` (`risk/graph.py`, SQL chỉ đọc theo ADR-004): từ một tài khoản đi 2 bước qua điểm chung (thiết bị, IP, địa chỉ giao hàng) trong 30 ngày, tối đa 40 tài khoản. Trả về nút, cạnh, mức rủi ro nặng nhất của từng tài khoản, đã bị kết luận lạm dụng hay chưa, kèm tóm tắt cụm. PII được che: email che, IP che, địa chỉ chỉ hiện phường/quận.
+- Component `LinkGraph`: bố trí force-directed tự viết (lực đẩy 1/d², lò xo, kéo về tâm, giảm dần). Mạng lưới bung ra khi mở; kéo thả được nút; rê chuột thì sáng các liên kết của nút đó và hiện thẻ thông tin. Có danh sách thay thế, tôn trọng giảm chuyển động. Gắn vào Case Detail và Appeal Detail.
+- CI: nâng `checkout`/`setup-*` lên v7 (Node 24), cố định `ubuntu-24.04`. CI xanh.
+- 157 test qua.
+
+**Phát hiện (dùng cho báo cáo)**
+- Farm "phân tán" trong thực nghiệm giao về cùng một địa chỉ viết theo 3 kiểu; bộ chuẩn hóa ĐÃ gộp đúng. Nó lọt vì chỉ có một tín hiệu chung (địa chỉ +30, tài khoản mới +10 = 40, dưới ngưỡng 50). Từng tín hiệu riêng lẻ yếu; nhìn cả cụm mới thấy rõ. Đây là lý do cần phân tích liên kết.
+
+**Bước tiếp theo**
+- (Recommended) Đặc trưng "kích thước cụm tài khoản mới cùng dùng voucher", rồi đo lại bằng simulator trên tập test MỚI (seed khác), ghi rõ là luật v2.
+- Dàn ý báo cáo.
+
 ## 2026-10-31 — Dữ liệu demo nhiều ngày, kịch bản demo, CI
 **Đã hoàn thành**
 - `python -m simulator.history --days 14 --yes`: sinh lịch sử demo CỘNG DỒN sau demo reset. Mỗi ngày là một đợt khách theo persona của tập dev, thao tác qua API thật; sau đó dời thời gian theo từng khách về đúng ngày và giờ trong quá khứ (trọng số giờ: trưa và tối đông hơn). Đơn ngày cũ được giả lập giao hàng (kẻ bùng hàng thì giao thất bại). Chỉ chạy khi DEMO_MODE=true. Test `test_demo_history.py` chạy trên CSDL test.

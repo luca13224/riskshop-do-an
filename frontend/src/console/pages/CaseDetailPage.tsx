@@ -1,4 +1,4 @@
-import { ArrowLeft, Link2, ShieldCheck, ShieldX } from "lucide-react"
+import { ArrowLeft, Link2, Share2, ShieldCheck, ShieldX } from "lucide-react"
 import { useState } from "react"
 import { Link, useParams } from "react-router"
 
@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { CaseStatusBadge } from "@/console/components/CaseStatusBadge"
 import { ContactPanel } from "@/console/components/ContactPanel"
 import { DecisionBadge, ScoreBar } from "@/console/components/DecisionBadge"
+import { LinkGraphPanel } from "@/console/components/LinkGraph"
 import { DecisionDetail } from "@/console/components/DecisionDetail"
 import { useMe } from "@/lib/api/auth"
 import {
@@ -117,6 +118,24 @@ export function CaseDetailPage() {
                   <DecisionDetail decision={d} />
                 </div>
               ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Share2 className="size-5 text-primary" /> Mạng liên kết tài
+                khoản
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Các tài khoản dính với khách này qua thiết bị, IP hoặc địa chỉ
+                giao hàng (2 bước, 30 ngày). Từng tín hiệu có thể yếu, nhưng một
+                cụm tài khoản mới cùng hội tụ về vài điểm chung là dấu hiệu farm
+                rõ ràng.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <LinkGraphPanel userId={c.primary_user_id} />
             </CardContent>
           </Card>
 
