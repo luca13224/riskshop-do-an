@@ -16,7 +16,7 @@ export function ShopFooter() {
   useRevealProgress(ref)
 
   return (
-    <footer ref={ref} className="curtain-footer overflow-hidden bg-[#0a0b0f] text-white/60">
+    <footer ref={ref} className="curtain-footer overflow-hidden bg-[#03060c] text-white/60">
       <div className="mx-auto grid max-w-7xl gap-x-8 gap-y-10 px-4 pt-16 pb-10 sm:grid-cols-3 sm:px-6 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
         <div className="sm:col-span-3 lg:col-span-1">
           <Link to="/" className="inline-flex items-center gap-2 text-white" aria-label="RiskShop, về trang chủ">

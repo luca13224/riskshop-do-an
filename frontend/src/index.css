@@ -4,8 +4,8 @@
 @import "@fontsource-variable/geist";
 @import "lenis/dist/lenis.css";
 
-/* Biến thể dark: Console (.console) luôn tối, Shop (.shop) luôn sáng, bất kể chế độ hệ điều hành (ADR-005) */
-@custom-variant dark (&:is(.dark *, .console *):not(.shop, .shop *));
+/* Biến thể dark: Console (.console) và Shop (.shop) đều dùng tông tối, bất kể chế độ hệ điều hành (ADR-007) */
+@custom-variant dark (&:is(.dark *, .console *, .shop *));
 
 @theme inline {
   --font-heading: var(--font-sans);
@@ -135,28 +135,28 @@
   }
 }
 
-/* ---------- Khu vực Shop: luôn tông sáng, bất kể Console đang sáng hay tối ---------- */
+/* ---------- Khu vực Shop: tông navy "rạp chiếu đêm", liền mạch với banner (ADR-007, thay phần màu của ADR-005) ---------- */
 .shop {
-  --background: #ffffff;
-  --foreground: #141414;
-  --card: #ffffff;
-  --card-foreground: #141414;
-  --popover: #ffffff;
-  --popover-foreground: #141414;
-  --primary: #141414;
-  --primary-foreground: #ffffff;
-  /* #f2f2f2: đúng màu nền của ảnh sản phẩm (docs/assets/IMAGE_BRIEF.md) để ảnh hòa vào thẻ */
-  --secondary: #f2f2f2;
-  --secondary-foreground: #141414;
-  --muted: #f2f2f2;
-  --muted-foreground: #6b6b6b;
-  --accent: #f2f2f2;
-  --accent-foreground: #141414;
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: #e7e7e4;
-  --input: #e2e2df;
-  --ring: #8a8a8a;
-  color-scheme: light;
+  --background: #070b14;
+  --foreground: #e9eef7;
+  --card: #0c1220;
+  --card-foreground: #e9eef7;
+  --popover: #0e1524;
+  --popover-foreground: #e9eef7;
+  --primary: #e9eef7;
+  --primary-foreground: #070b14;
+  /* Bề mặt thẻ: navy sáng hơn nền một bậc để thẻ tách khỏi nền mà không cần viền dày */
+  --secondary: #111a2a;
+  --secondary-foreground: #e9eef7;
+  --muted: #111a2a;
+  --muted-foreground: #93a0b6;
+  --accent: #18233a;
+  --accent-foreground: #e9eef7;
+  --destructive: #f2555a;
+  --border: rgba(148, 170, 210, 0.13);
+  --input: rgba(148, 170, 210, 0.2);
+  --ring: #67e8f9;
+  color-scheme: dark;
   background: var(--background);
   color: var(--foreground);
 }
@@ -278,18 +278,6 @@
 .btn-glow:hover {
   translate: 0 -1px;
   filter: brightness(1.12);
-}
-
-/* Header trên nền banner tối: đổi lại các token màu ngay tại header,
-   nhờ vậy mọi nút bên trong (bg-secondary, text-muted-foreground...) tự đổi theo mà không sửa từng nút. */
-.shop .header-dark {
-  --background: #05070b;
-  --foreground: #f4f7fb;
-  --secondary: rgba(255, 255, 255, 0.08);
-  --muted-foreground: rgba(255, 255, 255, 0.6);
-  --border: rgba(255, 255, 255, 0.08);
-  --primary: #ffffff;
-  --primary-foreground: #05070b;
 }
 
 /* Hiệu ứng vào trang: dùng thuộc tính `translate` riêng (không dùng `transform`)

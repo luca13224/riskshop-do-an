@@ -114,3 +114,20 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 - Hệ quả / rủi ro:
   - Kẻ gian có thể khiếu nại để được miễn trừ. Biện pháp giảm thiểu: người kết luận thấy số khiếu nại khác của cùng khách, miễn trừ có hạn 30 ngày, mọi kết luận đều có audit.
   - Miễn trừ theo tài khoản, không theo thiết bị.
+
+## ADR-007: Shop chuyển sang tông navy "rạp chiếu đêm" thống nhất
+- Ngày: 2026-10-31
+- Trạng thái: Accepted (thay phần "Shop tông sáng" của ADR-005; các phần khác của ADR-005 giữ nguyên)
+- Bối cảnh: banner rạp chiếu dùng nền tối, phần còn lại của Shop dùng nền trắng. Khi cuộn xuống, trang chuyển đột ngột từ tối sang trắng, các khối tối (bento, sản phẩm chủ lực, ưu đãi) nằm lọt thỏm trên nền trắng. Luca đánh giá trang "trống trải, lệch lạc" và chọn giữ màu xanh navy của banner.
+- Các phương án:
+  - (1) Giữ nền trắng, chỉ làm mềm đoạn chuyển: vẫn hai "ngôn ngữ" màu trên một trang.
+  - (2) Lai: trang chủ tối, các trang khác (danh mục, chi tiết, giỏ, thanh toán) sáng: đổi trang là đổi tông, cảm giác thiếu nhất quán.
+  - (3) Toàn bộ Shop dùng một bộ token navy, banner liền mạch với phần còn lại.
+- Quyết định: (3).
+  - Token `.shop` đổi sang navy (nền #070b14, bề mặt thẻ #111a2a, chữ #e9eef7, chữ phụ #93a0b6, viền mờ). Màu vàng `buy` vẫn là màu hành động; cyan là màu nhấn.
+  - Biến thể `dark:` áp dụng cho cả `.shop` (các thành phần dùng chung như huy hiệu trạng thái đơn tự lấy màu cho nền tối).
+  - Bỏ hiệu ứng "đèn rạp bật sáng" (lớp trắng phủ banner) và cơ chế header đổi tông khi nằm trên banner, vì không còn cần.
+- Lý do: một bộ màu cho cả cửa hàng; ảnh sản phẩm (ảnh chụp thật) nổi bật hơn trên nền tối; Shop và Risk Console cùng họ màu tối nhưng vẫn phân biệt bằng màu nhấn và mật độ thông tin.
+- Hệ quả / rủi ro:
+  - Phải giữ độ tương phản chữ đạt WCAG AA trên nền tối (đã tính theo công thức WCAG: chữ phụ #93a0b6 đạt 7.45:1 trên nền #070b14 và 6.59:1 trên thẻ #111a2a; chữ chính trên 14:1).
+  - Trang dài trên nền tối dễ "chìm": mỗi chương cần một điểm nhấn ánh sáng (quầng cyan/vàng, viền mờ) thay cho khoảng trắng.

@@ -84,7 +84,7 @@ export function CinemaHero({
   const [front, setFront] = useState<CategoryCode | null>(null) // danh mục đang ở chính giữa
   const [selected, setSelected] = useState<CategoryCode | null>(null) // danh mục người xem đã bấm chọn
   const showing = selected ?? front
-  const sectionRef = useLightsOn()
+  const sectionRef = useRef<HTMLElement>(null)
   useSpotlight(sectionRef)
   const progressRef = useRef<HTMLDivElement>(null) // thanh "đang chiếu", vòng lặp của Ring ghi thẳng vào
 
@@ -99,8 +99,7 @@ export function CinemaHero({
       {/* Nền tối của "phòng chiếu": dừng phía trên, nửa dưới màn hình chiếu chính nằm trên nền trắng */}
       <div
         aria-hidden
-        data-hero-dark // header đo phần tử này để biết lúc nào đang nằm trên nền tối
-        className="absolute inset-x-0 top-0 bottom-40 -z-10 bg-[#05070b] sm:bottom-56"
+        className="absolute inset-0 -z-10 bg-background"
       >
         <div className="absolute inset-0 [background-image:radial-gradient(rgba(255,255,255,.55)_1px,transparent_1px)] [background-size:46px_46px] opacity-[.12]" />
         <div className="absolute inset-x-0 bottom-0 h-2/3 bg-[linear-gradient(180deg,transparent,rgba(25,127,255,.07)_60%,rgba(25,127,255,.04))]" />
@@ -194,42 +193,8 @@ export function CinemaHero({
         onBrowse={onBrowse}
       />
 
-      {/* "Đèn rạp bật sáng": lớp trắng phủ lên banner, đậm dần khi banner cuộn ra khỏi màn hình */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-20 bg-white"
-        style={{ opacity: "var(--lights, 0)" }}
-      />
     </section>
   )
-}
-
-// Cập nhật biến CSS --lights (0 -> 0.9) theo tiến độ cuộn qua banner.
-// Bắt đầu sáng khi đã cuộn qua 30% banner; cập nhật tối đa 1 lần mỗi khung hình.
-function useLightsOn() {
-  const ref = useRef<HTMLElement>(null)
-  useEffect(() => {
-    let raf = 0
-    function update() {
-      raf = 0
-      const el = ref.current
-      if (!el) return
-      const rect = el.getBoundingClientRect()
-      const progress = Math.min(1, Math.max(0, -rect.top / rect.height))
-      const lights = Math.max(0, (progress - 0.3) / 0.7) * 0.9
-      el.style.setProperty("--lights", lights.toFixed(3))
-    }
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update)
-    }
-    update()
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => {
-      window.removeEventListener("scroll", onScroll)
-      cancelAnimationFrame(raf)
-    }
-  }, [])
-  return ref
 }
 
 // Vùng sáng đi theo chuột: ghi vị trí chuột (tính theo banner) vào --mx, --my.
@@ -645,7 +610,7 @@ function MainScreen({
         </div>
 
         {/* "Trang web" bên trong màn hình: nền trắng như shop thật */}
-        <div className="mx-1.5 rounded-t-[14px] bg-white p-4 text-foreground sm:mx-2 sm:p-6">
+        <div className="mx-1.5 rounded-t-[14px] bg-card p-4 text-foreground ring-1 ring-white/5 sm:mx-2 sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[11px] font-medium tracking-widest text-muted-foreground uppercase">

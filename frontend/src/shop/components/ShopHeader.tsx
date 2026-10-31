@@ -19,9 +19,9 @@ import { cn } from "@/lib/utils"
 
 type Panel = "categories" | "search" | "mobile"
 
-// Header của Shop (phần HEAD). Ba hành vi khi cuộn:
-// 1) trên banner tối của trang chủ thì đổi sang tông tối; 2) đã cuộn thì thu thấp lại;
-// 3) cuộn xuống thì ẩn để nhường chỗ cho nội dung, cuộn lên là hiện lại ngay.
+// Header của Shop (phần HEAD). Hai hành vi khi cuộn:
+// 1) đã cuộn thì thu thấp lại và thành kính mờ; 2) cuộn xuống thì ẩn để nhường chỗ cho nội dung,
+// cuộn lên là hiện lại ngay.
 export function ShopHeader() {
   const { data: user } = useMe()
   const logout = useLogout()
@@ -35,7 +35,6 @@ export function ShopHeader() {
     setOpen(panel === p ? null : { panel: p, at: location.key })
   const close = () => setOpen(null)
 
-  const overDark = useHeaderOverDark() && panel === null // mở bảng thì header về tông sáng cho dễ đọc
   const { hidden, scrolled } = useHeaderScroll(panel !== null)
 
   // Esc để đóng bảng đang mở
@@ -71,7 +70,6 @@ export function ShopHeader() {
           scrolled || panel
             ? "bg-background/80 shadow-[0_8px_30px_-20px_rgba(0,0,0,.35)] backdrop-blur-xl"
             : "bg-background",
-          overDark && "header-dark"
         )}
         onMouseLeave={panel === "categories" ? hoverLeave : undefined}
       >
@@ -234,7 +232,7 @@ function CategoriesPanel({
             </li>
           ))}
         </ul>
-        <div className="relative isolate hidden overflow-hidden rounded-2xl bg-[#05070b] p-5 text-white lg:block">
+        <div className="relative isolate hidden overflow-hidden rounded-2xl bg-[#0a1120] p-5 text-white ring-1 ring-white/[.07] lg:block">
           <div
             aria-hidden
             className="absolute inset-0 -z-10 bg-[radial-gradient(70%_80%_at_100%_0%,rgba(255,214,10,.25),transparent_60%),radial-gradient(60%_70%_at_0%_100%,rgba(80,200,255,.2),transparent_60%)]"
@@ -453,39 +451,6 @@ function HeaderLink({ to, plain, children }: { to: string; plain?: boolean; chil
       {children}
     </NavLink>
   )
-}
-
-// Header có đang nằm trên phần nền tối của banner trang chủ không (để đổi sang giao diện tối).
-function useHeaderOverDark(): boolean {
-  const { pathname } = useLocation()
-  const [overDark, setOverDark] = useState(false)
-  useEffect(() => {
-    if (pathname !== "/") return
-    let raf = 0
-    function update() {
-      raf = 0
-      const dark = document.querySelector("[data-hero-dark]")
-      const header = document.querySelector("header")
-      if (!dark || !header) return setOverDark(false)
-      // Tối khi phần nền tối còn nằm dưới header VÀ "đèn rạp" chưa bật quá 1/3 (xem useLightsOn ở CinemaHero)
-      const hero = document.getElementById("hero")
-      const lights = hero ? Number(getComputedStyle(hero).getPropertyValue("--lights") || 0) : 0
-      setOverDark(
-        dark.getBoundingClientRect().bottom > header.getBoundingClientRect().bottom && lights < 0.3
-      )
-    }
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update)
-    }
-    raf = requestAnimationFrame(update)
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => {
-      window.removeEventListener("scroll", onScroll)
-      cancelAnimationFrame(raf)
-      setOverDark(false)
-    }
-  }, [pathname])
-  return pathname === "/" && overDark
 }
 
 // Theo dõi hướng cuộn: scrolled = đã rời đầu trang; hidden = đang cuộn xuống (đủ xa đầu trang).

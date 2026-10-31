@@ -59,7 +59,7 @@ export function CatalogPage() {
       </nav>
 
       {/* Dải đầu trang: ảnh danh mục mờ phía sau tiêu đề */}
-      <header className="relative isolate mt-5 overflow-hidden rounded-[2rem] bg-[#0b0d12] px-6 py-10 text-white sm:px-10 sm:py-14">
+      <header className="relative isolate mt-5 overflow-hidden rounded-[2rem] bg-[#0b1322] px-6 ring-1 ring-white/[.06] py-10 text-white sm:px-10 sm:py-14">
         {category && (
           <img
             key={category.code}
@@ -169,7 +169,7 @@ function Chip({ to, active, children }: { to: string; active: boolean; children:
       to={to}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "shrink-0 rounded-full bg-secondary px-4 py-2 text-sm whitespace-nowrap transition hover:bg-[#e8e8e5]",
+        "shrink-0 rounded-full bg-secondary px-4 py-2 text-sm whitespace-nowrap transition hover:bg-accent",
         active && "bg-foreground text-background hover:bg-foreground/90"
       )}
     >

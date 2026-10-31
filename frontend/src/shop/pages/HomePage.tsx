@@ -216,7 +216,7 @@ function GlowCard({ dark, className, children }: { dark?: boolean; className?: s
       onPointerMove={onMove}
       className={cn(
         "glow-card group flex flex-col overflow-hidden rounded-[1.75rem] p-6 transition duration-500 hover:-translate-y-1 sm:p-8",
-        dark ? "bg-[#0b0d12] text-white" : "bg-secondary",
+        dark ? "bg-[linear-gradient(160deg,#10203a,#080d18_70%)] text-white ring-1 ring-cyan-300/10" : "bg-secondary ring-1 ring-white/[.04]",
         className
       )}
     >
@@ -274,7 +274,7 @@ function FlagshipStory() {
     <section
       ref={ref}
       aria-labelledby="chu-luc"
-      className="relative mx-[calc(50%-50vw)] h-[260vh] bg-[#05070b] text-white motion-reduce:h-auto"
+      className="relative mx-[calc(50%-50vw)] h-[260vh] bg-[linear-gradient(180deg,var(--background),#03060c_12%,#03060c_88%,var(--background))] text-white motion-reduce:h-auto"
       style={{ "--p": 0 } as CSSProperties}
     >
       <div className="sticky top-0 flex h-svh items-center overflow-hidden motion-reduce:static motion-reduce:h-auto motion-reduce:py-20">
@@ -316,7 +316,7 @@ function FlagshipStory() {
           </div>
           <div className="order-1 md:order-2">
             <div
-              className="mx-auto aspect-square w-[min(72vw,30rem)] overflow-hidden rounded-[2rem] bg-[#f2f2f2] shadow-[0_40px_120px_-30px_rgba(80,200,255,.45)] motion-reduce:scale-100! md:w-full md:max-w-xl"
+              className="mx-auto aspect-square w-[min(72vw,30rem)] overflow-hidden rounded-[2rem] bg-secondary shadow-[0_40px_120px_-30px_rgba(80,200,255,.45)] motion-reduce:scale-100! md:w-full md:max-w-xl"
               style={{ scale: "calc(0.78 + var(--p) * 0.26)", rotate: "calc((1 - var(--p)) * -4deg)" }}
             >
               {p ? (
@@ -435,7 +435,7 @@ function OfferCta() {
       variant="zoom"
       id="uu-dai"
       aria-labelledby="uu-dai-title"
-      className="relative isolate scroll-mt-24 overflow-hidden rounded-[2.5rem] bg-[#05070b] px-6 py-14 text-white sm:px-12 sm:py-20"
+      className="relative isolate scroll-mt-24 overflow-hidden rounded-[2.5rem] bg-[#0a1120] px-6 ring-1 ring-white/[.07] py-14 text-white sm:px-12 sm:py-20"
     >
       <div aria-hidden className="absolute inset-0 -z-10">
         <span className="absolute -top-24 -left-16 size-80 rounded-full bg-cyan-400/30 blur-3xl motion-safe:animate-[drift-blob_14s_ease-in-out_infinite]" />

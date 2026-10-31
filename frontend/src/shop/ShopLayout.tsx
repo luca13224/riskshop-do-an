@@ -18,13 +18,13 @@ export function ShopLayout() {
       <ShopSeo />
       <div
         data-curtain
-        className="curtain-content flex flex-1 flex-col bg-background pb-20 shadow-[0_30px_60px_-30px_rgba(0,0,0,.45)] md:rounded-b-[2.5rem] md:pb-28"
+        className="curtain-content flex flex-1 flex-col border-b border-white/[.06] bg-background pb-20 shadow-[0_40px_80px_-30px_rgba(0,0,0,.9)] md:rounded-b-[2.5rem] md:pb-28"
       >
         {/* Trang chủ mở đầu bằng "phòng chiếu" tối, nên thanh thông báo cũng tối theo (nhấn cyan, ADR-005) */}
         <p
           className={cn(
             "px-4 py-2 text-center text-xs font-medium sm:text-sm",
-            isHome ? "border-b border-white/5 bg-[#05070b] text-white/70" : "bg-buy text-buy-foreground"
+            isHome ? "border-b border-white/5 bg-background text-white/70" : "bg-buy text-buy-foreground"
           )}
         >
           Khách mới nhập mã <b className={isHome ? "text-cyan-300" : undefined}>TANTHU</b> giảm 50.000đ cho
