@@ -1,0 +1,236 @@
+{
+  "run_id": 1,
+  "dataset": "test_v2",
+  "seed": 3,
+  "scale": 1.0,
+  "rules_fingerprint": "86d43d9a06f10b0d100951c0137470863cd0d237a4b4eb16a17caabce471ea22",
+  "disabled_rules": [
+    "ADDR_VOUCHER_RING"
+  ],
+  "confusion": {
+    "TP": 55,
+    "FP": 18,
+    "TN": 282,
+    "FN": 96
+  },
+  "precision": {
+    "k": 55,
+    "n": 73,
+    "value": 0.7534,
+    "ci95": [
+      0.6436,
+      0.838
+    ]
+  },
+  "recall": {
+    "k": 55,
+    "n": 151,
+    "value": 0.3642,
+    "ci95": [
+      0.2917,
+      0.4435
+    ]
+  },
+  "fpr": {
+    "k": 18,
+    "n": 300,
+    "value": 0.06,
+    "ci95": [
+      0.0383,
+      0.0928
+    ]
+  },
+  "fpr_normal": {
+    "k": 0,
+    "n": 190,
+    "value": 0.0,
+    "ci95": [
+      0.0,
+      0.0198
+    ]
+  },
+  "fpr_hard_negative": {
+    "k": 18,
+    "n": 110,
+    "value": 0.1636,
+    "ci95": [
+      0.1061,
+      0.2439
+    ]
+  },
+  "recall_seen_variants": {
+    "k": 55,
+    "n": 111,
+    "value": 0.4955,
+    "ci95": [
+      0.4042,
+      0.5871
+    ]
+  },
+  "recall_unseen_variants": {
+    "k": 0,
+    "n": 40,
+    "value": 0.0,
+    "ci95": [
+      0.0,
+      0.0876
+    ]
+  },
+  "per_persona": {
+    "cod_bomber": {
+      "n": 15,
+      "flagged": 13,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.8667
+    },
+    "cod_hoarder": {
+      "n": 6,
+      "flagged": 0,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.0
+    },
+    "family": {
+      "n": 49,
+      "flagged": 8,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "rate": 0.1633
+    },
+    "farm": {
+      "n": 58,
+      "flagged": 42,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.7241
+    },
+    "farm_multi_drop": {
+      "n": 40,
+      "flagged": 0,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": true,
+      "rate": 0.0
+    },
+    "farm_spread": {
+      "n": 32,
+      "flagged": 0,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.0
+    },
+    "loyal": {
+      "n": 40,
+      "flagged": 0,
+      "is_abuse": false,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.0
+    },
+    "new_high_value": {
+      "n": 10,
+      "flagged": 10,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "rate": 1.0
+    },
+    "normal_new": {
+      "n": 150,
+      "flagged": 0,
+      "is_abuse": false,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.0
+    },
+    "repeat_buyer": {
+      "n": 10,
+      "flagged": 0,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "rate": 0.0
+    },
+    "roommates_4g": {
+      "n": 41,
+      "flagged": 0,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "rate": 0.0
+    }
+  },
+  "group_recall": {
+    "cod_bomber": {
+      "caught": 13,
+      "groups": 15
+    },
+    "farm": {
+      "caught": 8,
+      "groups": 8
+    },
+    "farm_spread": {
+      "caught": 0,
+      "groups": 5
+    },
+    "cod_hoarder": {
+      "caught": 0,
+      "groups": 6
+    },
+    "farm_multi_drop": {
+      "caught": 0,
+      "groups": 5
+    }
+  },
+  "business": {
+    "vouchers_redeemed_by_abuse": 88,
+    "vouchers_redeemed_by_legit": 131,
+    "cod_orders_by_persona": {
+      "cod_bomber:CONFIRMED": 2,
+      "cod_hoarder:CONFIRMED": 20,
+      "family:CONFIRMED": 28,
+      "loyal:CONFIRMED": 40,
+      "new_high_value:PENDING_REVIEW": 2,
+      "normal_new:CONFIRMED": 75,
+      "repeat_buyer:CONFIRMED": 40,
+      "roommates_4g:CONFIRMED": 24
+    }
+  },
+  "risk_latency_ms": {
+    "n": 993,
+    "p50": 8.39,
+    "p95": 11.11,
+    "p99": 13.94
+  },
+  "runtime": {
+    "seconds": 96.3,
+    "steps": 2346,
+    "server_errors": []
+  },
+  "request_ms": {
+    "payment_options": {
+      "n": 252,
+      "p50": 24.35,
+      "p95": 29.34,
+      "p99": 35.21
+    },
+    "place_order": {
+      "n": 472,
+      "p50": 36.93,
+      "p95": 44.74,
+      "p99": 49.96
+    },
+    "voucher_apply": {
+      "n": 311,
+      "p50": 33.63,
+      "p95": 38.98,
+      "p99": 44.12
+    }
+  }
+}

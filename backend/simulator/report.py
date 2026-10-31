@@ -12,6 +12,8 @@ PERSONA_LABELS = {
     "cod_bomber": "Bùng hàng COD",
     "farm_spread": "Farm phân tán (mỗi tài khoản một máy, đổi IP)",
     "cod_hoarder": "Tài khoản mới treo nhiều đơn COD",
+    "roommates_4g": "Nhóm ở trọ chung nhà, mỗi người 4G riêng",
+    "farm_multi_drop": "Farm phân tán gom hàng về 2–3 điểm nhận",
 }
 
 
@@ -28,7 +30,8 @@ def render_markdown(m: dict) -> str:
         f"# Kết quả mô phỏng: tập {m['dataset']} (seed {m['seed']}, scale {m['scale']:g})",
         "",
         f"> Tạo lúc {utcnow():%Y-%m-%d %H:%M} UTC · Lần chạy #{m['run_id']} · "
-        f"Dấu vân tay bộ luật: `{m['rules_fingerprint'][:16]}…`",
+        f"Dấu vân tay bộ luật: `{m['rules_fingerprint'][:16]}…`"
+        + (f" · Luật bị tắt: {', '.join(m['disabled_rules'])}" if m.get("disabled_rules") else ""),
         "> **Toàn bộ dữ liệu là mô phỏng.** Kết quả phản ánh giả định của bộ mô phỏng (`backend/simulator/personas.py`),"
         " không chứng minh hiệu quả trên sàn thật.",
         "",

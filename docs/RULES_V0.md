@@ -13,6 +13,10 @@ Những điểm dưới đây được điều chỉnh khi lập trình Risk Eng
 - **Lúc đặt hàng bị hạn chế:** không tạo đơn, hoàn tác giữ chỗ tồn kho, nhưng vẫn lưu quyết định để truy vết.
 - **R07** mặc định độ mạnh "vừa"; chỉ bậc ≥ 0,30 là "mạnh". **R08** bậc 3 triệu "vừa", bậc 5 triệu "mạnh".
 
+## 0b. Bộ luật v2 (2026-10-31, ADR-008)
+- Thêm **F12** `new_accounts_on_address_7d`, **F13** `address_ip_diversity_7d` và luật **R11** `ADDR_VOUCHER_RING` (mục 2, 3).
+- Thiết kế, hiệu chỉnh và lý do chọn ngưỡng: `docs/reviews/2026-10-31_RISK_V2_DESIGN.md`. Kết quả: `TEST_PLAN.md` mục 3c.
+
 ## 1. Ba điểm kiểm soát (evaluation context)
 
 | Context | Khi nào gọi | Quyết định có thể trả | Ghi chú |
@@ -38,6 +42,8 @@ Mọi đặc trưng được tính **tại thời điểm đánh giá**, chỉ t
 | F09 | `delivered_orders` | Tổng số đơn giao thành công (mọi phương thức) | Dùng cho luật tích cực |
 | F10 | `open_cod_orders` | Số đơn COD đang chờ giao (chưa kết thúc, chưa hủy) | |
 | F11 | `order_value` | Tổng giá trị đơn (VND) sau giảm giá | |
+| F12 | `new_accounts_on_address_7d` (v2) | Số tài khoản khách **mới (< 7 ngày)** có địa chỉ chuẩn hóa trùng địa chỉ đơn này trong 7 ngày, tính cả hiện tại | Chỉ có ở `place_order` |
+| F13 | `address_ip_diversity_7d` (v2) | Số IP khác nhau các tài khoản ở F12 đã dùng trong 7 ngày ÷ F12 | Gần 1: mỗi người một mạng; thấp: chung Wi-Fi. **Không phân biệt** được nhóm dùng 4G riêng với farm |
 
 ## 3. Danh sách luật
 
@@ -56,6 +62,7 @@ Mọi đặc trưng được tính **tại thời điểm đánh giá**, chỉ t
 | R07 | `COD_FAIL_RATE` | payment_options, place_order (COD) | F07 `cod_finished` ≥ 3 **và** F08 ≥ 0,30 → +45; F08 ≥ 0,20 → +25 | +45 / +25 | **S** (bậc 0,30) / M | Lịch sử bùng hàng là căn cứ trực tiếp nhất cho rủi ro COD | Khách gặp sự cố giao hàng thật (giảm thiểu: làm mượt + tối thiểu 3 đơn) |
 | R08 | `COD_HIGH_VALUE_LOW_HISTORY` | place_order (COD) | F11 ≥ 3.000.000đ **và** F09 < 2 → +40; F11 ≥ 5.000.000đ **và** F09 < 2 → +70 | +40 / +70 | M / **S** (bậc 5 triệu) | Đơn COD giá trị cao từ người chưa có lịch sử: thiệt hại lớn nếu bùng | Khách mới mua món đắt thật (được giữ đơn và gọi xác minh, không bị chặn) |
 | R09 | `GOOD_HISTORY` (luật tích cực) | payment_options, place_order | F09 ≥ 10 **và** tỷ lệ thất bại thực ≤ 5% | **−30** | — | Ghi nhận khách uy tín, giảm chặn nhầm | — (đây là luật giảm chặn nhầm cho **V5.2, V5.3**) |
+| R11 | `ADDR_VOUCHER_RING` (v2) | place_order | Voucher tân thủ **và** F12 ≥ 5 **và** F13 ≥ 0,75 | +25 | M | Farm phân tán: nhiều tài khoản mới cùng nhà nhưng mỗi người một mạng | **Nhóm ở trọ dùng 4G riêng** (≈15% bị gỡ voucher trên tập test v2); giảm thiểu: chỉ gỡ voucher, khiếu nại được |
 | R10 | `COD_OPEN_ORDERS` | payment_options, place_order (COD) | F10 ≥ 3 | +25 | M | "Treo" nhiều đơn COD cùng lúc (từ kịch bản 4 của đề cương) | Khách mua nhiều đợt khuyến mãi liền nhau |
 
 Ngưỡng tiền (3 triệu, 5 triệu) là **giả định** cho shop mô phỏng [XM], cấu hình được.

@@ -19,6 +19,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.config import BACKEND_DIR, get_settings
 from app.core.db import make_engine
+from simulator.personas import DATASETS
 from simulator.report import render_markdown
 from simulator.runner import run
 
@@ -30,10 +31,12 @@ def main() -> int:
     sys.stderr.reconfigure(encoding="utf-8")
     logging.getLogger("httpx").setLevel(logging.WARNING)  # bỏ log từng request
     parser = argparse.ArgumentParser(description="Bộ mô phỏng đánh giá Risk Engine")
-    parser.add_argument("--dataset", choices=["dev", "test"], default="dev")
+    parser.add_argument("--dataset", choices=sorted(DATASETS), default="dev")
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--scale", type=float, default=1.0, help="nhân số lượng persona (ví dụ 0.3 để chạy nhanh)")
     parser.add_argument("--confirm-test", action="store_true", help="xác nhận đã khóa luật trước khi chạy tập test")
+    parser.add_argument("--disable-rule", action="append", default=[], metavar="CODE",
+                        help="tắt một luật theo mã (lặp lại được), ví dụ để chạy bộ luật v1 trên tập test_v2")
     args = parser.parse_args()
 
     url = get_settings().sim_database_url
@@ -41,15 +44,17 @@ def main() -> int:
         print("Thiếu SIM_DATABASE_URL (phải trỏ tới CSDL riêng có chữ 'sim', vì mô phỏng sẽ XÓA dữ liệu).",
               file=sys.stderr)
         return 1
-    if args.dataset == "test" and not args.confirm_test:
+    if args.dataset.startswith("test") and not args.confirm_test:
         print("Tập test chỉ chạy sau khi đã khóa luật. Chạy lại kèm --confirm-test nếu chắc chắn.", file=sys.stderr)
         return 1
 
     session_factory = sessionmaker(bind=make_engine(url), autoflush=False, expire_on_commit=False)
-    result = run(session_factory, args.dataset, args.seed, args.scale)
+    result = run(session_factory, args.dataset, args.seed, args.scale, disable_rules=tuple(args.disable_rule))
 
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     stem = f"{args.dataset}_seed{args.seed}_scale{args.scale:g}"
+    if args.disable_rule:
+        stem += "_without-" + "-".join(sorted(args.disable_rule))
     (REPORT_DIR / f"{stem}.json").write_text(json.dumps(result, ensure_ascii=False, indent=2, default=str),
                                              encoding="utf-8")
     (REPORT_DIR / f"{stem}.md").write_text(render_markdown(result), encoding="utf-8")

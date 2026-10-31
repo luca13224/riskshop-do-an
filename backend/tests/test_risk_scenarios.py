@@ -123,6 +123,59 @@ def test_family_sharing_wifi_and_address_is_allowed(shop, db):
     assert hit_codes(db, d) == {"VCH_NEW_ACCOUNT", "IP_MULTI_NEW_ACCOUNTS", "ADDR_MULTI_ACCOUNTS"}
 
 
+# ---------- Bộ luật v2: farm phân tán (mỗi tài khoản một máy, một mạng, cùng một nhà) ----------
+
+def spread_member(i: int) -> TestClient:
+    c = customer(f"spread{i}@example.com", f"device-spread-{i:04d}", ip=f"192.0.2.{10 + i}")
+    browse(c)
+    c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
+    assert c.post("/api/cart/voucher", json={"code": "TANTHU"}).status_code == 200  # lúc áp mã chưa có địa chỉ
+    return c
+
+
+def test_spread_farm_caught_from_fifth_account(shop, db):
+    for i in range(1, 5):
+        assert checkout(spread_member(i), PREPAID).status_code == 201
+    d4 = last_decision(db, "spread4@example.com")
+    # Thứ 4: chưa đủ ngưỡng cụm (F12 = 4 < 5) -> chỉ R01 + R03 bậc 3 = 30, vẫn cho phép
+    assert d4.decision == "ALLOW" and "ADDR_VOUCHER_RING" not in hit_codes(db, d4)
+
+    r = checkout(spread_member(5), PREPAID)
+    assert r.status_code == 409 and r.json()["error"]["code"] == "VOUCHER_NOT_APPLICABLE"
+    assert "địa chỉ" not in r.json()["error"]["message"]  # không lộ luật cho khách
+    d5 = last_decision(db, "spread5@example.com")
+    assert d5.features_snapshot["new_accounts_on_address_7d"] == 5
+    assert d5.features_snapshot["address_ip_diversity_7d"] == 1.0
+    # R01 (+10) + R03 bậc 5 (+30) + R11 (+25) = 65 >= 50 -> gỡ voucher (v1 chỉ có 40, lọt)
+    assert d5.decision == "ALLOW_WITH_RESTRICTION" and d5.score == 65
+    assert hit_codes(db, d5) == {"VCH_NEW_ACCOUNT", "ADDR_MULTI_ACCOUNTS", "ADDR_VOUCHER_RING"}
+
+
+def test_spread_rule_ignores_orders_without_new_user_voucher(shop, db):
+    for i in range(1, 6):
+        c = customer(f"noncoupon{i}@example.com", f"device-nc-{i:04d}", ip=f"192.0.2.{50 + i}")
+        browse(c)
+        c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
+        assert checkout(c, PREPAID).status_code == 201
+    d = last_decision(db, "noncoupon5@example.com")
+    assert d.features_snapshot["new_accounts_on_address_7d"] == 5
+    assert "ADDR_VOUCHER_RING" not in hit_codes(db, d)
+
+
+def test_family_low_network_diversity_not_hit_by_spread_rule(shop, db):
+    for i in range(1, 6):
+        c = customer(f"nha{i}@example.com", f"device-nha-{i:04d}", ip="198.51.100.9")
+        browse(c)
+        c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
+        c.post("/api/cart/voucher", json={"code": "TANTHU"})
+        # Người 1–4 đặt được; người thứ 5 bị gỡ voucher (409) bởi luật v1, không phải R11
+        assert checkout(c, PREPAID).status_code == (201 if i < 5 else 409)
+    d = last_decision(db, "nha5@example.com")
+    assert d.features_snapshot["address_ip_diversity_7d"] == 0.2  # 1 mạng / 5 tài khoản
+    # R11 không khớp. (Người thứ 5 vẫn bị gỡ voucher do R01+R03+R04 = 50: giới hạn đã biết của v1, không đổi.)
+    assert "ADDR_VOUCHER_RING" not in hit_codes(db, d)
+
+
 # ---------- Cảnh 5: COD ----------
 
 def test_khang_cod_hidden_and_rejected_but_prepaid_ok(shop, db):

@@ -46,6 +46,35 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
 
+## 3c. Bộ luật v2 (R11) trên tập dữ liệu mới (2026-10-31, ADR-008)
+Lệnh:
+```
+.venv/Scripts/python -m simulator --dataset dev_v2 --seed 1 [--disable-rule ADDR_VOUCHER_RING]
+.venv/Scripts/python -m simulator --dataset test_v2 --seed 3 --confirm-test [--disable-rule ADDR_VOUCHER_RING]
+```
+- `dev_v2`/`test_v2` thêm: farm phân tán (giờ là kiểu **đã biết**), hard negative mới "nhóm ở trọ dùng 4G riêng", và ở test một **biến thể chưa biết mới** "farm gom hàng về 2–3 điểm nhận" (định nghĩa trước khi chạy, không tinh chỉnh theo nó). Mỗi farm một địa chỉ riêng (bộ v1 vô tình cho mọi farm chung một địa chỉ).
+- Ngưỡng R11 chọn trên dev_v2 (xem thiết kế, mục 9). Bộ luật v2 khóa với dấu vân tay `1d9f87d5a9d57e9a…`; chạy "v1" bằng cách tắt R11 trên cùng dân số (`86d43d9a06f10b0d…`).
+
+| Chỉ số (tập test_v2, seed 3, 451 tài khoản) | v1 (không R11) | v2 (có R11) |
+|---|---|---|
+| Precision | 75,3% (55/73) | 73,6% (67/91) |
+| Recall tất cả | 36,4% (55/151) | 44,4% (67/151) |
+| Farm phân tán (kiểu đã biết) | 0% (0/32) | 37,5% (12/32) |
+| Farm gom về nhiều điểm (chưa biết mới) | 0% (0/40) | 0% (0/40) |
+| FPR khách thông thường | 0% (0/190) | 0% (0/190) |
+| FPR hard negative | 16,4% (18/110) | 21,8% (24/110) |
+| — trong đó nhóm trọ 4G | 0% (0/41) | 14,6% (6/41) |
+| Độ trễ request đặt hàng p95 (toàn bộ API) | 44,7 ms | 44,5 ms |
+
+Chi tiết và KTC 95%: [test v2](experiments/test_v2_seed3_scale1.md), [test v1 trên cùng dân số](experiments/test_v2_seed3_scale1_without-ADDR_VOUCHER_RING.md), [dev v2](experiments/dev_v2_seed1_scale1.md).
+
+### Đọc kết quả (trung thực)
+- R11 bắt được hơn 1/3 farm phân tán mà v1 bỏ lọt hoàn toàn; 4 tài khoản đầu của mỗi farm vẫn lọt (chưa đủ dấu vết cụm).
+- Cái giá: 6 trên 41 người trong nhóm ở trọ dùng 4G riêng bị gỡ voucher nhầm. Với dữ liệu hiện có, độ phân tán mạng **không phân biệt** được nhóm này với farm.
+- Biến thể chưa biết mới (chia nhỏ cụm ra 2–3 điểm nhận) lọt 100%: luật theo ngưỡng luôn có cách né bằng cách ở dưới ngưỡng. Đây là lý do hướng phát triển là học máy trên đồ thị khi có dữ liệu thật.
+- Độ trễ request p95 ở lần chạy này (~44 ms, đo cả request API trong tiến trình mô phỏng) không so trực tiếp được với "độ trễ chấm điểm p95" của v1 (chỉ phần Risk Engine); giữa hai lần chạy cùng ngày, R11 không làm tăng độ trễ đo được.
+- Tài khoản "bùng hàng COD" và "treo nhiều đơn COD" không đổi, vì R11 chỉ thuộc chính sách voucher.
+
 ## 3b. Kiểm thử thủ công giao diện (2026-10-31, sau khi chuyển Shop sang tông navy, ADR-007)
 Chạy trên trình duyệt tích hợp, tài khoản khách Minh (dữ liệu demo), độ rộng 1440 px và 375 px.
 

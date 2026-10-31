@@ -41,6 +41,28 @@ DATASETS: dict[str, dict] = {
     },
 }
 
+# ---- Bộ dữ liệu cho bộ luật v2 (2026-10-31). Giữ nguyên "dev"/"test" ở trên để kết quả v1 tái lập được. ----
+# farm_spread giờ là kiểu ĐÃ BIẾT (đã thấy ở test v1, R11 được thiết kế cho nó) nên nằm cả ở dev_v2 để hiệu chỉnh.
+# roommates_4g: hard negative MỚI, nhóm ở trọ chung nhà, mỗi người dùng 4G riêng (độ phân tán mạng cao như farm).
+# farm_multi_drop: biến thể CHƯA BIẾT MỚI, định nghĩa trước khi chạy và không tinh chỉnh theo nó:
+# farm phân tán nhưng gom hàng về 2–3 điểm nhận khác nhau, nên mỗi địa chỉ chỉ có vài tài khoản.
+# per_group_address: mỗi farm một địa chỉ riêng (ở dev/test v1, mọi farm cùng loại vô tình giao về MỘT địa chỉ,
+# khiến các farm độc lập gộp thành một cụm lớn, dễ phát hiện hơn thực tế).
+DATASETS["dev_v2"] = {
+    **DATASETS["dev"],
+    "farm": {**DATASETS["dev"]["farm"], "per_group_address": True},
+    "farm_spread": {"n": 4, "accounts": (4, 7), "unseen": False, "per_group_address": True},
+    "roommates_4g": {"n": 6, "size": (3, 6)},
+}
+DATASETS["test_v2"] = {
+    **DATASETS["test"],
+    "farm": {**DATASETS["test"]["farm"], "per_group_address": True},
+    "farm_spread": {"n": 5, "accounts": (5, 8), "unseen": False, "per_group_address": True},
+    "cod_hoarder": {"n": 6, "orders": (3, 4), "unseen": False},  # đã thấy ở test v1, v2 chưa xử lý
+    "roommates_4g": {"n": 8, "size": (3, 6)},
+    "farm_multi_drop": {"n": 5, "accounts": (6, 9), "drops": (2, 3)},
+}
+
 FARM_ADDRESS_VARIANTS = [
     "Số 5 Ngõ 12 Láng Hạ", "so 05 ngo 12 lang ha", "5, Ngõ 12, Láng Hạ", "Số 05 - Ngõ 12 Láng Hạ",
 ]
@@ -178,9 +200,10 @@ def build_population(dataset: str, rng: random.Random, scale: float, actions) ->
         members = [acc("farm", f"farm{g}", True, device=devices[i % n_dev], ip=_ip(rng) if rotate else base_ip)
                    for i in range(rng.randint(*p["accounts"]))]
         grp = Group(f"farm{g}", members)
+        variants = _drop_variants(g, "Láng Hạ") if p.get("per_group_address") else FARM_ADDRESS_VARIANTS
         for a in members:
             addr = {**_address(rng, "Farm"), "district": "Ba Đình", "province": "Hà Nội", "ward": "Thành Công",
-                    "line": rng.choice(FARM_ADDRESS_VARIANTS) if p["address_variants"] else FARM_ADDRESS_VARIANTS[0]}
+                    "line": rng.choice(variants) if p["address_variants"] else variants[0]}
             grp.steps += [lambda a=a: actions.register(a), lambda a=a: actions.add(a, "AU-001", 1),
                           lambda a=a: actions.voucher(a, "TANTHU"),
                           lambda a=a, ad=addr: actions.checkout_if_voucher(a, ad)]
@@ -202,19 +225,21 @@ def build_population(dataset: str, rng: random.Random, scale: float, actions) ->
     # ---- Biến thể chưa biết (chỉ tập test) ----
     if "farm_spread" in cfg:
         for g in range(n_of("farm_spread")):
-            members = [acc("farm_spread", f"farm_spread{g}", True, unseen=True)
+            members = [acc("farm_spread", f"farm_spread{g}", True, unseen=cfg["farm_spread"].get("unseen", True))
                        for _ in range(rng.randint(*cfg["farm_spread"]["accounts"]))]
             grp = Group(f"farm_spread{g}", members)
+            variants = (_drop_variants(100 + g, "Khương Mai") if cfg["farm_spread"].get("per_group_address")
+                        else ["Số 9 Ngõ 3 Khương Mai", "so 09 ngo 3 khuong mai", "9, Ngõ 3, Khương Mai"])
             for a in members:
                 addr = {**_address(rng, "Farm"), "district": "Thanh Xuân", "province": "Hà Nội", "ward": "Khương Mai",
-                        "line": rng.choice(["Số 9 Ngõ 3 Khương Mai", "so 09 ngo 3 khuong mai", "9, Ngõ 3, Khương Mai"])}
+                        "line": rng.choice(variants)}
                 grp.steps += [lambda a=a: actions.register(a), lambda a=a: actions.view(a, "AU-001"),
                               lambda a=a: actions.add(a, "AU-001", 1), lambda a=a: actions.voucher(a, "TANTHU"),
                               lambda a=a, ad=addr: actions.checkout_if_voucher(a, ad)]
             groups.append(grp)
     if "cod_hoarder" in cfg:
         for g in range(n_of("cod_hoarder")):
-            a = acc("cod_hoarder", f"cod_hoarder{g}", True, unseen=True)
+            a = acc("cod_hoarder", f"cod_hoarder{g}", True, unseen=cfg["cod_hoarder"].get("unseen", True))
             addr = _address(rng, a.key)
             steps = [lambda a=a: actions.register(a), lambda a=a: actions.view(a, rng.choice(MID))]
             for _ in range(rng.randint(*cfg["cod_hoarder"]["orders"])):
@@ -222,4 +247,39 @@ def build_population(dataset: str, rng: random.Random, scale: float, actions) ->
                           lambda a=a, ad=addr: actions.checkout(a, ad, cod=True, abandon_if_no_cod=True)]
             groups.append(Group(a.group, [a], steps))
 
+    # ---- Bộ v2 ----
+    if "roommates_4g" in cfg:  # hard negative: chung nhà, mỗi người một máy và một mạng 4G riêng
+        for g in range(n_of("roommates_4g")):
+            addr = _address(rng, f"NhaTro{g}")
+            members = [acc("roommates_4g", f"roommates_4g{g}", False, hard_negative=True)
+                       for _ in range(rng.randint(*cfg["roommates_4g"]["size"]))]
+            grp = Group(f"roommates_4g{g}", members)
+            for a in members:
+                grp.steps += [lambda a=a: actions.register(a), lambda a=a: actions.view(a, rng.choice(CHEAP)),
+                              lambda a=a: actions.add(a, rng.choice(CHEAP), 1),
+                              lambda a=a: actions.voucher(a, "TANTHU"),
+                              lambda a=a, ad=addr: actions.checkout(a, ad, cod=rng.random() < 0.5,
+                                                                    abandon_if_no_cod=False)]
+            groups.append(grp)
+    if "farm_multi_drop" in cfg:  # biến thể chưa biết: farm phân tán, gom hàng về 2–3 điểm nhận
+        p = cfg["farm_multi_drop"]
+        for g in range(n_of("farm_multi_drop")):
+            drops = [_drop_variants(200 + g * 10 + k, "Hoàng Mai")[0] for k in range(rng.randint(*p["drops"]))]
+            members = [acc("farm_multi_drop", f"farm_multi_drop{g}", True, unseen=True)
+                       for _ in range(rng.randint(*p["accounts"]))]
+            grp = Group(f"farm_multi_drop{g}", members)
+            for i, a in enumerate(members):
+                addr = {**_address(rng, "Farm"), "district": "Hoàng Mai", "province": "Hà Nội", "ward": "Mai Động",
+                        "line": drops[i % len(drops)]}
+                grp.steps += [lambda a=a: actions.register(a), lambda a=a: actions.view(a, "AU-001"),
+                              lambda a=a: actions.add(a, "AU-001", 1), lambda a=a: actions.voucher(a, "TANTHU"),
+                              lambda a=a, ad=addr: actions.checkout_if_voucher(a, ad)]
+            groups.append(grp)
+
     return groups
+
+
+def _drop_variants(k: int, street: str) -> list[str]:
+    """Một địa chỉ riêng cho nhóm thứ k, viết theo 3 kiểu khác nhau nhưng chuẩn hóa về cùng một địa chỉ."""
+    n, lane = 5 + k * 7, 2 + k
+    return [f"Số {n} Ngõ {lane} {street}", f"so 0{n} ngo {lane} {street.lower()}", f"{n}, Ngõ {lane}, {street}"]

@@ -12,6 +12,7 @@ from app.modules.catalog.seed import PRODUCTS
 from app.modules.lab.reset import reset
 from app.modules.order.models import Order
 from app.modules.risk.models import Rule
+from app.modules.risk.seed import RULES
 
 ADDRESS = {"recipient_name": "Khách", "phone": "0901234567", "line": "12 Láng Hạ",
            "ward": "Thành Công", "district": "Ba Đình", "province": "Hà Nội"}
@@ -32,7 +33,7 @@ def test_reset_creates_baseline(db):
     creds = reset(db)
     assert set(creds) >= {"minh@shop.test", "khang@shop.test", "lan@shop.test", "admin@riskshop.test"}
     assert db.scalar(select(func.count()).select_from(Product)) == len(PRODUCTS)
-    assert db.scalar(select(func.count()).select_from(Rule)) == 10
+    assert db.scalar(select(func.count()).select_from(Rule)) == len(RULES)
     lan_id = db.scalar(select(User.id).where(User.email == "lan@shop.test"))
     assert db.scalar(select(func.count()).select_from(Order).where(Order.user_id == lan_id)) == 30
 

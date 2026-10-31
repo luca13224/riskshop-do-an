@@ -135,21 +135,28 @@ def _rules_fingerprint(db: Session) -> str:
     return hashlib.sha256(blob.encode()).hexdigest()
 
 
-def _prepare(db: Session) -> dict[str, Product]:
+def _prepare(db: Session, disable_rules: tuple[str, ...] = ()) -> dict[str, Product]:
     _wipe(db)
     catalog_seed.seed(db)
     promotion_seed.seed(db)
     seed_rules(db)
+    # Tắt luật theo mã: dùng để chạy "bộ luật v1" (không có luật v2) trên CÙNG một tập dữ liệu mà so sánh.
+    # Dấu vân tay bộ luật có tính cờ enabled, nên báo cáo phân biệt được hai lần chạy.
+    for code in disable_rules:
+        version_id = db.scalar(select(Rule.active_version_id).where(Rule.code == code))
+        if version_id is None:
+            raise ValueError(f"Không có luật {code}")
+        db.get(RuleVersion, version_id).enabled = False
     db.execute(text("UPDATE products SET stock = 100000"))  # mô phỏng không đo chuyện hết hàng
     db.commit()
     return {p.sku: p for p in db.scalars(select(Product))}
 
 
 def run(session_factory: Callable[[], Session], dataset: str, seed: int, scale: float = 1.0,
-        progress: Callable[[str], None] = print) -> dict:
+        progress: Callable[[str], None] = print, disable_rules: tuple[str, ...] = ()) -> dict:
     rng = random.Random(seed)
     db = session_factory()
-    skus = _prepare(db)
+    skus = _prepare(db, disable_rules)
 
     def _get_db():
         s = session_factory()
@@ -175,7 +182,8 @@ def run(session_factory: Callable[[], Session], dataset: str, seed: int, scale: 
         db.commit()
 
         sim_run = SimRun(dataset=dataset, seed=seed, rules_fingerprint=_rules_fingerprint(db),
-                         config={"scale": scale, "groups": len(groups), "accounts": len(accounts)})
+                         config={"scale": scale, "groups": len(groups), "accounts": len(accounts),
+                                 "disabled_rules": list(disable_rules)})
         db.add(sim_run)
         db.commit()
         progress(f"Dân số: {len(accounts)} tài khoản trong {len(groups)} nhóm. Đang chạy hành vi…")
@@ -208,7 +216,7 @@ def run(session_factory: Callable[[], Session], dataset: str, seed: int, scale: 
         sim_run.finished_at = utcnow()
         db.commit()
         return {"run_id": sim_run.id, "dataset": dataset, "seed": seed, "scale": scale,
-                "rules_fingerprint": sim_run.rules_fingerprint, **metrics}
+                "rules_fingerprint": sim_run.rules_fingerprint, "disabled_rules": list(disable_rules), **metrics}
     finally:
         if previous is None:
             app.dependency_overrides.pop(get_db, None)

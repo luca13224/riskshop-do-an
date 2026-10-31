@@ -131,3 +131,19 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 - Hệ quả / rủi ro:
   - Phải giữ độ tương phản chữ đạt WCAG AA trên nền tối (đã tính theo công thức WCAG: chữ phụ #93a0b6 đạt 7.45:1 trên nền #070b14 và 6.59:1 trên thẻ #111a2a; chữ chính trên 14:1).
   - Trang dài trên nền tối dễ "chìm": mỗi chương cần một điểm nhấn ánh sáng (quầng cyan/vàng, viền mờ) thay cho khoảng trắng.
+
+## ADR-008: Bộ luật v2 — luật R11 dựa trên cụm tài khoản quanh địa chỉ
+- Ngày: 2026-10-31
+- Trạng thái: Accepted
+- Bối cảnh: bộ luật v1 bỏ lọt 100% farm "phân tán" (mỗi tài khoản một máy, một mạng, cùng giao về một nhà). Đồ thị liên kết trên Console cho thấy cụm này rõ ràng, nhưng Risk Engine chưa dùng thông tin cụm.
+- Các phương án:
+  - (1) Tính cụm 2 bước trên toàn đồ thị ở mỗi đơn: bắt rộng hơn nhưng nhiều truy vấn mỗi đơn, khó giải thích.
+  - (2) Đặc trưng 1 bước quanh nút địa chỉ (F12 số tài khoản mới, F13 độ phân tán mạng) + luật `compound` sẵn có: một truy vấn, dùng index sẵn có, giải thích được.
+  - (3) Học máy / phát hiện cộng đồng: chưa có dữ liệu thật để huấn luyện và đánh giá.
+- Quyết định: (2). R11 = voucher tân thủ và F12 ≥ 5 và F13 ≥ 0,75 → +25, độ mạnh trung bình (chỉ gỡ voucher, không giữ hay chặn đơn).
+  - Ngưỡng 5 (thiết kế ban đầu là 4) chọn trên tập **dev_v2**: ở ngưỡng 4 độ chính xác riêng của R11 là 61%, ở ngưỡng 5 là 70%.
+  - Đánh giá theo giao thức chống học thuộc đề: tập dev và test **mới** (`dev_v2`, `test_v2` seed 3), khóa luật trước khi chạy test, so v1/v2 trên cùng dân số, có một biến thể chưa biết mới (farm gom hàng về nhiều điểm nhận).
+- Lý do: tăng recall tổng từ 36,4% lên 44,4% trên tập test mới, khách thông thường không bị ảnh hưởng (0/190), không tăng độ trễ đo được.
+- Hệ quả / rủi ro:
+  - Hard negative mới: nhóm ở trọ dùng 4G riêng bị gỡ voucher nhầm 14,6% (6/41) trên tập test; đặc trưng mạng không phân biệt được nhóm này với farm. Giảm thiểu: chỉ gỡ voucher, khiếu nại (ADR-006).
+  - Farm gom hàng về nhiều điểm nhận vẫn lọt 100% (0/40): kẻ gian chỉ cần chia nhỏ cụm. Đây là giới hạn của luật theo ngưỡng.

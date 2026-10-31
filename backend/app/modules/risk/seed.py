@@ -65,6 +65,19 @@ RULES = [
          strength="medium", policies=[C], contexts=[PAYMENT_OPTIONS, PLACE_ORDER],
          params={"feature": "open_cod_orders", "tiers": [{"gte": 3, "points": 25}]},
          reason_template="{value} đơn COD đang chờ giao (ngưỡng {threshold})"),
+    # ---- Bộ luật v2 (2026-10-31, docs/reviews/2026-10-31_RISK_V2_DESIGN.md) ----
+    # Farm phân tán: mỗi tài khoản một máy, một mạng, nhưng cùng giao về một nhà. Một mình mỗi tín hiệu thì yếu;
+    # nhìn cả cụm quanh địa chỉ mới thấy: nhiều tài khoản mới, mỗi người vào mạng từ một nơi khác nhau.
+    # Gia đình thật thường chung Wi-Fi nên độ phân tán mạng thấp. Độ mạnh "vừa": chỉ gỡ voucher, không giữ đơn.
+    # Ngưỡng 5 (không phải 4 như thiết kế ban đầu): chọn trên tập dev_v2 để giảm gỡ nhầm nhóm ở trọ dùng 4G riêng.
+    dict(code="ADDR_VOUCHER_RING", name="R11 · Cụm tài khoản mới cùng địa chỉ, khác mạng", rule_type="compound",
+         strength="medium", policies=[V], contexts=[PLACE_ORDER],
+         params={"conditions": [{"feature": "voucher_new_user", "op": "eq", "value": True},
+                                {"feature": "new_accounts_on_address_7d", "op": "gte", "value": 5},
+                                {"feature": "address_ip_diversity_7d", "op": "gte", "value": 0.75}], "points": 25},
+         reason_template="{new_accounts_on_address_7d} tài khoản mới cùng địa chỉ giao hàng trong 7 ngày, "
+                         "độ phân tán mạng {address_ip_diversity_7d}",
+         note="Bộ luật v2: cụm tài khoản mới quanh một địa chỉ"),
 ]
 
 POLICIES = {
@@ -98,7 +111,8 @@ def seed_rules(db: Session) -> int:
         db.add(rule)
         db.flush()
         version = RuleVersion(rule_id=rule.id, version=1, contexts=spec["contexts"], params=spec["params"],
-                              reason_template=spec["reason_template"], change_note="Phiên bản đầu (RULES_V0)")
+                              reason_template=spec["reason_template"],
+                              change_note=spec.get("note", "Phiên bản đầu (RULES_V0)"))
         db.add(version)
         db.flush()
         rule.active_version_id = version.id

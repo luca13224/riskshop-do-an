@@ -85,3 +85,20 @@ def test_payment_options_never_reviews():
 def test_most_severe_decision_wins():
     decision, actions = decide(PLACE_ORDER, {"voucher": 60, "cod": 75}, {"cod": 1}, POLICIES[PLACE_ORDER])
     assert decision == REVIEW and actions["remove_voucher"] and actions["hold_order"]
+
+
+# R11 (bộ luật v2): đúng tham số trong seed, kiểm 5 trường hợp của RULES_V0 mục 7
+def _r11():
+    from app.modules.risk.seed import RULES
+    return next(r for r in RULES if r["code"] == "ADDR_VOUCHER_RING")
+
+
+def test_r11_thresholds_and_hard_negatives():
+    p = _r11()["params"]
+    base = {"voucher_new_user": True, "new_accounts_on_address_7d": 5, "address_ip_diversity_7d": 0.75}
+    assert rules.compound(p, base).points == 25  # đúng ngưỡng
+    assert rules.compound(p, {**base, "new_accounts_on_address_7d": 4}) is None  # dưới ngưỡng cụm
+    assert rules.compound(p, {**base, "address_ip_diversity_7d": 0.5}) is None  # gia đình chung mạng
+    assert rules.compound(p, {**base, "voucher_new_user": None}) is None  # không dùng voucher tân thủ
+    assert rules.compound(p, {**base, "new_accounts_on_address_7d": None}) is None  # chưa có địa chỉ
+    assert _r11()["contexts"] == ["place_order"] and _r11()["strength"] == "medium"  # không chạy lúc áp mã
