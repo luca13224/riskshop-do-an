@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "RiskShop: kiến trúc tổng thể (modular monolith)",
+    "locale": "vi",
+    "output": "docs/diagrams/architecture-tong-the-20261031-144450/kien-truc-tong-the.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/luca13224/riskshop-do-an.git",
+      "provider": "github",
+      "link_mode": "local-only",
+      "revision": "d284f97fccb729420def50605e7ba9020b31aedf"
+    }
+  },
+  "components": [
+    { "id": "staff", "type": "external", "label": "Nhân viên rủi ro", "sublabel": "analyst / manager", "pos": [40, 40], "size": [140, 64],
+      "sources": [{ "path": "frontend/src/App.tsx", "line": 46, "end_line": 60, "label": "route /console" }] },
+    { "id": "console", "type": "frontend", "label": "Risk Console", "sublabel": "React SPA /console", "pos": [230, 40], "size": [160, 64],
+      "sources": [{ "path": "frontend/src/console/ConsoleLayout.tsx", "line": 1, "end_line": 323 }] },
+    { "id": "customer", "type": "external", "label": "Khách hàng", "sublabel": "trình duyệt", "pos": [40, 220], "size": [140, 64],
+      "sources": [{ "path": "frontend/src/App.tsx", "line": 34, "end_line": 44, "label": "route Shop" }] },
+    { "id": "shop", "type": "frontend", "label": "Shop", "sublabel": "React SPA /", "pos": [230, 220], "size": [160, 64],
+      "sources": [
+        { "path": "frontend/src/shop/ShopLayout.tsx", "line": 1, "end_line": 276 },
+        { "path": "frontend/src/lib/api/order.ts", "line": 80, "end_line": 100, "label": "gọi checkout" }
+      ] },
+    { "id": "api", "type": "backend", "label": "FastAPI app", "sublabel": "app/main.py · /api", "pos": [480, 220], "size": [160, 64],
+      "sources": [{ "path": "backend/app/main.py", "line": 30, "end_line": 59, "label": "gắn router" }] },
+    { "id": "ops", "type": "backend", "label": "Module vận hành", "sublabel": "cases · appeals · reports · lab · audit", "pos": [730, 40], "size": [240, 64],
+      "sources": [
+        { "path": "backend/app/modules/cases/service.py", "line": 48, "end_line": 73, "label": "open_from_decision" },
+        { "path": "backend/app/modules/appeals/router.py", "line": 1, "end_line": 59 }
+      ] },
+    { "id": "commerce", "type": "backend", "label": "Module thương mại", "sublabel": "auth · catalog · cart · promotion · order", "tag": "+ events", "pos": [730, 220], "size": [240, 64],
+      "sources": [
+        { "path": "backend/app/modules/order/router.py", "line": 22, "end_line": 34, "label": "POST checkout" },
+        { "path": "backend/app/modules/order/service.py", "line": 84, "end_line": 176, "label": "checkout()" }
+      ] },
+    { "id": "risk", "type": "security", "label": "Risk Engine", "sublabel": "đặc trưng · luật · ma trận", "pos": [1060, 220], "size": [190, 64],
+      "sources": [
+        { "path": "backend/app/modules/risk/service.py", "line": 207, "end_line": 281, "label": "evaluate()" },
+        { "path": "backend/app/modules/risk/service.py", "line": 129, "end_line": 181, "label": "decide()" },
+        { "path": "backend/app/modules/risk/service.py", "line": 296, "end_line": 333, "label": "record()" }
+      ] },
+    { "id": "worker", "type": "backend", "label": "Worker", "sublabel": "tiến trình riêng", "pos": [1390, 40], "size": [170, 64],
+      "sources": [{ "path": "backend/worker/main.py", "line": 23, "end_line": 40 }] },
+    { "id": "jobs", "type": "messagebus", "label": "Hàng đợi jobs", "sublabel": "bảng jobs trong MariaDB", "pos": [1390, 220], "size": [170, 64],
+      "sources": [{ "path": "backend/app/core/jobs.py", "line": 1, "end_line": 95 }] },
+    { "id": "db", "type": "database", "label": "MariaDB 10.11", "sublabel": "một CSDL dùng chung, SQLAlchemy + Alembic", "pos": [730, 400], "size": [830, 64],
+      "sources": [
+        { "path": "backend/app/core/db.py", "line": 1, "end_line": 42 },
+        { "path": "backend/app/core/config.py", "line": 18, "end_line": 20 }
+      ] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Trình duyệt (một app React + Vite)", "wraps": ["console", "shop"] },
+    { "kind": "region", "label": "Tiến trình API: FastAPI modular monolith", "wraps": ["api", "ops", "commerce", "risk"] }
+  ],
+  "connections": [
+    { "id": "staff-console", "from": "staff", "to": "console", "label": "dùng" },
+    { "id": "console-api", "from": "console", "to": "api", "label": "REST /api/console" },
+    { "id": "customer-shop", "from": "customer", "to": "shop", "label": "mua", "variant": "emphasis" },
+    { "id": "shop-api", "from": "shop", "to": "api", "label": "REST JSON", "variant": "emphasis" },
+    { "id": "api-ops", "from": "api", "to": "ops", "label": "router" },
+    { "id": "api-commerce", "from": "api", "to": "commerce", "label": "router", "variant": "emphasis" },
+    { "id": "commerce-risk", "from": "commerce", "to": "risk", "label": "evaluate()", "variant": "security" },
+    { "id": "risk-jobs", "from": "risk", "to": "jobs", "label": "enqueue open_case", "variant": "dashed" },
+    { "id": "worker-jobs", "from": "worker", "to": "jobs", "label": "claim SKIP LOCKED", "variant": "dashed" },
+    { "id": "worker-ops", "from": "worker", "to": "ops", "label": "open_from_decision", "variant": "dashed" },
+    { "id": "commerce-db", "from": "commerce", "to": "db", "label": "SQL" },
+    { "id": "risk-db", "from": "risk", "to": "db", "label": "đọc SQL (ADR-004)" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Một codebase, một CSDL", "items": [
+      "Các module nằm chung một tiến trình FastAPI, gắn router ở app/main.py (ADR-003)",
+      "Module vận hành cũng đọc/ghi MariaDB (case, khiếu nại, audit); cạnh này lược bớt cho dễ đọc",
+      "Module events ghi nhật ký hành vi (đăng ký, đăng nhập, thử voucher) cho Risk Engine"
+    ] },
+    { "dot": "rose", "title": "Risk Engine", "items": [
+      "Chấm điểm ở server ngay trong checkout, có fallback khi engine lỗi",
+      "Chỉ ĐỌC bảng của module khác bằng SQL để tính đặc trưng (ADR-004)",
+      "Lưu quyết định + luật đã khớp; cần case thì thêm job cùng transaction"
+    ] },
+    { "dot": "amber", "title": "Việc nền không cần Celery/Redis", "items": [
+      "Hàng đợi là bảng jobs; worker lấy việc bằng FOR UPDATE SKIP LOCKED",
+      "Worker gọi cases.open_from_decision để mở hoặc gom case theo cụm",
+      "Khiếu nại được chấp nhận thì cấp miễn trừ cho chính sách (ADR-006)"
+    ] }
+  ]
+}

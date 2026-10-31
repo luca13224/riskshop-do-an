@@ -1,0 +1,366 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Luồng đặt hàng có chấm điểm rủi ro",
+    "locale": "vi",
+    "output": "docs/diagrams/sequence-dat-hang-20261031-144450/luong-dat-hang.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/luca13224/riskshop-do-an.git",
+      "provider": "github",
+      "link_mode": "local-only",
+      "revision": "d284f97fccb729420def50605e7ba9020b31aedf"
+    }
+  },
+  "participants": [
+    {
+      "id": "khach",
+      "type": "external",
+      "label": "Khách hàng",
+      "sublabel": "trình duyệt",
+      "sources": [
+        {
+          "path": "frontend/src/App.tsx",
+          "line": 38,
+          "label": "route checkout"
+        }
+      ]
+    },
+    {
+      "id": "shop",
+      "type": "frontend",
+      "label": "Shop",
+      "sublabel": "React SPA",
+      "sources": [
+        {
+          "path": "frontend/src/lib/api/order.ts",
+          "line": 80,
+          "end_line": 100,
+          "label": "useCheckout"
+        }
+      ]
+    },
+    {
+      "id": "order",
+      "type": "backend",
+      "label": "Order",
+      "sublabel": "checkout()",
+      "sources": [
+        {
+          "path": "backend/app/modules/order/router.py",
+          "line": 22,
+          "end_line": 34
+        },
+        {
+          "path": "backend/app/modules/order/service.py",
+          "line": 84,
+          "end_line": 176
+        }
+      ]
+    },
+    {
+      "id": "risk",
+      "type": "security",
+      "label": "Risk Engine",
+      "sublabel": "evaluate / record",
+      "sources": [
+        {
+          "path": "backend/app/modules/risk/service.py",
+          "line": 207,
+          "end_line": 281,
+          "label": "evaluate()"
+        },
+        {
+          "path": "backend/app/modules/risk/service.py",
+          "line": 129,
+          "end_line": 181,
+          "label": "decide()"
+        },
+        {
+          "path": "backend/app/modules/risk/service.py",
+          "line": 296,
+          "end_line": 333,
+          "label": "record()"
+        }
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "MariaDB",
+      "sublabel": "CSDL dùng chung",
+      "sources": [
+        {
+          "path": "backend/app/core/db.py",
+          "line": 1,
+          "end_line": 42
+        }
+      ]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "Worker",
+      "sublabel": "việc nền",
+      "sources": [
+        {
+          "path": "backend/worker/main.py",
+          "line": 23,
+          "end_line": 40
+        },
+        {
+          "path": "backend/app/core/jobs.py",
+          "line": 50,
+          "end_line": 95
+        }
+      ]
+    },
+    {
+      "id": "cases",
+      "type": "backend",
+      "label": "Cases",
+      "sublabel": "open_from_decision",
+      "sources": [
+        {
+          "path": "backend/app/modules/cases/service.py",
+          "line": 48,
+          "end_line": 73
+        }
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 286,
+      "label": "Gửi đơn"
+    },
+    {
+      "from": 292,
+      "to": 536,
+      "label": "Chấm điểm"
+    },
+    {
+      "from": 540,
+      "to": 702,
+      "label": "Nhánh chặn / hạn chế"
+    },
+    {
+      "from": 708,
+      "to": 940,
+      "label": "Nhánh tạo đơn"
+    },
+    {
+      "from": 950,
+      "to": 1110,
+      "label": "Mở case bất đồng bộ"
+    }
+  ],
+  "messages": [
+    {
+      "id": "bam-dat-hang",
+      "from": "khach",
+      "to": "shop",
+      "y": 170,
+      "label": "bấm Đặt hàng"
+    },
+    {
+      "id": "post-checkout",
+      "from": "shop",
+      "to": "order",
+      "y": 202,
+      "label": "POST /api/orders/checkout",
+      "variant": "emphasis",
+      "note": "kèm Idempotency-Key: gửi lại không tạo đơn trùng"
+    },
+    {
+      "id": "giu-ton-kho",
+      "from": "order",
+      "to": "db",
+      "y": 270,
+      "label": "giữ tồn kho, kiểm voucher, lưu địa chỉ"
+    },
+    {
+      "id": "evaluate",
+      "from": "order",
+      "to": "risk",
+      "y": 302,
+      "label": "evaluate(place_order)",
+      "variant": "security",
+      "note": "luôn chạy ở server; engine lỗi thì dùng kết quả dự phòng"
+    },
+    {
+      "id": "doc-dac-trung",
+      "from": "risk",
+      "to": "db",
+      "y": 370,
+      "label": "đọc đặc trưng bằng SQL",
+      "note": "thiết bị, IP, địa chỉ dùng chung, lịch sử đơn"
+    },
+    {
+      "id": "so-dem",
+      "from": "db",
+      "to": "risk",
+      "y": 438,
+      "label": "số đếm",
+      "variant": "return"
+    },
+    {
+      "id": "ket-qua",
+      "from": "risk",
+      "to": "order",
+      "y": 470,
+      "label": "decision + actions",
+      "variant": "return",
+      "note": "decide(): ALLOW / RESTRICTION / REVIEW / BLOCK"
+    },
+    {
+      "id": "rollback",
+      "from": "order",
+      "to": "db",
+      "y": 548,
+      "label": "rollback giữ tồn kho",
+      "note": "khi block, disable_cod hoặc remove_voucher"
+    },
+    {
+      "id": "record-chan",
+      "from": "order",
+      "to": "risk",
+      "y": 616,
+      "label": "record(result) rồi commit",
+      "note": "vẫn lưu quyết định để truy vết"
+    },
+    {
+      "id": "loi-403",
+      "from": "order",
+      "to": "shop",
+      "y": 684,
+      "label": "403 / 409 + lý do",
+      "variant": "return"
+    },
+    {
+      "id": "tao-don",
+      "from": "order",
+      "to": "db",
+      "y": 724,
+      "label": "INSERT orders",
+      "note": "CONFIRMED, hoặc PENDING_REVIEW nếu hold_order"
+    },
+    {
+      "id": "record-don",
+      "from": "order",
+      "to": "risk",
+      "y": 792,
+      "label": "record(result, order_id)"
+    },
+    {
+      "id": "luu-quyet-dinh",
+      "from": "risk",
+      "to": "db",
+      "y": 824,
+      "label": "INSERT risk_decisions, rule_hits, jobs",
+      "note": "job open_case cùng transaction (chỉ khi open_case)"
+    },
+    {
+      "id": "tra-don",
+      "from": "order",
+      "to": "shop",
+      "y": 892,
+      "label": "201 + thông tin đơn",
+      "variant": "return"
+    },
+    {
+      "id": "hien-ket-qua",
+      "from": "shop",
+      "to": "khach",
+      "y": 924,
+      "label": "hiện kết quả",
+      "variant": "return"
+    },
+    {
+      "id": "claim-job",
+      "from": "worker",
+      "to": "db",
+      "y": 972,
+      "label": "claim job (SKIP LOCKED)",
+      "variant": "dashed"
+    },
+    {
+      "id": "goi-handler",
+      "from": "worker",
+      "to": "cases",
+      "y": 1004,
+      "label": "open_from_decision",
+      "variant": "dashed"
+    },
+    {
+      "id": "mo-case",
+      "from": "cases",
+      "to": "db",
+      "y": 1036,
+      "label": "mở case mới / gom vào case đang mở",
+      "variant": "dashed",
+      "note": "theo open_cluster_key; chạy lại không tạo bản ghi trùng"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "order",
+      "from": 202,
+      "to": 898,
+      "type": "backend"
+    },
+    {
+      "participant": "risk",
+      "from": 302,
+      "to": 476,
+      "type": "security"
+    },
+    {
+      "participant": "risk",
+      "from": 792,
+      "to": 830,
+      "type": "security"
+    },
+    {
+      "participant": "worker",
+      "from": 972,
+      "to": 1010,
+      "type": "backend"
+    },
+    {
+      "participant": "cases",
+      "from": 1004,
+      "to": 1042,
+      "type": "backend"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Đường chính",
+      "items": [
+        "Shop gửi checkout; Order giữ tồn kho rồi gọi Risk Engine trước khi tạo đơn",
+        "Quyết định luôn được lưu kèm luật đã khớp, kể cả khi đơn bị chặn"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Hành động theo quyết định",
+      "items": [
+        "BLOCK: không tạo đơn, trả 403",
+        "Hạn chế: bỏ voucher hoặc tắt COD, trả 409 để khách chọn lại",
+        "REVIEW: tạo đơn PENDING_REVIEW, chờ nhân viên duyệt"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Bất đồng bộ",
+      "items": [
+        "Mở case không làm chậm luồng mua hàng: worker xử lý sau",
+        "Job ghi cùng transaction với quyết định nên không mất việc"
+      ]
+    }
+  ]
+}

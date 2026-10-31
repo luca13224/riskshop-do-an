@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "e0a38db6-d502-4afc-bc16-40b24a42a0e9",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "D:\\do_an\\docs\\diagrams\\sequence-dat-hang-20261031-144450\\candidate.json",
+  "output": "D:\\do_an\\docs\\diagrams\\sequence-dat-hang-20261031-144450\\luong-dat-hang.html",
+  "specification": {
+    "sha256": "1adf5604f61d92ceae0375266dfd03c10df6b2b210371528bd5d3b53a350b39a",
+    "bytes": 8726
+  },
+  "artifact": {
+    "sha256": "508b402dcd376e503ec651021d623b7c24836670bc41b111dd5735262d1200ee",
+    "bytes": 850994
+  }
+}

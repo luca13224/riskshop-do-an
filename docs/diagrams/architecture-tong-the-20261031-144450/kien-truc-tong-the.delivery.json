@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "5de6f79d-022f-4db0-9a52-d37f366899ab",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "D:\\do_an\\docs\\diagrams\\architecture-tong-the-20261031-144450\\candidate.json",
+  "output": "D:\\do_an\\docs\\diagrams\\architecture-tong-the-20261031-144450\\kien-truc-tong-the.html",
+  "specification": {
+    "sha256": "9e0bf7611e6e4e3eb8b5e7fd5e2976527527393381040148a88bf2da9f9b6fc0",
+    "bytes": 6600
+  },
+  "artifact": {
+    "sha256": "6fb2291030cbe3e7e2c2ce41ed0a0a845ff4a5c3bb4501d8b01dc9ba2361924f",
+    "bytes": 856119
+  }
+}
