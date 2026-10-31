@@ -14,6 +14,7 @@ import { RulesPage } from "@/console/pages/RulesPage"
 import { ReportsPage } from "@/console/pages/ReportsPage"
 import { AuditLogPage } from "@/console/pages/AuditLogPage"
 import { CaseDetailPage } from "@/console/pages/CaseDetailPage"
+import { CatalogPage } from "@/shop/pages/CatalogPage"
 import { ShopLayout } from "@/shop/ShopLayout"
 import { AppealsPage } from "@/shop/pages/AppealsPage"
 import { CartPage } from "@/shop/pages/CartPage"
@@ -33,6 +34,8 @@ export function App() {
       <Routes>
         <Route element={<ShopLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="danh-muc" element={<CatalogPage />} />
+          <Route path="danh-muc/:code" element={<CatalogPage />} />
           <Route path="products/:slug" element={<ProductDetailPage />} />
           <Route path="cart" element={<CartPage />} />
           <Route path="checkout" element={<CheckoutPage />} />

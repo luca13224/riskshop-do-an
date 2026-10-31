@@ -2,7 +2,7 @@
 
 Không nằm dưới /api vì máy tìm kiếm luôn tìm hai file này ở gốc website. Khi chạy dev, Vite chuyển
 tiếp /robots.txt và /sitemap.xml sang backend (frontend/vite.config.ts).
-Sitemap chỉ liệt kê trang CÔNG KHAI: trang chủ, trang danh mục, trang sản phẩm đang bán.
+Sitemap chỉ liệt kê trang CÔNG KHAI: trang chủ, trang danh mục (/danh-muc/...), trang sản phẩm đang bán.
 """
 
 from xml.sax.saxutils import escape
@@ -34,8 +34,8 @@ def robots_txt() -> str:
 
 
 def sitemap_paths(db: Session) -> list[str]:
-    paths = ["/"]
-    paths += [f"/?category={c.code}" for c in service.list_categories(db) if c.product_count > 0]
+    paths = ["/", "/danh-muc"]
+    paths += [f"/danh-muc/{c.code}" for c in service.list_categories(db) if c.product_count > 0]
     slugs = db.scalars(select(Product.slug).where(Product.is_active.is_(True)).order_by(Product.id)).all()
     paths += [f"/products/{s}" for s in slugs]
     return paths

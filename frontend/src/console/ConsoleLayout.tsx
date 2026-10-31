@@ -204,7 +204,10 @@ export function ConsoleLayout() {
           ))}
         </nav>
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <Outlet />
+          {/* key theo đường dẫn: đổi trang là nội dung mới mờ dần vào (.page-in), dữ liệu vẫn lấy từ bộ nhớ đệm */}
+          <div key={pathname} className="page-in">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

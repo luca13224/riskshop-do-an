@@ -163,12 +163,12 @@ export function CinemaHero({
           className="rise mt-7 flex flex-wrap justify-center gap-3"
           style={{ "--d": "500ms" } as CSSProperties}
         >
-          <a
-            href="#san-pham"
+          <Link
+            to="/danh-muc"
             className="btn-glow h-13 rounded-[13px] px-7 text-base font-medium"
           >
             <span>Xem sản phẩm</span>
-          </a>
+          </Link>
           <Link
             to="/register"
             className="flex h-13 items-center rounded-[13px] border border-white/15 px-6 text-base text-white/85 transition hover:bg-white/5"

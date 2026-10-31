@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "lenis/dist/lenis.css";
 
 /* Biến thể dark: Console (.console) luôn tối, Shop (.shop) luôn sáng, bất kể chế độ hệ điều hành (ADR-005) */
 @custom-variant dark (&:is(.dark *, .console *):not(.shop, .shop *));
@@ -430,3 +431,164 @@
   }
 }
 
+
+/* ================= Shop: chuyển động khi cuộn (head / body / foot) ================= */
+
+/* Xuất hiện khi lăn tới: Reveal.tsx gắn data-shown khi phần tử lọt vào màn hình.
+   Mỗi kiểu (data-variant) một cách vào; --d là độ trễ để các phần tử vào lần lượt. */
+.reveal {
+  opacity: 0;
+  translate: 0 28px;
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    translate 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    scale 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.9s ease;
+  transition-delay: var(--d, 0ms);
+}
+.reveal[data-variant="left"] {
+  translate: 48px 0;
+}
+.reveal[data-variant="zoom"] {
+  translate: none;
+  scale: 0.94;
+  filter: blur(8px);
+}
+.reveal[data-variant="fade"] {
+  translate: none;
+}
+.reveal[data-shown] {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+  filter: none;
+}
+
+/* Đường kẻ tự vẽ (các bước mua sắm): dài dần theo trục ngang khi xuất hiện */
+.draw-line {
+  scale: 0 1;
+  transform-origin: left center;
+  transition: scale 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.2s;
+}
+[data-shown] > .draw-line,
+.draw-line[data-shown] {
+  scale: 1 1;
+}
+
+/* Thẻ "viền sáng theo chuột" (bento): GlowCard ghi vị trí chuột vào --gx, --gy */
+.glow-card {
+  position: relative;
+  isolation: isolate;
+}
+.glow-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    360px circle at var(--gx, 50%) var(--gy, 0%),
+    rgba(255, 214, 10, 0.9),
+    rgba(80, 200, 255, 0.35) 40%,
+    transparent 70%
+  );
+  /* Chỉ giữ phần viền 1px: lấy cả khối trừ đi phần nội dung */
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.glow-card:hover::before {
+  opacity: 1;
+}
+
+/* Header: thu gọn khi đã cuộn, ẩn khi cuộn xuống, hiện lại khi cuộn lên */
+.shop-header {
+  transition:
+    translate 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.3s,
+    color 0.3s;
+}
+.shop-header[data-hidden] {
+  translate: 0 -100%;
+}
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    translate: 0 -8px;
+  }
+}
+.panel-in {
+  animation: panel-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Footer "kéo màn": nội dung trang (z cao, nền trắng, bo góc dưới) trượt lên để lộ footer nằm sẵn phía dưới.
+   Chỉ bật từ màn hình md, khi footer chắc chắn thấp hơn chiều cao màn hình. */
+@media (min-width: 768px) {
+  .curtain-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 0;
+  }
+}
+.curtain-content {
+  position: relative;
+  z-index: 10;
+}
+
+/* Chữ thương hiệu cỡ lớn ở footer: chữ rỗng, sáng dần theo --p (0 → 1) do footer ghi khi lộ ra */
+.brand-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.18);
+  background: linear-gradient(90deg, #ffd60a, #67e8f9) 0 0 / calc(var(--p, 0) * 100%) 100% no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Hình minh họa bento: nhãn đơn hàng bồng bềnh; mảng màu nền của khối ưu đãi trôi chậm */
+@keyframes float {
+  50% {
+    translate: 0 -8px;
+  }
+}
+@keyframes drift-blob {
+  50% {
+    translate: 60px 30px;
+    scale: 1.15;
+  }
+}
+
+/* Chuyển trang trong Console: mờ dần vào, nhích lên nhẹ */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+.page-in {
+  animation: page-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal[data-variant] {
+    opacity: 1;
+    translate: none;
+    scale: none;
+    filter: none;
+    transition: none;
+  }
+  .draw-line {
+    scale: 1 1;
+    transition: none;
+  }
+  .shop-header,
+  .panel-in,
+  .page-in {
+    transition: none;
+    animation: none;
+  }
+}

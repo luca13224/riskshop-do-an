@@ -60,7 +60,7 @@ export function ProductDetailPage() {
         </Link>
         <ChevronRight className="size-4" />
         <Link
-          to={`/?category=${p.category}#san-pham`}
+          to={`/danh-muc/${p.category}`}
           className="hover:text-foreground"
         >
           {p.category_name}

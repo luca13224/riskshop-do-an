@@ -29,6 +29,6 @@ def test_sitemap_lists_only_public_active_pages(client, db):
     locs = [e.text for e in ET.fromstring(r.content).findall("s:url/s:loc", NS)]
     assert any(loc.endswith("/products/tai-nghe-a") for loc in locs)
     assert not any("hang-an" in loc for loc in locs)  # sản phẩm ngừng bán không vào sitemap
-    assert any(loc.endswith("/?category=audio") for loc in locs)
-    assert not any("category=gear" in loc for loc in locs)  # danh mục không còn hàng thì bỏ qua
+    assert any(loc.endswith("/danh-muc/audio") for loc in locs)
+    assert not any("/danh-muc/gear" in loc for loc in locs)  # danh mục không còn hàng thì bỏ qua
     assert not any("/console" in loc or "/orders" in loc for loc in locs)

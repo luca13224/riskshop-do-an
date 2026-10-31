@@ -21,36 +21,21 @@ const PRIVATE_PAGES: [prefix: string, title: string][] = [
 export function ShopSeo() {
   const { pathname } = useLocation()
   const productMatch = useMatch("/products/:slug")
+  const catalogMatch = useMatch("/danh-muc/:code")
   if (productMatch) return <ProductSeo slug={productMatch.params.slug ?? ""} />
+  if (catalogMatch) return <CatalogSeo code={catalogMatch.params.code} />
+  if (pathname === "/danh-muc") return <CatalogSeo />
   if (pathname === "/") return <HomeSeo />
   const priv = PRIVATE_PAGES.find(([prefix]) => pathname.startsWith(prefix))
   return <Seo title={priv?.[1] ?? SITE_NAME} path={pathname} noindex />
 }
 
 function HomeSeo() {
-  const [params] = useSearchParams()
-  const categories = useCategories()
-  const code = params.get("category")
-  const category = categories.data?.find((c) => c.code === code)
-
-  // Trang kết quả tìm kiếm / trang 2, 3...: không lập chỉ mục để tránh nội dung trùng lặp
-  const isListingVariant = params.has("q") || (params.get("page") ?? "1") !== "1"
-  if (category) {
-    return (
-      <Seo
-        title={`${category.name} chính hãng`}
-        description={`${category.product_count} sản phẩm ${category.name.toLowerCase()} tại ${SITE_NAME}. Giá rõ ràng, giao nhanh, đổi trả 7 ngày.`}
-        path={`/?category=${category.code}`}
-        noindex={isListingVariant}
-      />
-    )
-  }
   return (
     <Seo
       title={SITE_NAME}
       description={HOME_DESCRIPTION}
       path="/"
-      noindex={isListingVariant}
       jsonLd={{
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -58,6 +43,36 @@ function HomeSeo() {
         url: absoluteUrl("/"),
         inLanguage: "vi",
       }}
+    />
+  )
+}
+
+// /danh-muc và /danh-muc/:code. Trang kết quả tìm kiếm, trang 2, 3...: không lập chỉ mục (tránh trùng lặp)
+function CatalogSeo({ code }: { code?: string }) {
+  const [params] = useSearchParams()
+  const categories = useCategories()
+  const category = categories.data?.find((c) => c.code === code)
+  const isListingVariant = params.has("q") || (params.get("page") ?? "1") !== "1"
+  if (code && !category) {
+    return <Seo title="Danh mục" path={`/danh-muc/${code}`} noindex={!!categories.data} />
+  }
+  if (category) {
+    return (
+      <Seo
+        title={`${category.name} chính hãng`}
+        description={`${category.product_count} sản phẩm ${category.name.toLowerCase()} tại ${SITE_NAME}. Giá rõ ràng, giao nhanh, đổi trả 7 ngày.`}
+        path={`/danh-muc/${category.code}`}
+        image={`/categories/${category.code}.webp`}
+        noindex={isListingVariant}
+      />
+    )
+  }
+  return (
+    <Seo
+      title="Tất cả sản phẩm"
+      description={`Toàn bộ đồ công nghệ đang bán tại ${SITE_NAME}: tai nghe, laptop, màn hình, bàn phím, điện thoại, thiết bị thông minh.`}
+      path="/danh-muc"
+      noindex={isListingVariant}
     />
   )
 }
@@ -108,7 +123,7 @@ function breadcrumbJsonLd(p: Product) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Trang chủ", item: absoluteUrl("/") },
-      { "@type": "ListItem", position: 2, name: p.category_name, item: absoluteUrl(`/?category=${p.category}`) },
+      { "@type": "ListItem", position: 2, name: p.category_name, item: absoluteUrl(`/danh-muc/${p.category}`) },
       { "@type": "ListItem", position: 3, name: p.name },
     ],
   }
