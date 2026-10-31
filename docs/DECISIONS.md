@@ -165,3 +165,20 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 - Hệ quả / rủi ro:
   - Trên bộ mô phỏng, v3 cho kết quả **trùng hoàn toàn** với v2 (TEST_PLAN mục 3d): không bắt thêm, không nhầm thêm. Bộ mô phỏng không có hành vi chung SĐT hay "săn sale" nên R12, R14 chưa được đo.
   - Phát hiện trên tập test: luật theo đơn (R08 COD giá trị cao) kéo điểm tin cậy của khách mới hợp lệ xuống ~30. Đề xuất v3.1: chỉ tính các luật "về tài khoản" vào lớp 1; muốn đổi phải đo lại trên tập test mới.
+
+## ADR-010: Tự động khóa quyền mua hàng khi cố đặt lặp sau nhiều lần bị từ chối
+- Ngày: 2026-10-31
+- Trạng thái: Accepted
+- Bối cảnh: chưa có tình huống nào hệ thống ra quyết định CHẶN. Luca muốn tài khoản cố đặt hàng lặp lại sau khi bị từ chối bị khóa mua, tự động hoàn toàn. Giao diện đã ẩn COD / gỡ mã ngay khi bị từ chối, nên gửi lại đúng thứ đã bị từ chối nhiều lần gần như chắc chắn là gọi API trực tiếp hoặc dùng công cụ.
+- Các phương án:
+  - (1) Ban vô thời hạn ngay khi vượt ngưỡng: đúng ý ban đầu, nhưng một lỗi (mạng gửi lặp, lỗi giao diện) cũng thành khóa vĩnh viễn.
+  - (2) Khóa có bậc, tự động: lần đầu khóa 24 giờ, tái phạm trong 30 ngày thì khóa vô thời hạn; gỡ được qua khiếu nại hoặc Risk Manager.
+  - (3) Chỉ mở case, người quyết định khóa: an toàn nhất nhưng không tự động.
+- Quyết định: (2), Luca chọn.
+  - Ngưỡng: lần đặt hàng bị từ chối thứ 4 trong 24 giờ (đếm từ lần khóa gần nhất; các lần bị chặn vì đang khóa không được đếm).
+  - Chỉ khóa **quyền mua hàng**; khách vẫn đăng nhập, xem đơn, khiếu nại.
+  - Bảng `account_restrictions`: không xóa, chỉ đánh dấu gỡ (ai, khi nào, lý do). Audit `account.restrict` / `account.unrestrict`.
+- Lý do: tự động hoàn toàn như yêu cầu, có phản ứng theo bậc, và không có quyết định nào không đảo ngược được (người bị quyết định tự động có đường để con người xem xét lại).
+- Hệ quả / rủi ro:
+  - Khách thật bấm lặp do lỗi có thể bị khóa 24 giờ; giảm thiểu: thông điệp hướng dẫn khiếu nại, Risk Manager gỡ được.
+  - Kẻ gian có thể tạo tài khoản mới sau khi bị khóa: khóa theo tài khoản, chưa theo thiết bị (hướng phát triển: đưa "thiết bị từng gắn với tài khoản bị khóa" thành dấu hiệu trừ điểm tin cậy).

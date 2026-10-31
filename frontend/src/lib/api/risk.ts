@@ -30,6 +30,7 @@ export interface RiskDecision {
   order_code: string | null
   hits: RuleHit[]
   trust: Trust | null // điểm tin cậy tài khoản lúc quyết định (bộ luật v3); null với quyết định cũ
+  restriction: Restriction | null // quyết định này kích hoạt, hoặc bị chặn vì khóa mua hàng (ADR-010)
 }
 
 export type TrustTier = "normal" | "watch" | "restricted" | "review" | "critical"
@@ -67,6 +68,7 @@ export const ACTION_LABELS: Record<string, string> = {
   hold_order: "Giữ đơn",
   block: "Chặn đơn",
   open_case: "Mở case",
+  restrict_account: "Khóa mua hàng",
 }
 
 // Live Monitor: hỏi server mỗi 2 giây (polling). Đủ "thời gian thực" cho MVP;
@@ -177,5 +179,41 @@ export function useLinkGraph(userId: number | undefined) {
     queryKey: ["console", "risk", "graph", userId],
     queryFn: () => apiFetch<LinkGraph>(`/api/console/risk/graph/${userId}`),
     enabled: userId !== undefined,
+  })
+}
+
+// ---------- Khóa quyền mua hàng (ADR-010) ----------
+
+export type RestrictionKind = "purchase_cooldown" | "purchase_ban"
+
+export interface Restriction {
+  kind: RestrictionKind
+  since: string
+  until: string | null // null: vô thời hạn
+  reason: string
+}
+
+export const RESTRICTION_LABELS: Record<RestrictionKind, string> = {
+  purchase_cooldown: "Tạm khóa mua hàng",
+  purchase_ban: "Khóa mua hàng vô thời hạn",
+}
+
+export function useRestriction(userId: number) {
+  return useQuery({
+    queryKey: ["console", "risk", "restriction", userId],
+    queryFn: () => apiFetch<Restriction | null>(`/api/console/risk/users/${userId}/restriction`),
+  })
+}
+
+export function useLiftRestriction(userId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (reason: string) =>
+      apiFetch<null>(`/api/console/risk/users/${userId}/restriction/lift`, {
+        method: "POST",
+        body: JSON.stringify({ reason }),
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["console", "risk", "restriction", userId] }),
   })
 }

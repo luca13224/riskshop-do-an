@@ -1,10 +1,12 @@
 import {
   ACTION_LABELS,
+  RESTRICTION_LABELS,
   TRUST_TIER_LABELS,
   type RiskDecision,
   type Trust,
   type TrustTier,
 } from "@/lib/api/risk"
+import { formatDateTime } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 const STRENGTH_LABELS = {
@@ -77,6 +79,13 @@ export function DecisionDetail({ decision: d }: { decision: RiskDecision }) {
   const actions = Object.entries(d.actions).filter(([, on]) => on)
   return (
     <div className="grid gap-3">
+      {d.restriction && (
+        <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">
+          <b>{RESTRICTION_LABELS[d.restriction.kind]}</b>{" "}
+          {d.restriction.until ? `đến ${formatDateTime(d.restriction.until)}` : "vô thời hạn"} ·{" "}
+          {d.restriction.reason}
+        </p>
+      )}
       {d.trust && <TrustPanel trust={d.trust} />}
       {d.error && (
         <p className="text-sm text-destructive">

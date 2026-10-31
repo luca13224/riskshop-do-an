@@ -15,6 +15,7 @@
 | 3 | Điều tra case | 1:30 | Giải thích được, quy trình xử lý, audit | MVP |
 | 4 | Gia đình chung Wi-Fi (hard negative) | 1:00 | Kiểm soát chặn nhầm | MVP |
 | 5 | Bùng hàng COD và khách quen | 1:30 | Quyết định theo chính sách; giữ đơn chờ duyệt | MVP |
+| 5c | Cố tình đặt lặp → khóa mua hàng tự động | 0:45 | Quyết định CHẶN duy nhất trong demo; tự động nhưng gỡ được (ADR-010) | MVP |
 | 5d | Khiếu nại khi bị chặn nhầm | 1:00 | Khách có đường lên tiếng; xét lại bốn mắt; miễn trừ có kiểm soát | MVP |
 | 6 | Quản lý luật | 1:00 | Cấu hình được, có phiên bản, phân quyền | MVP (cơ bản) |
 | 7 | Kết quả thực nghiệm | 1:00 | Đã kiểm chứng bằng số liệu | MVP |
@@ -84,6 +85,12 @@
 - **5c.** Lan đặt COD giá trị cao → `ALLOW` (hard negative). Mở chi tiết: **luật tín hiệu tích cực** (lịch sử giao thành công dài) đã kéo điểm xuống.
 - **Chứng minh:** cùng mức rủi ro nhưng hành động khác nhau theo chính sách; vòng đời đơn hàng có bước giữ đơn chờ duyệt; lịch sử tốt được ghi nhận.
 - **Cần có:** module fulfillment (giả lập giao thành công/thất bại để có lịch sử), luật tỷ lệ COD thất bại có làm mượt, luật giá trị COD bất thường, luật tích cực, trạng thái `PENDING_REVIEW`, ẩn phương thức thanh toán theo quyết định.
+
+## Cảnh 5c — Cố tình đặt lặp sau khi bị từ chối (0:45)
+- Khang bị ẩn COD. Người thuyết trình nói: "kẻ gian bỏ qua giao diện, gọi thẳng API đặt COD nhiều lần".
+- Gửi 4 lần (công cụ API hoặc script): 3 lần đầu bị từ chối "Đơn hàng này hỗ trợ thanh toán trước"; lần thứ 4 bị **chặn** và tài khoản **tạm khóa mua hàng 24 giờ**; tái phạm trong 30 ngày thì khóa vô thời hạn.
+- Console: case tự mở, dải đỏ "Tạm khóa mua hàng", khung "Quyền mua hàng" có nút Gỡ khóa (chỉ Risk Manager, bắt buộc lý do, ghi audit).
+- Điểm nhấn: hoàn toàn tự động nhưng không có quyết định nào "không thể đảo ngược"; khách vẫn đăng nhập và khiếu nại được (chuyển sang cảnh 5d).
 
 ## Cảnh 5d — Khiếu nại khi bị chặn nhầm (1:00)
 - **Bên trái:** tài khoản mới ở cảnh 5b (đơn đang bị giữ) mở trang **Khiếu nại**.

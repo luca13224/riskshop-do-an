@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CaseStatusBadge } from "@/console/components/CaseStatusBadge"
 import { ContactPanel } from "@/console/components/ContactPanel"
+import { RestrictionPanel } from "@/console/components/RestrictionPanel"
 import { DecisionBadge, ScoreBar } from "@/console/components/DecisionBadge"
 import { LinkGraphPanel } from "@/console/components/LinkGraph"
 import { DecisionDetail } from "@/console/components/DecisionDetail"
@@ -173,6 +174,7 @@ export function CaseDetailPage() {
 
         <div className="grid content-start gap-6">
           <ActionPanel kase={c} />
+          <RestrictionPanel key={`r-${c.case_code}`} userId={c.primary_user_id} />
           <ContactPanel
             key={c.case_code}
             userId={c.primary_user_id}

@@ -22,6 +22,12 @@ Những điểm dưới đây được điều chỉnh khi lập trình Risk Eng
 - Thêm F14–F16 và R12–R15 (mục 2, 3). Mã TANTHU đổi thành **NGUOIMOI**, cấp sẵn vào túi voucher khi đăng ký.
 - Thiết kế: `docs/reviews/2026-10-31_TRUST_SCORE_DESIGN.md`. Kết quả: `TEST_PLAN.md` mục 3d.
 
+## 0d. Khóa quyền mua hàng tự động (2026-10-31, ADR-010)
+- Đếm số lần **đặt hàng bị từ chối** (đơn không được tạo) trong 24 giờ, tính từ lần khóa gần nhất. Lần thứ 4 → tạm khóa mua 24 giờ; đã từng bị khóa tự động trong 30 ngày → khóa vô thời hạn. Lần kích hoạt là quyết định **BLOCK**, tự mở case, ghi audit.
+- Khi đang khóa: mọi lần đặt hàng bị chặn ngay (không chấm điểm, không cộng dồn); vẫn đăng nhập, xem đơn, khiếu nại được.
+- Gỡ: khiếu nại được chấp nhận, hoặc Risk Manager/Admin (bắt buộc lý do ≥ 10 ký tự, audit `account.unrestrict`).
+- Đây là quy tắc thực thi theo **hành vi lặp lại**, không phải luật chấm điểm, nên không làm thay đổi nguyên tắc "REVIEW/BLOCK theo điểm cần luật mạnh" ở mục 4.
+
 ## 1. Ba điểm kiểm soát (evaluation context)
 
 | Context | Khi nào gọi | Quyết định có thể trả | Ghi chú |
