@@ -539,11 +539,13 @@
   z-index: 10;
 }
 
-/* Chữ thương hiệu cỡ lớn ở footer: chữ rỗng, sáng dần theo --p (0 → 1) do footer ghi khi lộ ra */
-.brand-outline {
+/* Chữ thương hiệu cỡ lớn ở footer: nền chữ mờ, lớp màu vàng → xanh phủ dần từ trái theo --p (0 → 1)
+   do footer ghi khi lộ ra. Không dùng text-stroke: font biến thiên có nét chồng nhau sẽ lộ vết chéo trong chữ S. */
+.brand-fill {
   color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.18);
-  background: linear-gradient(90deg, #ffd60a, #67e8f9) 0 0 / calc(var(--p, 0) * 100%) 100% no-repeat;
+  background:
+    linear-gradient(90deg, #ffd60a, #67e8f9) 0 0 / calc(var(--p, 0) * 100%) 100% no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.07));
   -webkit-background-clip: text;
   background-clip: text;
 }

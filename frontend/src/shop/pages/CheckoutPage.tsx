@@ -201,7 +201,7 @@ export function CheckoutPage() {
                           ? "Trả tiền mặt cho nhân viên giao hàng."
                           : (options.data?.message ??
                             "Chưa hỗ trợ cho đơn hàng này.")
-                        : "Cổng thanh toán mô phỏng, đơn được coi là đã thanh toán ngay."}
+                        : "Thanh toán trước khi giao, đơn được xác nhận ngay."}
                     </span>
                   </span>
                 </label>
