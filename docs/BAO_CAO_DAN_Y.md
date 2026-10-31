@@ -82,7 +82,15 @@
 ## Kết luận và hướng phát triển (~2–3 trang)
 - Kết quả đạt được (3–5 ý).
 - Hạn chế: dữ liệu mô phỏng, thời gian bị nén, luật có thể bị lách, ID thiết bị không phải fingerprint thật, chưa đo tải.
-- Hướng phát triển: đặc trưng cụm từ đồ thị liên kết (luật v2, đo lại trên tập test mới); ML chạy song song (shadow mode); SSE cho Live Monitor; tách Risk thành service; trợ lý tóm tắt case cho analyst (có người duyệt).
+- Hướng phát triển (cập nhật 2026-10-31; luật v2 cụm địa chỉ và Trust Score v3 đã làm):
+  - **v3.1:** tách luật "về tài khoản" và "về giao dịch", chỉ luật tài khoản tính vào điểm tin cậy (ADR-009); đo lại trên tập test mới.
+  - **Chế độ bóng (shadow mode)** cho luật mới; **xác minh thêm (OTP)** thay cho gỡ mã ngay khi điểm tin cậy thấp.
+  - **Đổi chính sách thay vì bắt người:** mã người mới giới hạn theo SĐT nhận hàng.
+  - **Lan truyền rủi ro trên đồ thị:** khoảng cách tới tài khoản đã xác nhận lạm dụng; thêm nút SĐT nhận hàng.
+  - **Học máy khi có nhãn thật:** hồi quy logistic (giải thích được) học điểm từ kết quả case; Isolation Forest chỉ để gợi ý cho analyst.
+  - **Tách Risk Engine thành dịch vụ dùng lại được:** API có phiên bản + khóa, API nhận sự kiện, plugin WooCommerce (ARCHITECTURE.md mục 6).
+  - **Luồng tranh chấp có bằng chứng video** (ý tưởng của Luca): shop quay lúc đóng gói, shipper chụp lúc bàn giao, khách quay lúc mở hàng; bằng chứng gắn vào khiếu nại "hàng sai/thiếu". Băm SHA-256 và ghi dấu thời gian ở server lúc tải lên để phát hiện chỉnh sửa; chính sách ai được xem, lưu bao lâu, sự đồng ý của người bị quay. Web làm được (ô tải file `capture` hoặc `getUserMedia` + `MediaRecorder`, cần HTTPS) nhưng khó bắt buộc quay trực tiếp và chống chỉnh sửa như app. Cần module đổi trả/hoàn tiền trước; sau đó thêm luật "khiếu nại hàng sai nhiều lần" vào Trust Score. Không dùng thị giác máy tính để tự kiểm hàng.
+  - Thẻ / tài khoản ngân hàng dùng chung (cần thanh toán thật); SSE cho Live Monitor; trợ lý tóm tắt case cho analyst (có người duyệt).
 
 ## Tài liệu tham khảo
 **[XM]** Chỉ đưa tài liệu đã đọc và kiểm chứng được. Đề cương hiện có 2 tài liệu (VECOM EBI 2023; một tài liệu về phát hiện bất thường luồng mạng), cần khoảng 10–15 tài liệu: sách hoặc bài báo về fraud detection, đánh giá mô hình phân loại, link analysis; văn bản pháp luật về dữ liệu cá nhân; tài liệu chính thức của FastAPI, SQLAlchemy, React, MariaDB.
