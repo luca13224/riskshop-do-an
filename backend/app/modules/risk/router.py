@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.modules.auth.deps import require_roles
 from app.modules.auth.models import ADMIN, RISK_MANAGER, STAFF_ROLES, User
-from app.modules.risk import rules_admin, service
+from app.core.errors import AppError
+from app.modules.risk import graph, rules_admin, service
 from app.modules.risk.schemas import DecisionOut, NewVersionIn, RuleOut, RuleVersionOut
 
 router = APIRouter(prefix="/console/risk", tags=["risk"], dependencies=[Depends(require_roles(*STAFF_ROLES))])
@@ -38,3 +39,13 @@ def new_rule_version(
     db: Session = Depends(get_db),
 ):
     return rules_admin.create_version(db, user, code, data.params, data.enabled, data.change_note)
+
+
+# Đồ thị liên kết: các tài khoản dính với nhau qua thiết bị / IP / địa chỉ giao hàng (2 bước, 30 ngày)
+@router.get("/graph/{user_id}")
+def link_graph(user_id: int, db: Session = Depends(get_db)) -> dict:
+    result = graph.link_graph(db, user_id)
+    if result is None:
+        raise AppError("USER_NOT_FOUND", "Không tìm thấy khách hàng.", 404)
+    return result
+
