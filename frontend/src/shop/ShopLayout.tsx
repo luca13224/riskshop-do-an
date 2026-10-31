@@ -7,6 +7,7 @@ import { isStaff, useLogout, useMe } from "@/lib/api/auth"
 import { useCart } from "@/lib/api/cart"
 import { useCategories } from "@/lib/api/catalog"
 import { cn } from "@/lib/utils"
+import { ShopSeo } from "@/shop/ShopSeo"
 
 function CartButton() {
   const { data: cart } = useCart()
@@ -88,6 +89,7 @@ export function ShopLayout() {
 
   return (
     <div className="shop flex min-h-svh flex-col overflow-x-clip">
+      <ShopSeo />
       {/* Trang chủ mở đầu bằng "phòng chiếu" tối, nên thanh thông báo cũng tối theo (nhấn cyan, ADR-005) */}
       <p
         className={cn(

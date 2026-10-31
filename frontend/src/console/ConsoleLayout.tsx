@@ -15,11 +15,12 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { useState, type FormEvent } from "react"
-import { Link, NavLink, Outlet, useNavigate } from "react-router"
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router"
 
 import { ROLE_LABELS, useLogout, useMe } from "@/lib/api/auth"
 import { useDashboard } from "@/lib/api/dashboard"
 import { useHealth } from "@/lib/api/health"
+import { Seo } from "@/lib/seo"
 import { cn } from "@/lib/utils"
 
 type BadgeKey = "cases" | "appeals"
@@ -82,8 +83,14 @@ export function ConsoleLayout() {
     appeals: dash.data?.attention.open_appeals ?? 0,
   }
 
+  // Tiêu đề tab theo mục đang mở (khớp đường dẫn dài nhất); Console là khu vực nội bộ nên luôn noindex
+  const { pathname } = useLocation()
+  const current = ALL_ITEMS.filter((i) => pathname === i.to || pathname.startsWith(i.to + "/"))
+    .sort((a, b) => b.to.length - a.to.length)[0]
+
   return (
     <div className="console flex min-h-svh">
+      <Seo title={`${current?.label ?? "Tổng quan"} · Risk Console`} path={pathname} noindex />
       <aside className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col border-r bg-background/40 backdrop-blur md:flex">
         <Link
           to="/console"

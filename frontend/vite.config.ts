@@ -16,6 +16,9 @@ export default defineConfig({
     // nên frontend gọi "/api/health" mà không cần ghi địa chỉ backend.
     proxy: {
       "/api": "http://127.0.0.1:8000",
+      // SEO: robots.txt và sitemap.xml do backend sinh từ danh mục sản phẩm
+      "/robots.txt": "http://127.0.0.1:8000",
+      "/sitemap.xml": "http://127.0.0.1:8000",
     },
   },
 })

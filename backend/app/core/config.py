@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     sim_database_url: str | None = None  # CSDL riêng cho bộ mô phỏng (simulator)
     # Danh sách origin cho phép gọi API từ trình duyệt, cách nhau bằng dấu phẩy
     cors_origins: str = "http://localhost:5173"
+    # Địa chỉ gốc công khai của website, dùng để ghép URL tuyệt đối trong sitemap.xml và robots.txt (SEO)
+    site_url: str = "http://localhost:5173"
 
     # Khóa bí mật để băm IP (HMAC). Đổi khóa thì mọi bản băm IP cũ không so khớp được nữa.
     ip_hash_secret: str
