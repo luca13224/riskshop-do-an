@@ -82,7 +82,7 @@ export function DecisionDetail({ decision: d }: { decision: RiskDecision }) {
       {d.restriction && (
         <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">
           <b>{RESTRICTION_LABELS[d.restriction.kind]}</b>{" "}
-          {d.restriction.until ? `đến ${formatDateTime(d.restriction.until)}` : "vô thời hạn"} ·{" "}
+          {d.restriction.until ? `đến ${formatDateTime(d.restriction.until)} ` : ""}·{" "}
           {d.restriction.reason}
         </p>
       )}
