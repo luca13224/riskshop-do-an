@@ -1,13 +1,13 @@
 # Bắt đầu từ đây — thông tin demo RiskShop
 
 > File ghim ở đầu repo: link, tài khoản demo, cách chạy, các cảnh demo. Cập nhật lần cuối: 2026-10-31.
-> **Mật khẩu KHÔNG nằm ở đây** (repo đưa lên GitHub). Mật khẩu ở `backend/.env.accounts` trên máy (xem mục 2).
+> **Mật khẩu KHÔNG nằm ở đây** (repo công khai trên GitHub, ai có link cũng xem được). Mật khẩu ở `backend/.env.accounts` trên máy (xem mục 2).
 
 ## 1. Đường dẫn
 
 | | Địa chỉ |
 |---|---|
-| GitHub (private) | https://github.com/luca13224/riskshop-do-an |
+| GitHub (công khai) | https://github.com/luca13224/riskshop-do-an |
 | Shop (khách hàng) | http://localhost:5173 |
 | Risk Console (nhân viên) | http://localhost:5173/console |
 | Tài liệu API (tự sinh) | http://localhost:8000/docs |
