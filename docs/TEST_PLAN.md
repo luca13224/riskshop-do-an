@@ -48,7 +48,7 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
 
-## 3e. Bộ luật v3.1 — luật giao dịch không trừ điểm tài khoản (2026-11-03, ADR-012, Proposed)
+## 3e. Bộ luật v3.1 — luật giao dịch không trừ điểm tài khoản (2026-11-03, ADR-012)
 Thay đổi: R08 (COD giá trị cao, ít lịch sử) không còn trừ vào điểm tin cậy tài khoản (`trust.exclude_rules`), vẫn tính vào điểm COD của đơn. Kiểm tra nhanh trên dev_v2 (không có tham số nào để tinh chỉnh: kết quả trùng v3), sau đó chạy **tập test_v2 seed 5 (seed chưa từng dùng)**, mỗi phiên bản một lần, cùng dân số:
 ```
 .venv/Scripts/python -m simulator --dataset test_v2 --seed 5 --confirm-test                      # v3.1

@@ -57,7 +57,7 @@ Yêu cầu chi tiết (FR / NFR / BR / UC) ở `docs/REQUIREMENTS.md`. Kịch b�
 - [x] Report tháng 10 (bản Word, chưa gửi)
 - [x] REQUIREMENTS.md bản 1 (2026-11-03)
 - [ ] Chốt bảng mục tiêu O1–O9 với GVHD
-- [x] Đo bổ sung 2026-11-03: v3.1 trên seed 5 (ADR-012, Proposed), tải đồng thời, script đối chiếu giải thích / audit
+- [x] Đo bổ sung 2026-11-03: v3.1 trên seed 5 (ADR-012), tải đồng thời, script đối chiếu giải thích / audit
 - [ ] Còn đo: persona né khóa trong mô phỏng (O7), buổi đo thời gian xử lý case (O9)
 - [ ] Tra nguồn số liệu cho phần bối cảnh
 - [ ] Viết báo cáo theo `docs/BAO_CAO_DAN_Y.md`

@@ -199,7 +199,7 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 
 ## ADR-012: Bộ luật v3.1 — luật chỉ mô tả đơn đang đặt không trừ vào điểm tin cậy tài khoản
 - Ngày: 2026-11-03
-- Trạng thái: Proposed (đã cài và đo, chờ Luca duyệt; muốn quay về v3 chỉ cần bỏ khóa `exclude_rules` trong `TRUST`)
+- Trạng thái: Accepted (Luca duyệt 2026-11-03; muốn quay về v3 chỉ cần bỏ khóa `exclude_rules` trong `TRUST`)
 - Bối cảnh: đo bộ luật v3 (TEST_PLAN 3d) cho thấy khách mới hợp lệ mua COD giá trị cao có điểm tin cậy thấp hơn cả farm (trung vị 30), vì R08 "COD giá trị cao, ít lịch sử" bị cộng vào điểm TÀI KHOẢN. R08 không nói gì về con người, chỉ nói về đơn đang đặt (giá trị, phương thức). Điểm tin cậy bị kéo xuống thì khách đó bị khóa mã GIAM10 / NGUOIMOI, bị mở case ở các lần sau.
 - Các phương án:
   - (1) Giữ v3: đơn giản, nhưng điểm tin cậy lẫn "đơn này rủi ro" với "người này đáng ngờ"; giải thích với khách khó.
