@@ -40,5 +40,5 @@ def test_ban_evaders_are_locked_but_relatives_are_not():
     m = run(TestSession, "dev_v3", seed=3, scale=0.4)
     assert m["runtime"]["server_errors"] == []
     evader, relative = m["per_persona"]["ban_evader"], m["per_persona"]["banned_relative"]
-    assert evader["flagged"] == evader["n"]
+    assert evader["flagged"] == evader["n"] and evader.get("vouchers", 0) == 0
     assert "purchase_linked" not in relative.get("locked", {})

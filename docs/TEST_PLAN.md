@@ -13,7 +13,7 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 - Danh sách sản phẩm: sắp xếp theo giá, lọc khoảng giá, từ chối tham số sai (`test_catalog.py`); Console Đơn hàng: lọc trạng thái, tìm mã đơn, phân trang, đếm theo trạng thái (`test_order.py`); robots.txt, sitemap (`test_seo.py`).
 - Điểm tin cậy và túi voucher (`test_trust.py`); khóa quyền mua hàng tự động, gỡ khóa, khiếu nại gỡ khóa (`test_restrictions.py`).
 - Né lệnh khóa bằng tài khoản mới, gia đình chung máy, chung IP, khóa thủ công (`test_linked_ban.py`, `test_restrictions.py`).
-- Lần chạy gần nhất: **192 test qua** (2026-11-03).
+- Lần chạy gần nhất: **193 test qua** (2026-11-03).
 
 ## 2. Thực nghiệm mô phỏng (`backend/simulator`)
 ```
@@ -47,6 +47,30 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Bùng hàng COD chỉ bắt được ~50–67%: kẻ có lịch sử ngắn (dưới 3 đơn) chưa đủ dữ liệu cho luật tỉ lệ thất bại.
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
+
+## 3i. Sau ADR-013: R16 chỉ trừ điểm tin cậy, khóa ở bước đặt hàng (2026-11-03, mục tiêu O7)
+Đổi: R16 không cộng vào điểm voucher / COD (contexts rỗng), bậc 1 điểm chung 45 → 35 (chọn trên dev_v3). Chạy **test_v3 seed 7** (seed mới), một lần:
+```
+.venv/Scripts/python -m simulator --dataset test_v3 --seed 7 --confirm-test
+```
+
+| Persona (test_v3) | Seed 6, trước ADR-013 | **Seed 7, sau ADR-013** |
+|---|---|---|
+| Né khóa chung ≥ 2 điểm: bị khóa thanh toán | 7/15 = 46,7% | **10/15 = 66,7%** (KTC 95%: 41,7%–84,8%) |
+| — bị gắn cờ / lấy được mã | 15/15 / 0 | 15/15 / 0 |
+| Né khóa cùng máy gom mã: bị khóa | 8/12 | 11/15 |
+| Né khóa chỉ giữ SĐT (chưa biết): lấy được mã | 0/6 | **6/6** (đánh đổi đã biết trước) |
+| Người nhà dùng chung máy: bị hạn chế | 7/8 | **0/8** (KTC 95%: 0%–32,4%) |
+| FPR hard negative toàn tập | 23,5% | 16,5% |
+| FPR tổng / precision / recall | 8,0% / 78,5% / 49,4% | 5,8% / 84,1% / 49,5% |
+
+Dấu vân tay `f270cd66dfcbe367…`. Hai seed là hai dân số khác nhau nên cột trái chỉ để tham khảo. Chi tiết: [test v3 seed 7](experiments/test_v3_seed7_scale1.md), [dev v3 sau ADR-013](experiments/dev_v3_seed1_scale1_adr013.md).
+
+### Đọc kết quả (trung thực)
+- Đạt mục đích chính của ADR-013: người nhà không còn bị phạt nhầm, và nhiều kẻ né khóa bị khóa hơn.
+- **O7 vẫn chưa đạt (66,7% < 90%).** 5 tài khoản còn lại thao tác như bot (đăng ký xong áp mã ngay, không xem sản phẩm): R06 + R16 + R01 kéo điểm tin cậy xuống 35, mã bị gỡ ở bước áp mã, chúng bỏ đơn. Không lấy được lợi ích, nhưng không có lệnh khóa. Con số này phụ thuộc giả định persona (kẻ gian hành xử như bot), nên không khái quát.
+- Cái giá: biến thể chỉ chung SĐT lấy được mã 6/6, đúng như ADR-011 (1 điểm thì chỉ mở case). Hướng phát triển: analyst xử lý case, hoặc thêm tín hiệu (thẻ thanh toán, mục ADR-011).
+- Recall biến thể chưa biết về 0% ở seed 7 (seed 6: 16,7%, toàn bộ là 6 tài khoản "chỉ giữ SĐT").
 
 ## 3h. Né lệnh khóa bằng tài khoản mới (2026-11-03, ADR-011, mục tiêu O7)
 Bộ dữ liệu mới `dev_v3` / `test_v3` = bộ v2 + 4 persona (định nghĩa trước khi chạy, xem đầu `simulator/personas.py`). Mỗi nhóm có một tài khoản **nguồn** mua một đơn rồi bị nhân viên khóa vô thời hạn; tài khoản nguồn không được chấm.

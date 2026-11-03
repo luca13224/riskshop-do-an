@@ -215,3 +215,21 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
   - Kẻ gian dùng đơn COD giá trị cao không còn bị trừ điểm tài khoản vì riêng R08; vẫn bị giữ đơn, và R07 / R10 (lịch sử COD) vẫn trừ điểm.
   - Luật giao dịch mới thêm sau này phải được xếp loại (tài khoản hay giao dịch) khi viết luật (cập nhật skill `risk-rule`).
   - Giả định chưa kiểm chứng: các luật còn lại đều mô tả tài khoản; R05 (thử mã liên tục) và R06 (tốc độ như bot) là hành vi theo phiên, có thể cần xem lại.
+
+## ADR-013: R16 chỉ trừ điểm tin cậy; khóa kẻ né lệnh khóa ở bước đặt hàng
+- Ngày: 2026-11-03
+- Trạng thái: Accepted (Luca chọn 2026-11-03; sửa phần cài đặt của ADR-011, phần quy tắc khóa của ADR-011 giữ nguyên)
+- Bối cảnh: đo O7 (TEST_PLAN 3h) cho thấy cài đặt khác thiết kế ADR-011. ADR-011 định "chung 1 điểm → chỉ trừ điểm tin cậy + mở case", nhưng R16 (+45) cộng thẳng vào điểm voucher / COD, nên 7/8 người nhà dùng chung máy bị gỡ mã và tắt COD. Cùng lúc, kẻ né khóa bị gỡ mã ngay ở bước áp mã (lúc đó mới thấy 1 điểm là thiết bị), bỏ đơn, không tới bước đặt hàng nơi có đủ ≥ 2 điểm để bị khóa: chỉ 46,7% bị khóa.
+- Các phương án:
+  - (1) Khóa ngay ở bước áp mã khi chung máy với tài khoản bị khóa và đang dùng mã người mới: khóa được nhiều hơn, nhưng ở bước này người nhà và kẻ né khóa giống hệt nhau, người nhà bị khóa thanh toán 30 ngày.
+  - (2) R16 chỉ trừ điểm tin cậy (contexts rỗng, không cộng vào điểm giao dịch), hạ bậc 1 điểm chung từ 45 xuống 35 để tài khoản mới (R01 −10) vẫn còn ≥ 50 = `min_trust` của NGUOIMOI. Kẻ né khóa đi tiếp tới bước đặt hàng và bị khóa khi chung ≥ 2 điểm.
+- Quyết định: (2). Điều kiện khóa của ADR-011 không đổi (≥ 2 điểm, hoặc 1 điểm + spam mã người mới).
+- Lý do: đúng ý thiết kế ADR-011; ưu tiên không phạt nhầm người nhà; bằng chứng đầy đủ nhất có ở bước đặt hàng. Con số 35 chọn bằng lập luận trên dev_v3, không chỉnh theo tập test.
+- Kết quả đo (test_v3 seed 7, seed mới, chạy một lần; so với seed 6 ở TEST_PLAN 3h là so khác dân số, chỉ mang tính tham khảo):
+  - Né khóa chung ≥ 2 điểm: bị khóa 10/15 = 66,7% (seed 6: 46,7%); vẫn 100% bị gắn cờ, 0 mã bị lấy.
+  - Người nhà dùng chung máy: 0/8 bị hạn chế (seed 6: 7/8).
+  - Đánh đổi đã biết trước: biến thể "chỉ giữ SĐT cũ" (1 điểm, không spam) giờ lấy được mã 6/6 (seed 6: 0/6). Theo ADR-011 trường hợp này chỉ mở case; analyst là lớp xử lý.
+- Hệ quả / rủi ro:
+  - O7 (≥ 90% bị khóa) vẫn chưa đạt. Phần còn lại: kẻ né khóa thao tác như bot (R06) bị điểm tin cậy kéo xuống dưới 50, bị gỡ mã ở bước áp mã rồi bỏ đơn: không lấy được lợi ích nhưng không bị ghi lệnh khóa.
+  - R16 không còn xuất hiện trong danh sách "luật khớp" của giao dịch, chỉ trong "sổ trừ điểm"; lý do khóa vẫn ghi rõ tài khoản và loại điểm chung. Trang Luật hiển thị "chỉ điểm tin cậy tài khoản".
+  - Seed đổi luôn: phiên bản luật mới tạo từ seed lấy ghi chú `note` của luật làm lý do thay đổi.

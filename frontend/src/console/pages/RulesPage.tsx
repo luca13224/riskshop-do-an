@@ -133,7 +133,7 @@ function RuleCard({ rule, canEdit }: { rule: Rule; canEdit: boolean }) {
         <CardContent className="grid gap-4 text-sm">
           <p className="text-xs text-muted-foreground">
             Áp dụng ở:{" "}
-            {rule.active.contexts.map((c) => CONTEXT_LABELS[c]).join(", ")} ·
+            {rule.active.contexts.map((c) => CONTEXT_LABELS[c]).join(", ") || "chỉ điểm tin cậy tài khoản"} ·
             Câu giải thích: "{rule.active.reason_template}"
           </p>
 

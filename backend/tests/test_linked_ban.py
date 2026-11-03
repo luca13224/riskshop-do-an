@@ -55,14 +55,30 @@ def test_family_member_on_shared_device_is_not_locked(shop, db):
     con = customer("con@example.com", "device-nha-0001", ip="198.51.100.20")  # dùng chung máy của bố
     browse(con)
     r = try_voucher(con)  # thử mã MỘT lần: chưa phải spam
-    assert r.status_code == 409  # mã người mới bị gỡ (điểm voucher và điểm tin cậy đều xấu)
+    # ADR-013: chung 1 điểm chỉ trừ điểm tin cậy (R16 không cộng vào điểm voucher), nên vẫn dùng được mã người mới
+    assert r.status_code == 200
     d = last_decision(db, "con@example.com")
     assert d.features_snapshot["banned_link_types_90d"] == 1
-    assert "LINKED_TO_BANNED" in hit_codes(db, d) and d.features_snapshot["trust_score"] < 50
+    assert "LINKED_TO_BANNED" not in hit_codes(db, d)
+    assert d.features_snapshot["trust_deductions"]["LINKED_TO_BANNED"] == 35
+    assert 50 <= d.features_snapshot["trust_score"] < 70  # bậc "theo dõi": đủ cho NGUOIMOI, không đủ cho GIAM10
     assert db.scalar(select(Job.id).where(Job.job_type == "open_case"))  # analyst được báo để xem
     assert linked_locks(db, "con@example.com") == []  # KHÔNG khóa thanh toán
-    # Con vẫn mua được bằng địa chỉ của mình, không dùng mã
+    # Con mua được bằng địa chỉ của mình
     assert order(con, {**ADDRESS, "line": "2 Phố Con", "phone": "0922000222"}).status_code == 201
+    assert linked_locks(db, "con@example.com") == []
+
+
+def test_evader_who_keeps_the_code_is_locked_at_checkout(shop, db):
+    """ADR-013: kẻ né khóa không bị gỡ mã ở bước áp mã (mới thấy 1 điểm), nên đi tiếp; tới bước đặt hàng
+    hệ thống thấy thêm địa chỉ / SĐT của tài khoản bị khóa (>= 2 điểm) thì chặn đơn và khóa thanh toán."""
+    dad = banned_dad(db)
+    alt = customer("ne-khoa@example.com", "device-nha-0001", ip="198.51.100.22")
+    assert try_voucher(alt).status_code == 200
+    blocked = order(alt, HOME)  # giao về đúng địa chỉ / SĐT của tài khoản bị khóa
+    assert blocked.status_code == 403
+    (lock,) = linked_locks(db, "ne-khoa@example.com")
+    assert f"#{dad}" in lock.reason
 
 
 def test_new_account_spamming_welcome_code_gets_30_day_lock(shop, db):

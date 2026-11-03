@@ -44,7 +44,7 @@ Mã giảm giá: **NGUOIMOI** (−50.000đ, khách mới, đơn từ 200.000đ, 
 - **Demo reset** (XÓA toàn bộ dữ liệu, tạo lại sản phẩm, voucher, luật, nhân viên, Minh/Khang/Lan; chỉ chạy khi `.env` có `DEMO_MODE=true`):
   `cd backend` → `.venv/Scripts/python -m app.modules.lab.reset --yes`
 - **Lịch sử 14 ngày** cho Dashboard có số liệu: `.venv/Scripts/python -m simulator.history --days 14 --yes`
-- Kiểm tra nhanh: `.venv/Scripts/python -m pytest -q` (hiện 192 test qua).
+- Kiểm tra nhanh: `.venv/Scripts/python -m pytest -q` (hiện 193 test qua).
 
 ## 5. Các cảnh có thao tác đặc biệt
 
@@ -59,5 +59,5 @@ Mã giảm giá: **NGUOIMOI** (−50.000đ, khách mới, đơn từ 200.000đ, 
 ## 6. Quy tắc khóa (tóm tắt để trả lời hội đồng)
 
 - Lần đặt hàng bị từ chối thứ 4 trong 24 giờ → khóa mua 24 giờ; tái phạm trong 30 ngày → khóa vô thời hạn (ADR-010).
-- Tài khoản mới chung **≥ 2** điểm (thiết bị, SĐT nhận hàng, địa chỉ) với tài khoản đang bị khóa vô thời hạn, hoặc chung 1 điểm **và** spam mã người mới → khóa thanh toán 30 ngày, tái phạm 60 ngày. Chung 1 điểm mà không spam (người nhà dùng chung máy) → chỉ trừ điểm tin cậy và mở case. Chung IP → không tính (ADR-011).
+- Tài khoản mới chung **≥ 2** điểm (thiết bị, SĐT nhận hàng, địa chỉ) với tài khoản đang bị khóa vô thời hạn, hoặc chung 1 điểm **và** spam mã người mới → khóa thanh toán 30 ngày, tái phạm 60 ngày. Chung 1 điểm mà không spam (người nhà dùng chung máy) → chỉ trừ điểm tin cậy và mở case. Chung IP → không tính (ADR-011, ADR-013).
 - Mọi lệnh khóa: tự mở case, ghi audit, khách vẫn đăng nhập và khiếu nại được, Risk Manager gỡ được (bắt buộc lý do).

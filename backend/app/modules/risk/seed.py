@@ -106,13 +106,17 @@ RULES = [
     # ---- ADR-011: né lệnh khóa bằng tài khoản mới ----
     # Một điểm chung mạnh với tài khoản đang bị ban: trừ đủ mạnh để mã người mới bị khóa (tin cậy < 50) và mở case,
     # nhưng KHÔNG tự khóa thanh toán (bố bị ban, con dùng chung máy). Khóa thanh toán xử lý riêng ở service.
+    # ADR-013: R16 CHỈ trừ điểm tin cậy tài khoản (contexts rỗng: không cộng vào điểm voucher / COD của giao dịch).
+    # Chung 1 điểm (người nhà dùng chung máy) thì không bị gỡ mã sớm; kẻ né khóa đi tiếp tới bước đặt hàng, nơi biết
+    # đủ thiết bị + SĐT + địa chỉ, và bị khóa thanh toán khi chung >= 2 điểm (service._linked_enforcement).
+    # 35 điểm (trước là 45, chọn trên dev_v3): cộng R01 (10) vẫn còn 55 >= 50 = min_trust của NGUOIMOI.
     dict(code="LINKED_TO_BANNED", name="R16 · Dùng chung thiết bị / SĐT / địa chỉ với tài khoản đang bị khóa",
          rule_type="count_threshold_tiers", strength="medium", policies=[V, C],
-         contexts=[VOUCHER_APPLY, PAYMENT_OPTIONS, PLACE_ORDER],
-         params={"feature": "banned_link_types_90d", "tiers": [{"gte": 2, "points": 60}, {"gte": 1, "points": 45}]},
+         contexts=[],
+         params={"feature": "banned_link_types_90d", "tiers": [{"gte": 2, "points": 60}, {"gte": 1, "points": 35}]},
          reason_template="Dùng chung {value} loại điểm (thiết bị, SĐT, địa chỉ) với tài khoản đang bị khóa "
                          "(ngưỡng {threshold})",
-         note="ADR-011: né lệnh khóa bằng tài khoản mới"),
+         note="ADR-013: chỉ trừ điểm tin cậy; 1 điểm chung = 35"),
 ]
 
 # Bậc điểm tin cậy (bộ luật v3): dưới case_below thì mở case lúc đặt hàng; từ cod_off_at_or_below trở xuống thì tắt COD.
@@ -141,7 +145,7 @@ def seed_rules(db: Session) -> int:
             ):
                 version = RuleVersion(rule_id=rule.id, version=current.version + 1, contexts=spec["contexts"],
                                       params=spec["params"], reason_template=spec["reason_template"],
-                                      change_note="Cập nhật từ seed: đồng bộ payment_options với place_order")
+                                      change_note=spec.get("note", "Cập nhật từ seed"))
                 db.add(version)
                 db.flush()
                 rule.active_version_id = version.id
