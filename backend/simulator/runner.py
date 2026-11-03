@@ -35,6 +35,7 @@ from app.modules.auth.models import CUSTOMER
 from app.modules.catalog import seed as catalog_seed
 from app.modules.promotion import seed as promotion_seed
 from app.modules.risk.models import DecisionPolicy, Rule, RuleVersion
+from app.modules.risk import service as risk_service
 from app.modules.risk.seed import seed_rules
 from app.modules.simulation.models import SimLabel, SimRun
 from simulator.personas import Account, Group, build_population
@@ -119,6 +120,11 @@ class Actions:
         """Farm chỉ mua khi còn voucher; bị gỡ voucher thì bỏ."""
         if a.client.get("/api/cart").json().get("voucher"):
             self._place(a, address, "PREPAID")
+
+    def ban(self, a: Account) -> None:
+        """Nhân viên khóa vô thời hạn tài khoản nguồn (bối cảnh cho persona né lệnh khóa, ADR-011)."""
+        risk_service.ban(self.db, a.user_id, None, "Mô phỏng: khóa sau khi xem case lạm dụng")
+        self.db.commit()
 
     def _place(self, a: Account, address: dict, method: str):
         return self._timed("place_order", lambda: a.client.post(
@@ -274,6 +280,17 @@ def evaluate(db: Session, run_id: int) -> dict:
     for (persona, _), flags in groups.items():
         group_recall[persona][0] += int(any(flags))
         group_recall[persona][1] += 1
+
+    # Khóa tài khoản theo persona (O7: né lệnh khóa phải bị khóa thanh toán; người nhà thì không)
+    for persona, kind, c in db.execute(text("""
+        SELECT l.persona, r.kind, COUNT(DISTINCT r.user_id) FROM account_restrictions r
+        JOIN sim_labels l ON l.user_id = r.user_id WHERE l.run_id = :run GROUP BY l.persona, r.kind"""),
+            {"run": run_id}).all():
+        per_persona[persona].setdefault("locked", {})[kind] = c
+    for persona, c in db.execute(text("""
+        SELECT l.persona, COUNT(*) FROM voucher_redemptions v JOIN sim_labels l ON l.user_id = v.user_id
+        WHERE l.run_id = :run GROUP BY l.persona"""), {"run": run_id}).all():
+        per_persona[persona]["vouchers"] = c
 
     hard = [r for r in rows if r.hard_negative]
     normal_legit = [r for r in rows if not r.is_abuse and not r.hard_negative]

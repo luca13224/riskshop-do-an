@@ -14,7 +14,13 @@ PERSONA_LABELS = {
     "cod_hoarder": "Tài khoản mới treo nhiều đơn COD",
     "roommates_4g": "Nhóm ở trọ chung nhà, mỗi người 4G riêng",
     "farm_multi_drop": "Farm phân tán gom hàng về 2–3 điểm nhận",
+    "ban_evader": "Né lệnh khóa: tài khoản mới chung ≥ 2 điểm với tài khoản bị khóa",
+    "ban_evader_spam": "Né lệnh khóa: nhiều tài khoản mới cùng máy, gom mã người mới",
+    "ban_evader_one_link": "Né lệnh khóa: chỉ giữ SĐT nhận hàng cũ",
+    "banned_relative": "Người nhà dùng chung máy với tài khoản bị khóa",
 }
+
+LOCK_LABELS = {"purchase_linked": "khóa do liên kết", "purchase_cooldown": "khóa 24 giờ", "purchase_ban": "khóa vô thời hạn"}
 
 
 def _r(rate: dict) -> str:
@@ -55,13 +61,14 @@ def render_markdown(m: dict) -> str:
         f"| FPR: hard negative | {_r(m['fpr_hard_negative'])} |",
         "",
         "## Theo persona",
-        "| Persona | Loại | Số tài khoản | Bị gắn cờ | Tỷ lệ |",
-        "|---|---|---|---|---|",
+        "| Persona | Loại | Số tài khoản | Bị gắn cờ | Tỷ lệ | Bị khóa tài khoản | Voucher đã dùng |",
+        "|---|---|---|---|---|---|---|",
     ]
     for key, p in m["per_persona"].items():
         kind = ("Lạm dụng (chưa biết)" if p["unseen"] else "Lạm dụng") if p["is_abuse"] else (
             "Hard negative" if p["hard_negative"] else "Hợp lệ")
-        lines.append(f"| {PERSONA_LABELS.get(key, key)} | {kind} | {p['n']} | {p['flagged']} | {p['rate']:.0%} |")
+        locked = ", ".join(f"{c} {LOCK_LABELS.get(k, k)}" for k, c in sorted(p.get("locked", {}).items())) or "—"
+        lines.append(f"| {PERSONA_LABELS.get(key, key)} | {kind} | {p['n']} | {p['flagged']} | {p['rate']:.0%} | {locked} | {p.get('vouchers', 0)} |")
 
     lines += ["", "## Phát hiện theo nhóm (một farm bị phát hiện nếu ít nhất một tài khoản bị gắn cờ)",
               "| Kiểu lạm dụng | Nhóm bị phát hiện / tổng |", "|---|---|"]

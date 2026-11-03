@@ -63,6 +63,31 @@ DATASETS["test_v2"] = {
     "farm_multi_drop": {"n": 5, "accounts": (6, 9), "drops": (2, 3)},
 }
 
+# ---- Bộ dữ liệu cho mục tiêu O7 (2026-11-03, ADR-011): né lệnh khóa bằng tài khoản mới. ----
+# Mỗi nhóm có một tài khoản NGUỒN: đăng ký, mua một đơn, rồi bị nhân viên khóa vô thời hạn (purchase_ban).
+# Tài khoản nguồn không nằm trong dân số được chấm (nó là bối cảnh, không phải đối tượng đo).
+# - ban_evader (đã biết): tài khoản mới chung >= 2 điểm (thiết bị, SĐT nhận hàng, địa chỉ) với nguồn, dùng mã người mới.
+# - ban_evader_spam (đã biết): cùng máy với nguồn, mỗi tài khoản một địa chỉ / SĐT mới, tạo liên tiếp để gom mã.
+# - ban_evader_one_link (CHƯA BIẾT): máy mới, địa chỉ mới, chỉ giữ SĐT nhận hàng cũ, một tài khoản, không spam.
+#   Theo thiết kế ADR-011 trường hợp này chỉ bị trừ điểm + mở case, không bị khóa: đo để thấy giới hạn.
+# - banned_relative (hard negative): người nhà dùng chung máy với nguồn, địa chỉ / SĐT riêng, mua bình thường.
+# Tham số ở test rộng hơn dev (số tài khoản, tổ hợp điểm chung). Định nghĩa trước khi chạy, không tinh chỉnh theo test.
+EVADER_LINKS = ("device", "phone", "address")
+DATASETS["dev_v3"] = {
+    **DATASETS["dev_v2"],
+    "ban_evader": {"n": 5, "accounts": (1, 2), "links": [("device", "address")]},
+    "ban_evader_spam": {"n": 3, "accounts": (2, 3)},
+    "banned_relative": {"n": 5},
+}
+DATASETS["test_v3"] = {
+    **DATASETS["test_v2"],
+    "ban_evader": {"n": 8, "accounts": (1, 3),
+                   "links": [("device", "address"), ("device", "phone"), ("phone", "address"), EVADER_LINKS]},
+    "ban_evader_spam": {"n": 4, "accounts": (2, 4)},
+    "ban_evader_one_link": {"n": 6},
+    "banned_relative": {"n": 8},
+}
+
 FARM_ADDRESS_VARIANTS = [
     "Số 5 Ngõ 12 Láng Hạ", "so 05 ngo 12 lang ha", "5, Ngõ 12, Láng Hạ", "Số 05 - Ngõ 12 Láng Hạ",
 ]
@@ -275,6 +300,68 @@ def build_population(dataset: str, rng: random.Random, scale: float, actions) ->
                               lambda a=a: actions.add(a, "AU-001", 1), lambda a=a: actions.voucher(a, "NGUOIMOI"),
                               lambda a=a, ad=addr: actions.checkout_if_voucher(a, ad)]
             groups.append(grp)
+
+    # ---- Bộ v3: né lệnh khóa (O7) ----
+    def banned_source(tag: str, device: str) -> tuple[Account, dict, list[Callable]]:
+        src = acc("banned_source", tag, True, device=device)
+        addr = _address(rng, f"Ban{tag}")
+        steps = [lambda s=src: actions.register(s), lambda s=src: actions.view(s, rng.choice(CHEAP)),
+                 lambda s=src: actions.add(s, rng.choice(CHEAP), 1),
+                 lambda s=src, ad=addr: actions.checkout(s, ad, cod=False, abandon_if_no_cod=False),
+                 lambda s=src: actions.ban(s)]
+        return src, addr, steps
+
+    if "ban_evader" in cfg:
+        p = cfg["ban_evader"]
+        for g in range(n_of("ban_evader")):
+            tag = f"ban_evader{g}"
+            src, src_addr, steps = banned_source(tag, f"sim-ban{g}-dev")
+            members = []
+            for _ in range(rng.randint(*p["accounts"])):
+                links = rng.choice(p["links"])
+                a = acc("ban_evader", tag, True, device=src.device if "device" in links else None)
+                addr = _address(rng, a.key)
+                if "address" in links:
+                    addr = {**src_addr, "phone": addr["phone"]}
+                if "phone" in links:
+                    addr = {**addr, "phone": src_addr["phone"]}
+                members.append(a)
+                steps += [lambda a=a: actions.register(a), lambda a=a: actions.add(a, "AU-001", 1),
+                          lambda a=a: actions.voucher(a, "NGUOIMOI"),
+                          lambda a=a, ad=addr: actions.checkout_if_voucher(a, ad)]
+            groups.append(Group(tag, members, steps))
+    if "ban_evader_spam" in cfg:
+        for g in range(n_of("ban_evader_spam")):
+            tag = f"ban_evader_spam{g}"
+            src, _, steps = banned_source(tag, f"sim-banspam{g}-dev")
+            members = [acc("ban_evader_spam", tag, True, device=src.device)
+                       for _ in range(rng.randint(*cfg["ban_evader_spam"]["accounts"]))]
+            for a in members:
+                steps += [lambda a=a: actions.register(a), lambda a=a: actions.add(a, "AU-001", 1),
+                          lambda a=a: actions.voucher(a, "NGUOIMOI"),
+                          lambda a=a: actions.checkout_if_voucher(a, _address(rng, a.key))]
+            groups.append(Group(tag, members, steps))
+    if "ban_evader_one_link" in cfg:
+        for g in range(n_of("ban_evader_one_link")):
+            tag = f"ban_evader_one_link{g}"
+            src, src_addr, steps = banned_source(tag, f"sim-ban1-{g}-dev")
+            a = acc("ban_evader_one_link", tag, True, unseen=True)
+            addr = {**_address(rng, a.key), "phone": src_addr["phone"]}
+            steps += [lambda a=a: actions.register(a), lambda a=a: actions.view(a, "AU-001"),
+                      lambda a=a: actions.add(a, "AU-001", 1), lambda a=a: actions.voucher(a, "NGUOIMOI"),
+                      lambda a=a, ad=addr: actions.checkout_if_voucher(a, ad)]
+            groups.append(Group(tag, [a], steps))
+    if "banned_relative" in cfg:
+        for g in range(n_of("banned_relative")):
+            tag = f"banned_relative{g}"
+            src, _, steps = banned_source(tag, f"sim-banrel{g}-dev")
+            a = acc("banned_relative", tag, False, device=src.device, ip=src.ip, hard_negative=True)
+            sku = rng.choice(CHEAP + MID)
+            steps += [lambda a=a: actions.register(a), lambda a=a, s=sku: actions.view(a, s),
+                      lambda a=a, s=sku: actions.add(a, s, 1), lambda a=a: actions.voucher(a, "NGUOIMOI"),
+                      lambda a=a: actions.checkout(a, _address(rng, a.key), cod=rng.random() < 0.5,
+                                                   abandon_if_no_cod=False)]
+            groups.append(Group(tag, [a], steps))
 
     return groups
 

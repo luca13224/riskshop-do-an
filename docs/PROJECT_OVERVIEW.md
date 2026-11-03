@@ -35,7 +35,7 @@ Phạm vi: 2 nhóm chính sách (voucher tân thủ, COD), dữ liệu mô phỏ
 | O4 | Chỉ tiêu FPR tổng của đề cương | FPR trên toàn bộ tài khoản hợp lệ | ≤ 5% | P5 | test_v2 seed 5: 6,2%; v1 test: 7,9% · **chưa đạt** |
 | O5 | Không làm chậm checkout | p95 chấm điểm; p95 request đặt hàng ở 1 / 10 / 50 người đồng thời | ≤ 50 ms (chấm điểm) | mọi P | p95 chấm điểm ≤ 36,2 ms ở 1/10/50 người: **đạt**; request đặt hàng p95 lên 1,5–1,9 s ở 50 người (TEST_PLAN 3f) |
 | O6 | Quyết định giải thích được, truy vết được | % quyết định khác ALLOW có luật đã khớp, giá trị đặc trưng, audit | 100% | P4 | 8/8 mục kiểm tra đạt 100% trên dữ liệu demo: **đạt** (TEST_PLAN 3g) |
-| O7 | Lệnh khóa không bị né bằng tài khoản mới | % tài khoản né khóa (chung ≥ 2 điểm) bị khóa thanh toán | ≥ 90% | P3 | test tự động có; mô phỏng **[CẦN ĐO]** |
+| O7 | Lệnh khóa không bị né bằng tài khoản mới | % tài khoản né khóa (chung ≥ 2 điểm) bị khóa thanh toán | ≥ 90% | P3 | test_v3 seed 6: **46,7% bị khóa, chưa đạt**; nhưng 100% bị gắn cờ và không lấy được mã (TEST_PLAN 3h) |
 | O8 | Khách bị chặn nhầm có đường sửa sai | % quyết định hạn chế khiếu nại được; chấp nhận thì tự miễn trừ / gỡ khóa | 100% | P5 | có test |
 | O9 | Analyst xử lý case nhanh, nhất quán | Thời gian trung vị xử lý 1 case; tỉ lệ hai người cùng kết luận | đặt ngưỡng **trước** buổi đo (gợi ý ≤ 2 phút, ≥ 80%) | P4 | **[CẦN ĐO]** |
 
@@ -58,7 +58,8 @@ Yêu cầu chi tiết (FR / NFR / BR / UC) ở `docs/REQUIREMENTS.md`. Kịch b�
 - [x] REQUIREMENTS.md bản 1 (2026-11-03)
 - [ ] Chốt bảng mục tiêu O1–O9 với GVHD
 - [x] Đo bổ sung 2026-11-03: v3.1 trên seed 5 (ADR-012), tải đồng thời, script đối chiếu giải thích / audit
-- [ ] Còn đo: persona né khóa trong mô phỏng (O7), buổi đo thời gian xử lý case (O9)
+- [x] Đo O7 trên test_v3 seed 6 (TEST_PLAN 3h): chưa đạt, có 2 đề xuất sửa chờ quyết định
+- [ ] Còn đo: buổi đo thời gian xử lý case (O9)
 - [ ] Tra nguồn số liệu cho phần bối cảnh
 - [ ] Viết báo cáo theo `docs/BAO_CAO_DAN_Y.md`
 

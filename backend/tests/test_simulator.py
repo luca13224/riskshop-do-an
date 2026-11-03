@@ -32,3 +32,13 @@ def test_small_run_metrics_are_consistent():
     # Khách hợp lệ thông thường (không phải hard negative) không bị gắn cờ trong kịch bản chuẩn
     assert m["fpr_normal"]["k"] == 0
     assert "Toàn bộ dữ liệu là mô phỏng" in render_markdown(m)
+
+
+def test_ban_evaders_are_locked_but_relatives_are_not():
+    """Bộ dev_v3 (mục tiêu O7): tài khoản né lệnh khóa đều bị gắn cờ và không lấy được mã; người nhà không bị khóa.
+    (Kẻ né khóa bỏ đơn ngay khi bị gỡ mã thì chưa bị ghi lệnh khóa: xem TEST_PLAN 3h.)"""
+    m = run(TestSession, "dev_v3", seed=3, scale=0.4)
+    assert m["runtime"]["server_errors"] == []
+    evader, relative = m["per_persona"]["ban_evader"], m["per_persona"]["banned_relative"]
+    assert evader["flagged"] == evader["n"]
+    assert "purchase_linked" not in relative.get("locked", {})

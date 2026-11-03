@@ -13,7 +13,7 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 - Danh sách sản phẩm: sắp xếp theo giá, lọc khoảng giá, từ chối tham số sai (`test_catalog.py`); Console Đơn hàng: lọc trạng thái, tìm mã đơn, phân trang, đếm theo trạng thái (`test_order.py`); robots.txt, sitemap (`test_seo.py`).
 - Điểm tin cậy và túi voucher (`test_trust.py`); khóa quyền mua hàng tự động, gỡ khóa, khiếu nại gỡ khóa (`test_restrictions.py`).
 - Né lệnh khóa bằng tài khoản mới, gia đình chung máy, chung IP, khóa thủ công (`test_linked_ban.py`, `test_restrictions.py`).
-- Lần chạy gần nhất: **191 test qua** (2026-11-03).
+- Lần chạy gần nhất: **192 test qua** (2026-11-03).
 
 ## 2. Thực nghiệm mô phỏng (`backend/simulator`)
 ```
@@ -47,6 +47,35 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Bùng hàng COD chỉ bắt được ~50–67%: kẻ có lịch sử ngắn (dưới 3 đơn) chưa đủ dữ liệu cho luật tỉ lệ thất bại.
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
+
+## 3h. Né lệnh khóa bằng tài khoản mới (2026-11-03, ADR-011, mục tiêu O7)
+Bộ dữ liệu mới `dev_v3` / `test_v3` = bộ v2 + 4 persona (định nghĩa trước khi chạy, xem đầu `simulator/personas.py`). Mỗi nhóm có một tài khoản **nguồn** mua một đơn rồi bị nhân viên khóa vô thời hạn; tài khoản nguồn không được chấm.
+- Né khóa chung ≥ 2 điểm (thiết bị, SĐT nhận hàng, địa chỉ; ở test có 4 tổ hợp) — kiểu đã biết.
+- Né khóa bằng nhiều tài khoản mới cùng máy, gom mã người mới — kiểu đã biết.
+- Né khóa chỉ giữ SĐT nhận hàng cũ (máy mới, địa chỉ mới) — **biến thể chưa biết**, theo ADR-011 chỉ bị trừ điểm + mở case.
+- Người nhà dùng chung máy với tài khoản bị khóa — hard negative.
+```
+.venv/Scripts/python -m simulator --dataset dev_v3 --seed 1
+.venv/Scripts/python -m simulator --dataset test_v3 --seed 6 --confirm-test
+```
+
+| test_v3 seed 6 (bộ luật v3.1) | Bị gắn cờ | Không lấy được mã | **Bị khóa thanh toán** |
+|---|---|---|---|
+| Né khóa, chung ≥ 2 điểm (15) | 15/15 (KTC 95%: 79,6%–100%) | 15/15 | **7/15 = 46,7%** (KTC 95%: 24,8%–69,9%) |
+| Né khóa, cùng máy gom mã (12) | 12/12 | 12/12 | 8/12 = 66,7% |
+| Né khóa, chỉ giữ SĐT (6, chưa biết) | 6/6 | 6/6 | 0/6 (đúng thiết kế) |
+| Người nhà dùng chung máy (8, hard negative) | **7/8 bị hạn chế** (gỡ mã, tắt COD) | — | 0/8 |
+
+Toàn bộ tập: precision 78,5%, recall 49,4% (đã biết 60,2%, chưa biết 16,7%), FPR khách thường 0%, FPR hard negative 23,5%. Không so trực tiếp với v2 vì dân số khác (thêm persona). Chi tiết: [test v3](experiments/test_v3_seed6_scale1.md), [dev v3](experiments/dev_v3_seed1_scale1.md).
+
+### Đọc kết quả (trung thực)
+- **Lợi ích bị chặn 100%:** không tài khoản né khóa nào dùng được mã người mới, kể cả biến thể chưa biết.
+- **O7 (≥ 90% bị khóa thanh toán) chưa đạt: 46,7%.** Nguyên nhân (đã tra trên tập dev): ở bước áp mã, R16 (+45) cộng R01 đủ để gỡ mã; kẻ né khóa bỏ đơn ngay, không tới bước đặt hàng. Lệnh khóa liên kết chỉ được ghi khi có ≥ 2 điểm chung, mà địa chỉ / SĐT chỉ biết lúc đặt hàng; ở bước áp mã hệ thống mới thấy thiết bị (1 điểm). Tài khoản bị khóa là những tài khoản chung máy **và** có từ 2 lần thử mã trên máy đó (điều kiện spam).
+- **Cái giá với người nhà: 7/8 bị gỡ mã và tắt COD** vì R16 cộng thẳng vào điểm chính sách voucher / COD. ADR-011 định "chung 1 điểm, không spam → chỉ trừ điểm tin cậy + mở case", nhưng điểm R16 đủ lớn để kích hoạt hạn chế ở lớp giao dịch. Đây là khác biệt giữa thiết kế và cài đặt, cần quyết định (xem đề xuất bên dưới).
+- Đề xuất (chưa làm, cần Luca chốt, đo lại trên seed mới):
+  - (a) Ghi lệnh khóa ngay ở bước áp mã khi thiết bị chung với tài khoản bị khóa và tài khoản mới đang dùng mã người mới (dùng mã người mới chính là hành vi cần chặn).
+  - (b) R16 chỉ trừ điểm tin cậy khi liên kết = 1 (không cộng vào điểm voucher / COD), đúng ý ADR-011; giảm hạn chế nhầm người nhà.
+- Sau lần chạy này không chỉnh luật theo kết quả test; nếu làm (a) / (b) thì đo trên test_v3 seed mới (7 trở đi).
 
 ## 3e. Bộ luật v3.1 — luật giao dịch không trừ điểm tài khoản (2026-11-03, ADR-012)
 Thay đổi: R08 (COD giá trị cao, ít lịch sử) không còn trừ vào điểm tin cậy tài khoản (`trust.exclude_rules`), vẫn tính vào điểm COD của đơn. Kiểm tra nhanh trên dev_v2 (không có tham số nào để tinh chỉnh: kết quả trùng v3), sau đó chạy **tập test_v2 seed 5 (seed chưa từng dùng)**, mỗi phiên bản một lần, cùng dân số:

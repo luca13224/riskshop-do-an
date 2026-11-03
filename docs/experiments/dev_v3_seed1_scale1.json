@@ -1,0 +1,251 @@
+{
+  "run_id": 1,
+  "dataset": "dev_v3",
+  "seed": 1,
+  "scale": 1.0,
+  "rules_fingerprint": "2fa09e9c88da841a0c3564570b4763040afeff6c83433180aec149fd2184ae7a",
+  "disabled_rules": [],
+  "no_trust": false,
+  "trust_all_rules": false,
+  "confusion": {
+    "TP": 50,
+    "FP": 15,
+    "TN": 185,
+    "FN": 33
+  },
+  "precision": {
+    "k": 50,
+    "n": 65,
+    "value": 0.7692,
+    "ci95": [
+      0.6536,
+      0.8549
+    ]
+  },
+  "recall": {
+    "k": 50,
+    "n": 83,
+    "value": 0.6024,
+    "ci95": [
+      0.4948,
+      0.7009
+    ]
+  },
+  "fpr": {
+    "k": 15,
+    "n": 200,
+    "value": 0.075,
+    "ci95": [
+      0.046,
+      0.12
+    ]
+  },
+  "fpr_normal": {
+    "k": 0,
+    "n": 130,
+    "value": 0.0,
+    "ci95": [
+      0.0,
+      0.0287
+    ]
+  },
+  "fpr_hard_negative": {
+    "k": 15,
+    "n": 70,
+    "value": 0.2143,
+    "ci95": [
+      0.1344,
+      0.3239
+    ]
+  },
+  "recall_seen_variants": {
+    "k": 50,
+    "n": 83,
+    "value": 0.6024,
+    "ci95": [
+      0.4948,
+      0.7009
+    ]
+  },
+  "recall_unseen_variants": {
+    "k": 0,
+    "n": 0,
+    "value": null,
+    "ci95": null
+  },
+  "per_persona": {
+    "ban_evader": {
+      "n": 8,
+      "flagged": 8,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "locked": {
+        "purchase_linked": 3
+      },
+      "rate": 1.0
+    },
+    "ban_evader_spam": {
+      "n": 7,
+      "flagged": 7,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "locked": {
+        "purchase_linked": 4
+      },
+      "rate": 1.0
+    },
+    "banned_relative": {
+      "n": 5,
+      "flagged": 4,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "rate": 0.8
+    },
+    "cod_bomber": {
+      "n": 12,
+      "flagged": 7,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.5833
+    },
+    "family": {
+      "n": 22,
+      "flagged": 0,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "vouchers": 15,
+      "rate": 0.0
+    },
+    "farm": {
+      "n": 33,
+      "flagged": 21,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "vouchers": 12,
+      "rate": 0.6364
+    },
+    "farm_spread": {
+      "n": 23,
+      "flagged": 7,
+      "is_abuse": true,
+      "hard_negative": false,
+      "unseen": false,
+      "vouchers": 16,
+      "rate": 0.3043
+    },
+    "loyal": {
+      "n": 30,
+      "flagged": 0,
+      "is_abuse": false,
+      "hard_negative": false,
+      "unseen": false,
+      "rate": 0.0
+    },
+    "new_high_value": {
+      "n": 8,
+      "flagged": 8,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "rate": 1.0
+    },
+    "normal_new": {
+      "n": 100,
+      "flagged": 0,
+      "is_abuse": false,
+      "hard_negative": false,
+      "unseen": false,
+      "vouchers": 45,
+      "rate": 0.0
+    },
+    "repeat_buyer": {
+      "n": 8,
+      "flagged": 0,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "rate": 0.0
+    },
+    "roommates_4g": {
+      "n": 27,
+      "flagged": 3,
+      "is_abuse": false,
+      "hard_negative": true,
+      "unseen": false,
+      "vouchers": 14,
+      "rate": 0.1111
+    }
+  },
+  "group_recall": {
+    "cod_bomber": {
+      "caught": 7,
+      "groups": 12
+    },
+    "farm_spread": {
+      "caught": 4,
+      "groups": 4
+    },
+    "farm": {
+      "caught": 6,
+      "groups": 6
+    },
+    "ban_evader": {
+      "caught": 5,
+      "groups": 5
+    },
+    "ban_evader_spam": {
+      "caught": 3,
+      "groups": 3
+    }
+  },
+  "business": {
+    "vouchers_redeemed_by_abuse": 28,
+    "vouchers_redeemed_by_legit": 74,
+    "cod_orders_by_persona": {
+      "cod_bomber:CONFIRMED": 5,
+      "family:CONFIRMED": 10,
+      "loyal:CONFIRMED": 30,
+      "new_high_value:PENDING_REVIEW": 4,
+      "normal_new:CONFIRMED": 38,
+      "repeat_buyer:CONFIRMED": 24,
+      "roommates_4g:CONFIRMED": 14
+    }
+  },
+  "risk_latency_ms": {
+    "n": 552,
+    "p50": 11.45,
+    "p95": 14.92,
+    "p99": 19.37
+  },
+  "runtime": {
+    "seconds": 49.4,
+    "steps": 1495,
+    "server_errors": []
+  },
+  "request_ms": {
+    "payment_options": {
+      "n": 138,
+      "p50": 23.49,
+      "p95": 30.73,
+      "p99": 72.86
+    },
+    "place_order": {
+      "n": 276,
+      "p50": 35.27,
+      "p95": 44.8,
+      "p99": 51.4
+    },
+    "voucher_apply": {
+      "n": 180,
+      "p50": 30.91,
+      "p95": 37.43,
+      "p99": 41.36
+    }
+  }
+}
