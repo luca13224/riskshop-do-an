@@ -1,49 +1,70 @@
 # PROJECT OVERVIEW
 
-> Cập nhật lần cuối: 2026-10-30 · Trạng thái: **Đã chốt hướng kiến trúc (ADR-003); đang chuẩn bị thiết kế tối thiểu**
+> Cập nhật lần cuối: 2026-11-03 · Trạng thái: **Sản phẩm ~85–90% (bộ luật v3, 190 test qua); đang chuyển sang đo bổ sung và viết báo cáo**
 
 ## 1. Đề tài (dự kiến)
 **Xây dựng hệ thống kiểm soát rủi ro và ngăn ngừa lạm dụng chính sách trên sàn thương mại điện tử.**
 
 - Sinh viên: Luca — Hệ thống thông tin quản lý, Trường Đại học Thủy Lợi
-- Giảng viên hướng dẫn: _(chưa có thông tin)_
-- Thời hạn nộp / bảo vệ: _(chưa có thông tin)_
+- Giảng viên hướng dẫn: ThS. Tạ Chí Hiếu
+- Mục tiêu nội bộ: hoàn thiện sản phẩm trước 30/11/2026; hạn nộp khoảng cuối 12/2026 (cần GVHD xác nhận). Report tháng 10 gửi GVHD trước 08/11.
 
-## 2. Problem Statement (bản nháp — cần xác minh)
-_Đây là đề xuất của cố vấn, chưa dựa trên đề cương._
+## 2. Bối cảnh và vấn đề
+**Bối cảnh.** Sàn TMĐT dùng voucher người mới và thanh toán khi nhận hàng (COD) để hạ rào cản mua lần đầu. Hai chính sách này cũng mở ra hai kiểu lạm dụng phổ biến. Liên quan: người mua hợp lệ, người bán / sàn, đội vận hành rủi ro. **[XM]** số liệu quy mô TMĐT và tỷ lệ COD ở Việt Nam: chỉ dùng nguồn kiểm chứng được (Sách trắng TMĐT của Bộ Công Thương, báo cáo VECOM); chưa tra thì không ghi số.
 
-Các sàn thương mại điện tử dùng chính sách ưu đãi như voucher người mới hay hoàn tiền/trả hàng để thu hút khách. Một số người dùng lợi dụng chúng, ví dụ tạo nhiều tài khoản để nhận voucher nhiều lần hoặc lạm dụng hoàn tiền, gây thiệt hại cho sàn và người bán. Việc phát hiện thủ công tốn công, thiếu nhất quán và khó truy vết.
+| Mã | Vấn đề | Hậu quả |
+|---|---|---|
+| P1 | Farm tài khoản gom voucher người mới | Ngân sách khuyến mãi vào tay kẻ lạm dụng, không tạo khách thật |
+| P2 | Bùng hàng COD | Mất phí vận chuyển hai chiều, hàng kẹt, người bán chịu rủi ro |
+| P3 | Bị chặn thì tạo tài khoản mới làm lại | Lệnh khóa theo tài khoản bị vô hiệu |
+| P4 | Kiểm tra thủ công, không nhất quán, khó truy vết | Mỗi người xử lý một kiểu, không giải thích được vì sao chặn |
+| P5 | Chặn nhầm khách thật (gia đình chung Wi-Fi, khách mới mua COD giá trị cao) | Mất khách, phát sinh khiếu nại, ảnh hưởng uy tín |
 
-## 3. Mục tiêu (bản nháp)
-1. Phát hiện và chấm điểm rủi ro cho một số hành vi lạm dụng chính sách đã chọn.
-2. Ra quyết định có thể giải thích được (cho phép / xem xét thủ công / chặn).
-3. Cung cấp công cụ để quản trị viên xem xét case, xử lý khiếu nại và ghi nhật ký kiểm toán (audit log).
-4. Đánh giá hiệu quả bằng dữ liệu mô phỏng có kịch bản rõ ràng.
+## 3. Mục tiêu đo được
+> **Bản đề xuất ngày 2026-11-03, cần Luca chốt và hỏi GVHD.** Các mục tiêu này được viết **sau** các lần đo v1–v3, nên:
+> (a) O4 giữ nguyên chỉ tiêu FPR ≤ 5% của đề cương và báo cáo trung thực là chưa đạt;
+> (b) mọi kết luận đạt / chưa đạt cho bộ luật mới phải dùng **tập test seed mới** (seed 5 trở đi), chạy một lần sau khi khóa luật.
+
+Phạm vi: 2 nhóm chính sách (voucher tân thủ, COD), dữ liệu mô phỏng, chạy trên máy local. Đơn vị đo trong mô phỏng: tài khoản.
+
+| Mã | Mục tiêu | Chỉ số | Ngưỡng | Vấn đề | Số đã có |
+|---|---|---|---|---|---|
+| O1 | Bắt lạm dụng kiểu đã biết | Recall kiểu đã biết, tập test | ≥ 80% | P1, P2 | v1 test seed 2: 85,5% |
+| O2 | Không làm phiền khách bình thường | FPR khách thông thường | ≤ 2% | P5 | 0% ở mọi lần đo |
+| O3 | Hạn chế chặn nhầm ca khó | FPR hard negative | ≤ 20% | P5 | 18,2% – 31,2% tùy lần, **có lần chưa đạt** |
+| O4 | Chỉ tiêu FPR tổng của đề cương | FPR trên toàn bộ tài khoản hợp lệ | ≤ 5% | P5 | v1 test: 7,9%, **chưa đạt** |
+| O5 | Không làm chậm checkout | p95 chấm điểm; p95 request đặt hàng ở 1 / 10 / 50 người đồng thời | ≤ 50 ms (chấm điểm) | mọi P | chấm điểm 7,8–11,5 ms; đồng thời **[CẦN ĐO]** |
+| O6 | Quyết định giải thích được, truy vết được | % quyết định khác ALLOW có luật đã khớp, giá trị đặc trưng, audit | 100% | P4 | **[CẦN ĐO]** bằng script đối chiếu |
+| O7 | Lệnh khóa không bị né bằng tài khoản mới | % tài khoản né khóa (chung ≥ 2 điểm) bị khóa thanh toán | ≥ 90% | P3 | test tự động có; mô phỏng **[CẦN ĐO]** |
+| O8 | Khách bị chặn nhầm có đường sửa sai | % quyết định hạn chế khiếu nại được; chấp nhận thì tự miễn trừ / gỡ khóa | 100% | P5 | có test |
+| O9 | Analyst xử lý case nhanh, nhất quán | Thời gian trung vị xử lý 1 case; tỉ lệ hai người cùng kết luận | đặt ngưỡng **trước** buổi đo (gợi ý ≤ 2 phút, ≥ 80%) | P4 | **[CẦN ĐO]** |
+
+Yêu cầu chi tiết (FR / NFR / BR / UC) ở `docs/REQUIREMENTS.md`. Kịch bản đo cho các ô **[CẦN ĐO]** ở `docs/reviews/2026-11-03_7_KHAI_NIEM_REVIEW.md` mục 4.
 
 ## 4. Phạm vi
 | Mức | Nội dung | Trạng thái |
 |---|---|---|
-| MVP | Chọn 2–3 loại lạm dụng; Risk Engine dạng rule-based; màn hình quản trị viên | Đề xuất, chưa chốt |
-| Recommended | Sàn mô phỏng tối giản để sinh sự kiện; dashboard thống kê; luồng khiếu nại | Đề xuất, chưa chốt |
-| Advanced/Optional | Mô hình ML so sánh với rule; phân tích đồ thị liên kết tài khoản | Đề xuất, chưa chốt |
+| MVP | 2 nhóm chính sách (voucher tân thủ, COD); Risk Engine rule-based có phiên bản; Shop; Risk Console (Monitor, Case, Luật, Báo cáo, Audit, Attack Lab); khiếu nại | Xong |
+| Recommended | Trust Score 2 lớp (ADR-009); khóa quyền mua tự động (ADR-010); truy vết né khóa (ADR-011); túi voucher; simulator dev/test | Xong |
+| Advanced/Optional | Đồ thị liên kết tài khoản (xong, bản cơ bản); ML so sánh với rule; tách Risk Engine thành dịch vụ dùng cho sàn khác; bằng chứng camera đóng gói | Đồ thị xong; phần còn lại là hướng phát triển |
 
-**Ngoài phạm vi (dự kiến):** thanh toán thật, dữ liệu cá nhân thật, triển khai production.
+**Ngoài phạm vi:** thanh toán thật, dữ liệu cá nhân thật, triển khai production.
 
 ## 5. Hiện trạng
-- [x] Thống nhất vai trò cố vấn và nguyên tắc làm việc
-- [x] Tạo khung tài liệu dự án
-- [x] Đọc và phản biện đề cương (`docs/reviews/2026-10-30_INITIAL_REVIEW.md`)
-- [x] Chốt hướng: tự xây toàn bộ, modular monolith (ADR-003)
-- [x] Cài môi trường: XAMPP (MariaDB) tại `D:\xampp`, Node.js 24, Python 3.11
-- [ ] Hỏi thời hạn và yêu cầu của GVHD
-- [ ] Chốt các loại lạm dụng thuộc MVP (đề xuất: voucher tân thủ + COD)
-- [ ] Thiết kế tối thiểu: kịch bản demo, luật v0, ERD
+- [x] Kiến trúc modular monolith (ADR-003), 11 ADR đã chốt
+- [x] Shop, Risk Engine v3, Risk Console, khiếu nại, khóa tự động, truy vết né khóa
+- [x] Thực nghiệm v1, v2, v3 trên tập dev / test (TEST_PLAN mục 3, 3c, 3d)
+- [x] Report tháng 10 (bản Word, chưa gửi)
+- [x] REQUIREMENTS.md bản 1 (2026-11-03)
+- [ ] Chốt bảng mục tiêu O1–O9 với GVHD
+- [ ] Đo bổ sung: v3.1 trên seed mới, tải đồng thời, script đối chiếu giải thích / audit, persona né khóa
+- [ ] Tra nguồn số liệu cho phần bối cảnh
+- [ ] Viết báo cáo theo `docs/BAO_CAO_DAN_Y.md`
 
-**Ưu tiên của Luca:** sản phẩm và demo trước; báo cáo đồ án viết sau khi dự án đã chốt.
-
-## 6. Rủi ro chính đã nhận diện
+## 6. Rủi ro chính
 | Rủi ro | Ảnh hưởng | Hướng xử lý |
 |---|---|---|
-| Không có dữ liệu gian lận thật | Khó đánh giá hiệu quả | Sinh dữ liệu mô phỏng theo kịch bản, mô tả rõ giới hạn |
-| Phạm vi quá rộng | Không kịp tiến độ | Giới hạn MVP ở 2–3 loại lạm dụng |
-| Lạm dụng ML | Khó giải thích, khó bảo vệ | Rule-based làm lõi, ML chỉ là phần tùy chọn |
+| Không có dữ liệu gian lận thật | Khó khái quát kết quả | Mô phỏng có hard negative và biến thể chưa biết; ghi rõ giới hạn |
+| Đặt mục tiêu sau khi đã đo | Bị coi là dời cột gôn | Giữ chỉ tiêu đề cương, báo cáo chưa đạt; kiểm bộ luật mới trên seed mới |
+| Phạm vi phình to | Không kịp viết báo cáo | Dừng thêm tính năng sau 30/11, chỉ sửa lỗi |
+| Lạm dụng ML | Khó giải thích, khó bảo vệ | Rule-based làm lõi, ML là hướng phát triển |
