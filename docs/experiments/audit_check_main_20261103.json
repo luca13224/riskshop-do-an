@@ -1,0 +1,61 @@
+{
+  "database": "main",
+  "checks": {
+    "decision_not_allow_has_reason": {
+      "label": "Quyết định khác ALLOW có lý do (luật khớp / bậc tin cậy / lệnh khóa / lỗi có ghi)",
+      "total": 118,
+      "violations": 0,
+      "examples": [],
+      "pass_rate": 1.0
+    },
+    "decision_has_snapshot_and_policy": {
+      "label": "Mọi quyết định có ảnh chụp đặc trưng và phiên bản ma trận (trừ khi lỗi có ghi, hoặc bị chặn vì đang khóa)",
+      "total": 657,
+      "violations": 0,
+      "examples": [],
+      "pass_rate": 1.0
+    },
+    "rule_hit_complete": {
+      "label": "Mọi luật khớp có câu lý do, giá trị thực tế, trỏ đúng phiên bản luật",
+      "total": 708,
+      "violations": 0,
+      "examples": [],
+      "pass_rate": 1.0
+    },
+    "case_closed_has_reason_and_audit": {
+      "label": "Case đã đóng có lý do kết luận và bản ghi audit case.resolve",
+      "total": 8,
+      "violations": 0,
+      "examples": [],
+      "pass_rate": 1.0
+    },
+    "appeal_resolved_has_response_and_audit": {
+      "label": "Khiếu nại đã kết luận có câu trả lời cho khách và bản ghi audit appeal.resolve",
+      "total": 0,
+      "violations": 0,
+      "examples": [],
+      "pass_rate": null
+    },
+    "restriction_has_audit": {
+      "label": "Mọi lệnh khóa có audit (account.restrict tự động / account.ban của nhân viên)",
+      "total": 3,
+      "violations": 0,
+      "examples": [],
+      "pass_rate": 1.0
+    },
+    "restriction_lift_has_reason_and_audit": {
+      "label": "Lệnh khóa đã gỡ có người gỡ, lý do và audit account.unrestrict (hoặc gỡ qua khiếu nại)",
+      "total": 2,
+      "violations": 0,
+      "examples": [],
+      "pass_rate": 1.0
+    },
+    "rule_change_has_audit": {
+      "label": "Phiên bản luật do nhân viên tạo có audit rule.new_version",
+      "total": 0,
+      "violations": 0,
+      "examples": [],
+      "pass_rate": null
+    }
+  }
+}

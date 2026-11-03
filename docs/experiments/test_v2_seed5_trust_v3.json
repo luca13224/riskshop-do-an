@@ -1,0 +1,101 @@
+{
+  "cod_bomber": {
+    "n": 15,
+    "abuse": true,
+    "restricted": 9,
+    "trust<50": 0,
+    "trust<30": 0,
+    "open_case": 0,
+    "trust_median": 70
+  },
+  "cod_hoarder": {
+    "n": 6,
+    "abuse": true,
+    "restricted": 0,
+    "trust<50": 0,
+    "trust<30": 0,
+    "open_case": 0,
+    "trust_median": 75.0
+  },
+  "family": {
+    "n": 46,
+    "abuse": false,
+    "restricted": 6,
+    "trust<50": 0,
+    "trust<30": 0,
+    "open_case": 0,
+    "trust_median": 70.0
+  },
+  "farm": {
+    "n": 47,
+    "abuse": true,
+    "restricted": 31,
+    "trust<50": 23,
+    "trust<30": 4,
+    "open_case": 0,
+    "trust_median": 50
+  },
+  "farm_multi_drop": {
+    "n": 42,
+    "abuse": true,
+    "restricted": 0,
+    "trust<50": 0,
+    "trust<30": 0,
+    "open_case": 0,
+    "trust_median": 90.0
+  },
+  "farm_spread": {
+    "n": 36,
+    "abuse": true,
+    "restricted": 16,
+    "trust<50": 16,
+    "trust<30": 0,
+    "open_case": 0,
+    "trust_median": 70.0
+  },
+  "loyal": {
+    "n": 40,
+    "abuse": false,
+    "restricted": 0,
+    "trust<50": 0,
+    "trust<30": 0,
+    "open_case": 0,
+    "trust_median": 100.0
+  },
+  "new_high_value": {
+    "n": 10,
+    "abuse": false,
+    "restricted": 10,
+    "trust<50": 3,
+    "trust<30": 0,
+    "open_case": 3,
+    "trust_median": 60.0
+  },
+  "normal_new": {
+    "n": 150,
+    "abuse": false,
+    "restricted": 0,
+    "trust<50": 0,
+    "trust<30": 0,
+    "open_case": 0,
+    "trust_median": 100.0
+  },
+  "repeat_buyer": {
+    "n": 10,
+    "abuse": false,
+    "restricted": 0,
+    "trust<50": 0,
+    "trust<30": 0,
+    "open_case": 0,
+    "trust_median": 100.0
+  },
+  "roommates_4g": {
+    "n": 36,
+    "abuse": false,
+    "restricted": 2,
+    "trust<50": 2,
+    "trust<30": 0,
+    "open_case": 0,
+    "trust_median": 75.0
+  }
+}

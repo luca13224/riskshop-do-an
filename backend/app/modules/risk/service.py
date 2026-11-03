@@ -160,9 +160,12 @@ def trust_tier(score: int) -> str:
     return "critical"
 
 
-def _trust(db: Session, features: dict) -> tuple[int, dict[str, int]]:
+def _trust(db: Session, features: dict, exclude: frozenset[str] = frozenset()) -> tuple[int, dict[str, int]]:
+    """exclude: mã luật giao dịch không tính vào điểm tài khoản (cấu hình "trust.exclude_rules", bộ luật v3.1)."""
     deductions: dict[str, int] = {}
     for rule, version in _load_rules(db, None):
+        if rule.code in exclude:
+            continue
         match = rule_types.evaluate(rule.rule_type, version.params, features)
         if match is not None and match.points:
             deductions[rule.code] = match.points
@@ -477,7 +480,8 @@ def _evaluate(db: Session, req: EvaluationRequest) -> RiskResult:
     exempt = frozenset(active_exemptions(db, req.user.id) & set(active))
     if exempt:
         features["exempt_policies"] = sorted(exempt)  # Console thấy vì sao điểm cao mà vẫn cho phép
-    trust, deductions = _trust(db, features)
+    trust_cfg = (policy.thresholds if policy else {}).get("trust") or {}
+    trust, deductions = _trust(db, features, frozenset(trust_cfg.get("exclude_rules", ())))
     features["trust_score"] = trust
     features["trust_tier"] = trust_tier(trust)
     features["trust_deductions"] = deductions  # "sổ trừ điểm": mã luật -> điểm

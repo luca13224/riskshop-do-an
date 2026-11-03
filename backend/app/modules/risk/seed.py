@@ -117,7 +117,9 @@ RULES = [
 
 # Bậc điểm tin cậy (bộ luật v3): dưới case_below thì mở case lúc đặt hàng; từ cod_off_at_or_below trở xuống thì tắt COD.
 # Mã giảm giá bị khóa theo min_trust của từng mã (bảng vouchers). Bỏ khóa "trust" là tắt cả lớp 1 (dùng cho thực nghiệm).
-TRUST = {"case_below": 30, "cod_off_at_or_below": 0}
+# Bộ luật v3.1 (2026-11-03, ADR-012): luật chỉ mô tả ĐƠN đang đặt (giá trị, phương thức) không trừ vào điểm tin cậy
+# TÀI KHOẢN. Nó vẫn tính vào điểm COD của chính giao dịch đó. Trước v3.1, khách mới mua COD giá trị cao rớt xuống ~30 điểm.
+TRUST = {"case_below": 30, "cod_off_at_or_below": 0, "exclude_rules": ["COD_HIGH_VALUE_LOW_HISTORY"]}
 
 POLICIES = {
     VOUCHER_APPLY: {V: {"restrict": 50, "open_case": 80}, "trust": TRUST},

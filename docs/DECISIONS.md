@@ -196,3 +196,22 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
   - Thẻ / tài khoản ngân hàng: chưa làm được vì thanh toán là giả lập. Hướng phát triển: dùng "dấu vân tay thẻ" (fingerprint) do cổng thanh toán trả về, không bao giờ lưu số thẻ (PCI DSS).
   - Kẻ gian đổi cả máy, SĐT và địa chỉ thì không truy vết được bằng luật; chỉ còn đồ thị liên kết và hành vi.
   - Sửa kèm: lệnh khóa đã được người gỡ (xác định nhầm) không còn tính là "tái phạm" khi xét khóa vô thời hạn.
+
+## ADR-012: Bộ luật v3.1 — luật chỉ mô tả đơn đang đặt không trừ vào điểm tin cậy tài khoản
+- Ngày: 2026-11-03
+- Trạng thái: Proposed (đã cài và đo, chờ Luca duyệt; muốn quay về v3 chỉ cần bỏ khóa `exclude_rules` trong `TRUST`)
+- Bối cảnh: đo bộ luật v3 (TEST_PLAN 3d) cho thấy khách mới hợp lệ mua COD giá trị cao có điểm tin cậy thấp hơn cả farm (trung vị 30), vì R08 "COD giá trị cao, ít lịch sử" bị cộng vào điểm TÀI KHOẢN. R08 không nói gì về con người, chỉ nói về đơn đang đặt (giá trị, phương thức). Điểm tin cậy bị kéo xuống thì khách đó bị khóa mã GIAM10 / NGUOIMOI, bị mở case ở các lần sau.
+- Các phương án:
+  - (1) Giữ v3: đơn giản, nhưng điểm tin cậy lẫn "đơn này rủi ro" với "người này đáng ngờ"; giải thích với khách khó.
+  - (2) Hạ điểm R08: giảm cả khả năng giữ đơn COD rủi ro ở lớp giao dịch, tức là sửa sai chỗ.
+  - (3) Thêm danh sách luật giao dịch được loại khỏi điểm tin cậy (`trust.exclude_rules` trong ma trận quyết định), lúc đầu chỉ có R08. R08 vẫn tính vào điểm COD của chính đơn đó (vẫn giữ đơn chờ xác minh).
+- Quyết định: (3).
+- Lý do: tách rõ hai lớp của ADR-009 (lớp 1 = tài khoản, lớp 2 = giao dịch); là cấu hình, có phiên bản, có dấu vân tay trong báo cáo thực nghiệm; không đổi khả năng phát hiện.
+- Kết quả đo (tập test_v2 seed 5, seed chưa dùng, mỗi phiên bản chạy một lần; v3 chạy bằng cờ `--trust-all-rules` trên cùng dân số):
+  - Precision, recall, FPR **không đổi** (75,7% / 38,4% / 6,2%).
+  - Khách mới mua COD giá trị cao: trung vị điểm tin cậy 60 → 100; số tài khoản dưới 50 điểm 3/10 → 0/10. Các nhóm khác không đổi.
+  - Đơn của nhóm này vẫn bị giữ chờ xác minh 100% (đúng thiết kế fail-closed của lớp giao dịch).
+- Hệ quả / rủi ro:
+  - Kẻ gian dùng đơn COD giá trị cao không còn bị trừ điểm tài khoản vì riêng R08; vẫn bị giữ đơn, và R07 / R10 (lịch sử COD) vẫn trừ điểm.
+  - Luật giao dịch mới thêm sau này phải được xếp loại (tài khoản hay giao dịch) khi viết luật (cập nhật skill `risk-rule`).
+  - Giả định chưa kiểm chứng: các luật còn lại đều mô tả tài khoản; R05 (thử mã liên tục) và R06 (tốc độ như bot) là hành vi theo phiên, có thể cần xem lại.

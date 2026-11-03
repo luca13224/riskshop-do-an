@@ -1,0 +1,211 @@
+{
+  "created_at": "2026-11-03T11:28:19+00:00",
+  "machine": {
+    "os": "Windows-10-10.0.26200-SP0",
+    "cpu": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+    "cores": 16,
+    "python": "3.11.9"
+  },
+  "server": "1 tiến trình uvicorn, MariaDB XAMPP cùng máy",
+  "requests_per_round": 200,
+  "results": [
+    {
+      "users": 1,
+      "checkout_ms": {
+        "n": 200,
+        "p50": 34.2,
+        "p95": 38.6,
+        "p99": 41.2,
+        "mean": 34.7
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 12.9,
+        "p95": 15.1,
+        "p99": 18.1,
+        "mean": 13.2
+      },
+      "throughput_rps": 19.6,
+      "statuses": {
+        "201": 200
+      },
+      "round": 1
+    },
+    {
+      "users": 1,
+      "checkout_ms": {
+        "n": 200,
+        "p50": 34.1,
+        "p95": 38.6,
+        "p99": 40.4,
+        "mean": 34.4
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 13.1,
+        "p95": 15.2,
+        "p99": 16.3,
+        "mean": 13.2
+      },
+      "throughput_rps": 19.7,
+      "statuses": {
+        "201": 200
+      },
+      "round": 2
+    },
+    {
+      "users": 1,
+      "checkout_ms": {
+        "n": 200,
+        "p50": 33.0,
+        "p95": 39.4,
+        "p99": 45.5,
+        "mean": 33.5
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 12.4,
+        "p95": 16.1,
+        "p99": 19.8,
+        "mean": 12.9
+      },
+      "throughput_rps": 20.3,
+      "statuses": {
+        "201": 200
+      },
+      "round": 3
+    },
+    {
+      "users": 10,
+      "checkout_ms": {
+        "n": 200,
+        "p50": 167.0,
+        "p95": 336.9,
+        "p99": 779.7,
+        "mean": 197.9
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 18.3,
+        "p95": 32.6,
+        "p99": 88.4,
+        "mean": 21.8
+      },
+      "throughput_rps": 28.3,
+      "statuses": {
+        "201": 200
+      },
+      "round": 1
+    },
+    {
+      "users": 10,
+      "checkout_ms": {
+        "n": 200,
+        "p50": 176.8,
+        "p95": 342.2,
+        "p99": 401.7,
+        "mean": 192.5
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 17.9,
+        "p95": 33.5,
+        "p99": 75.6,
+        "mean": 21.0
+      },
+      "throughput_rps": 28.4,
+      "statuses": {
+        "201": 200
+      },
+      "round": 2
+    },
+    {
+      "users": 10,
+      "checkout_ms": {
+        "n": 200,
+        "p50": 171.3,
+        "p95": 268.2,
+        "p99": 331.6,
+        "mean": 179.9
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 18.9,
+        "p95": 35.5,
+        "p99": 96.0,
+        "mean": 22.3
+      },
+      "throughput_rps": 29.6,
+      "statuses": {
+        "201": 200
+      },
+      "round": 3
+    },
+    {
+      "users": 50,
+      "checkout_ms": {
+        "n": 200,
+        "p50": 869.9,
+        "p95": 1857.7,
+        "p99": 2155.1,
+        "mean": 965.9
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 18.4,
+        "p95": 34.0,
+        "p99": 44.6,
+        "mean": 21.1
+      },
+      "throughput_rps": 26.7,
+      "statuses": {
+        "201": 200
+      },
+      "round": 1
+    },
+    {
+      "users": 50,
+      "checkout_ms": {
+        "n": 200,
+        "p50": 694.7,
+        "p95": 1546.8,
+        "p99": 2008.4,
+        "mean": 814.4
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 19.9,
+        "p95": 36.2,
+        "p99": 46.4,
+        "mean": 21.8
+      },
+      "throughput_rps": 28.7,
+      "statuses": {
+        "201": 200
+      },
+      "round": 2
+    },
+    {
+      "users": 50,
+      "checkout_ms": {
+        "n": 200,
+        "p50": 744.0,
+        "p95": 1757.5,
+        "p99": 2128.6,
+        "mean": 861.3
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 18.9,
+        "p95": 35.0,
+        "p99": 43.9,
+        "mean": 21.5
+      },
+      "throughput_rps": 28.8,
+      "statuses": {
+        "201": 200
+      },
+      "round": 3
+    }
+  ]
+}

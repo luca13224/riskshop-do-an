@@ -146,3 +146,17 @@ def test_wallet_grants_welcome_voucher_and_locks_when_trust_drops(shop, db):
 
 def test_staff_cannot_read_customer_wallet(shop, client):
     assert client.get("/api/vouchers/wallet").status_code == 401
+
+
+def test_transaction_rule_does_not_lower_account_trust(shop, db):
+    """Bộ luật v3.1 (ADR-012): R08 (COD giá trị cao, ít lịch sử) chỉ mô tả ĐƠN đang đặt.
+    Đơn vẫn bị giữ chờ xác minh, nhưng điểm tin cậy tài khoản không bị kéo xuống vì nó."""
+    c = customer("coddat@example.com", "dev-coddat")
+    browse(c, "man-hinh")
+    c.post("/api/cart/items", json={"product_id": 3, "quantity": 1})
+    assert checkout(c).status_code == 201
+    d = last_decision(db, "coddat@example.com")
+    assert "COD_HIGH_VALUE_LOW_HISTORY" in hit_codes(db, d)  # vẫn tính vào điểm COD của giao dịch
+    assert d.actions["hold_order"]
+    assert "COD_HIGH_VALUE_LOW_HISTORY" not in d.features_snapshot["trust_deductions"]
+    assert d.features_snapshot["trust_score"] == 100

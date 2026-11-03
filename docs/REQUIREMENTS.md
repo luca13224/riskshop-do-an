@@ -63,13 +63,13 @@
 |---|---|---|---|
 | FR-40 | Simulator sinh persona hợp lệ, hard negative, lạm dụng đã biết và biến thể chưa biết; gọi đúng API của shop; nhãn thật lưu riêng, Risk Engine không đọc | MVP | `test_simulator.py` |
 | FR-41 | Tách tập dev / test, tái lập theo seed, ghi dấu vân tay bộ luật; báo cáo precision, recall, FPR kèm khoảng tin cậy Wilson | MVP | `docs/experiments/` |
-| FR-42 | Tắt từng luật (`--disable-rule`) hoặc tắt lớp Trust (`--no-trust`) để so sánh trên cùng dân số | Recommended | TEST_PLAN 3c, 3d |
+| FR-42 | Tắt từng luật (`--disable-rule`), tắt lớp Trust (`--no-trust`) hoặc chạy cách tính điểm v3 (`--trust-all-rules`) để so sánh trên cùng dân số | Recommended | TEST_PLAN 3c, 3d, 3e |
 
 ## 3. Non-functional Requirements
 | Mã | Nhóm | Yêu cầu | Mục tiêu liên quan | Trạng thái |
 |---|---|---|---|---|
-| NFR-01 | Hiệu năng | p95 thời gian chấm điểm ≤ 50 ms trên máy phát triển; đo thêm p95 request đặt hàng ở 1 / 10 / 50 người đồng thời | O5 | Chấm điểm đã đo 7,8–11,5 ms; đo đồng thời **[CẦN ĐO]** |
-| NFR-02 | Giải thích được | 100% quyết định khác ALLOW có luật đã khớp, giá trị thực tế, phiên bản luật | O6 | Có test; script đối chiếu toàn bộ **[CẦN ĐO]** |
+| NFR-01 | Hiệu năng | p95 thời gian chấm điểm ≤ 50 ms trên máy phát triển; đo thêm p95 request đặt hàng ở 1 / 10 / 50 người đồng thời | O5 | p95 chấm điểm ≤ 36,2 ms ở 1/10/50 người (TEST_PLAN 3f) |
+| NFR-02 | Giải thích được | 100% quyết định khác ALLOW có luật đã khớp, giá trị thực tế, phiên bản luật | O6 | `scripts/audit_check.py`: 100% trên dữ liệu demo (TEST_PLAN 3g) |
 | NFR-03 | Truy vết | Mọi thao tác nhân viên làm đổi trạng thái (kết luận case, khiếu nại, sửa luật, khóa / gỡ khóa, xem liên hệ) đều ghi audit | O6 | Có test |
 | NFR-04 | Phân quyền | RBAC 4 vai trò; quyền tối thiểu: Analyst không sửa luật, không gỡ khóa, không kết luận khiếu nại | — | Có test |
 | NFR-05 | Bảo mật đăng nhập | Mật khẩu băm; phiên trong CSDL, cookie HttpOnly; giới hạn sai 5 lần / tài khoản, 20 lần / IP trong 15 phút | — | Có test |
@@ -79,7 +79,7 @@
 | NFR-09 | Toàn vẹn dữ liệu | Giao dịch ACID cho đơn, tồn kho, lượt dùng voucher; ràng buộc UNIQUE chống trùng | — | Có test |
 | NFR-10 | Cấu hình được | Luật và ngưỡng quyết định là dữ liệu, sửa qua Console, không cần sửa code | — | Có test |
 | NFR-11 | Khả dụng | Shop dùng được ở 375 px và 1440 px, dùng được bằng bàn phím, có chế độ giảm chuyển động | — | Kiểm thủ công (TEST_PLAN 3b); 768 px chưa kiểm |
-| NFR-12 | Khả năng kiểm thử | Toàn bộ test tự động chạy trên CSDL riêng, qua migration thật | — | 190 test qua (2026-10-31) |
+| NFR-12 | Khả năng kiểm thử | Toàn bộ test tự động chạy trên CSDL riêng, qua migration thật | — | 191 test qua (2026-11-03) |
 
 ## 4. Business Rules
 | Mã | Quy tắc | Nguồn |

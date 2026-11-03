@@ -13,7 +13,7 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 - Danh sách sản phẩm: sắp xếp theo giá, lọc khoảng giá, từ chối tham số sai (`test_catalog.py`); Console Đơn hàng: lọc trạng thái, tìm mã đơn, phân trang, đếm theo trạng thái (`test_order.py`); robots.txt, sitemap (`test_seo.py`).
 - Điểm tin cậy và túi voucher (`test_trust.py`); khóa quyền mua hàng tự động, gỡ khóa, khiếu nại gỡ khóa (`test_restrictions.py`).
 - Né lệnh khóa bằng tài khoản mới, gia đình chung máy, chung IP, khóa thủ công (`test_linked_ban.py`, `test_restrictions.py`).
-- Lần chạy gần nhất: **190 test qua** (2026-10-31).
+- Lần chạy gần nhất: **191 test qua** (2026-11-03).
 
 ## 2. Thực nghiệm mô phỏng (`backend/simulator`)
 ```
@@ -47,6 +47,58 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Bùng hàng COD chỉ bắt được ~50–67%: kẻ có lịch sử ngắn (dưới 3 đơn) chưa đủ dữ liệu cho luật tỉ lệ thất bại.
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
+
+## 3e. Bộ luật v3.1 — luật giao dịch không trừ điểm tài khoản (2026-11-03, ADR-012, Proposed)
+Thay đổi: R08 (COD giá trị cao, ít lịch sử) không còn trừ vào điểm tin cậy tài khoản (`trust.exclude_rules`), vẫn tính vào điểm COD của đơn. Kiểm tra nhanh trên dev_v2 (không có tham số nào để tinh chỉnh: kết quả trùng v3), sau đó chạy **tập test_v2 seed 5 (seed chưa từng dùng)**, mỗi phiên bản một lần, cùng dân số:
+```
+.venv/Scripts/python -m simulator --dataset test_v2 --seed 5 --confirm-test                      # v3.1
+.venv/Scripts/python -m simulator.trust_report --out ../docs/experiments/test_v2_seed5_trust_v3.1.json
+.venv/Scripts/python -m simulator --dataset test_v2 --seed 5 --confirm-test --trust-all-rules    # v3
+.venv/Scripts/python -m simulator.trust_report --out ../docs/experiments/test_v2_seed5_trust_v3.json
+```
+
+| Chỉ số (test_v2 seed 5, 438 tài khoản) | v3 | v3.1 |
+|---|---|---|
+| Precision | 75,7% (56/74) | 75,7% (56/74) |
+| Recall tất cả / kiểu đã biết / biến thể chưa biết | 38,4% / 53,8% / 0% | giống v3 |
+| FPR tất cả / khách thường / hard negative | 6,2% / 0% / 17,6% | giống v3 |
+| Khách mới mua COD giá trị cao: trung vị điểm tin cậy | 60 | **100** |
+| — số tài khoản dưới 50 điểm (bị khóa mã) | 3/10 | **0/10** |
+| — đơn bị giữ chờ xác minh | 10/10 | 10/10 |
+
+Dấu vân tay: v3.1 `2fa09e9c88da841a…`, v3 `6879ec96daadcfce…`. Chi tiết: [v3.1](experiments/test_v2_seed5_scale1.md), [v3](experiments/test_v2_seed5_scale1_trust-all-rules.md), phân bố điểm [v3.1](experiments/test_v2_seed5_trust_v3.1.json) / [v3](experiments/test_v2_seed5_trust_v3.json).
+
+### Đọc kết quả (trung thực)
+- v3.1 sửa đúng chỗ đã phát hiện ở 3d: khách mới hợp lệ không còn "kém tin cậy hơn farm". Các nhóm khác không đổi điểm, khả năng phát hiện không đổi.
+- **Mục tiêu O1 (recall kiểu đã biết ≥ 80%) chưa đạt trên bộ dữ liệu v2:** 53,8% (KTC 95%: 44,3%–63,1%). Con số 85,5% ở mục 3 đo trên bộ v1, nơi mọi farm vô tình chung một địa chỉ (dễ hơn thực tế). Phần lọt chủ yếu là farm phân tán (44% bị bắt) và tài khoản treo nhiều đơn COD (0/6).
+- Mục tiêu O3 (FPR hard negative ≤ 20%) đạt ở lần này: 17,6%. O4 (FPR tổng ≤ 5%) chưa đạt: 6,2% (KTC 95%: 3,9%–9,5%).
+
+## 3f. Độ trễ khi nhiều người đặt hàng cùng lúc (2026-11-03, kịch bản E2, mục tiêu O5)
+Script [`backend/scripts/load_test.py`](../backend/scripts/load_test.py): mỗi người dùng ảo có tài khoản, thiết bị riêng, lặp "thêm giỏ → đặt hàng trả trước". 3 mức tải × 3 lượt × 200 lần đặt hàng. Máy: Windows 11, 16 luồng CPU AMD, Python 3.11; **1 tiến trình uvicorn**, MariaDB XAMPP cùng máy, CSDL mô phỏng. Không phải đo năng lực production.
+
+| Người dùng đồng thời | Request đặt hàng p50 / p95 / p99 (ms) | Chấm điểm Risk Engine p50 / p95 / p99 (ms) | Thông lượng (đơn/giây) |
+|---|---|---|---|
+| 1 | 33–34 / 38,6–39,4 / 40–46 | 12,4–13,1 / 15,1–16,1 / 16–20 | 19,6–20,3 |
+| 10 | 167–177 / 268–342 / 332–780 | 17,9–18,9 / 32,6–35,5 / 76–96 | 28,3–29,6 |
+| 50 | 695–870 / 1.547–1.858 / 2.008–2.155 | 18,4–19,9 / 34,0–36,2 / 44–46 | 26,7–28,8 |
+
+(Khoảng giá trị = nhỏ nhất – lớn nhất của 3 lượt.) Mọi request đều thành công (1.800/1.800 mã 201). Dữ liệu: [load_test_20261103.json](experiments/load_test_20261103.json).
+
+### Đọc kết quả (trung thực)
+- **O5 đạt ở phần Risk Engine:** p95 chấm điểm ≤ 36,2 ms ở cả 3 mức (ngưỡng 50 ms). p99 ở 10 người lên 76–96 ms: có đuôi chậm, chưa rõ nguyên nhân (cần đo thêm nếu muốn kết luận).
+- **Request đặt hàng chậm dần khi đông người, nhưng nút thắt không nằm ở Risk Engine:** thông lượng dừng ở khoảng 28 đơn/giây từ mức 10 người, nên thêm người chỉ làm hàng đợi dài ra (50 người: p95 khoảng 1,5–1,9 giây, phần chấm điểm chỉ khoảng 35 ms trong đó). Nguyên nhân khả dĩ (chưa đo tách): một tiến trình uvicorn, khóa dòng tồn kho / lượt dùng voucher trong giao dịch, MariaDB cấu hình mặc định của XAMPP.
+- Hướng cải thiện nếu cần (Advanced): chạy nhiều worker uvicorn, đo tách thời gian từng bước của checkout.
+
+## 3g. Tính giải thích được và audit (2026-11-03, kịch bản E3, mục tiêu O6)
+Script chỉ đọc [`backend/scripts/audit_check.py`](../backend/scripts/audit_check.py), 8 mục kiểm tra (quyết định khác ALLOW có lý do; quyết định có ảnh chụp đặc trưng và phiên bản ma trận; luật khớp có câu lý do và giá trị thực tế; case, khiếu nại, lệnh khóa, gỡ khóa, sửa luật đều có audit).
+
+| CSDL | Kết quả |
+|---|---|
+| Dữ liệu demo (657 quyết định, 118 khác ALLOW, 708 luật khớp, 8 case đóng, 3 lệnh khóa, 2 lần gỡ) | **8/8 mục đạt 100%** · [chi tiết](experiments/audit_check_main_20261103.json) |
+| CSDL đo tải (1.810 quyết định, đều ALLOW) | 8/8 đạt (chỉ mục "có ảnh chụp và phiên bản ma trận" có dữ liệu) |
+
+- Lần chạy đầu bắt được 5 quyết định không có phiên bản ma trận. Tra lại: đều là lần chặn vì tài khoản **đang bị khóa** (ADR-010, không chấm điểm, lý do khóa lưu trong ảnh chụp đặc trưng). Đúng thiết kế; script được sửa để nhận diện trường hợp này.
+- Giới hạn: chưa có dữ liệu khiếu nại đã kết luận và sửa luật trên CSDL demo (0 bản ghi), hai mục này mới được kiểm bằng test tự động. Nên chạy lại script sau buổi tập demo.
 
 ## 3d. Bộ luật v3 — Trust Score 2 lớp (2026-10-31, ADR-009)
 Lệnh so sánh trên cùng dân số (tập `test_v2`, seed 4 mới):
