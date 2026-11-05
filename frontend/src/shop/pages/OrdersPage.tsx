@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Link, Navigate } from "react-router"
 
 import { Button } from "@/components/ui/button"
@@ -7,9 +8,13 @@ import { PAYMENT_LABELS, useMyOrders } from "@/lib/api/order"
 import { formatDateTime, formatVND } from "@/lib/format"
 import { OrderStatusBadge } from "@/shop/components/OrderStatusBadge"
 
+// Hiện dần từng 10 đơn: khách mua nhiều không phải cuộn một danh sách dài
+const PAGE = 10
+
 export function OrdersPage() {
   const { data: user, isPending } = useMe()
   const orders = useMyOrders()
+  const [shown, setShown] = useState(PAGE)
 
   if (isPending) return null
   if (!user) return <Navigate to="/login?next=/orders" replace />
@@ -31,8 +36,9 @@ export function OrdersPage() {
           </Button>
         </div>
       ) : (
+        <>
         <ul className="mt-6 grid gap-3">
-          {orders.data.map((o) => (
+          {orders.data.slice(0, shown).map((o) => (
             <li key={o.order_code}>
               <Link
                 to={`/orders/${o.order_code}`}
@@ -55,6 +61,17 @@ export function OrdersPage() {
             </li>
           ))}
         </ul>
+        <div className="mt-4 flex flex-col items-center gap-2 text-sm text-muted-foreground">
+          <span className="tabular-nums">
+            Đang xem {Math.min(shown, orders.data.length)}/{orders.data.length} đơn
+          </span>
+          {shown < orders.data.length && (
+            <Button variant="outline" onClick={() => setShown((n) => n + PAGE)}>
+              Xem thêm {Math.min(PAGE, orders.data.length - shown)} đơn
+            </Button>
+          )}
+        </div>
+        </>
       )}
     </div>
   )
