@@ -1,10 +1,11 @@
-import { ChevronDown, History, Pencil } from "lucide-react"
+import { ChevronDown, FlaskConical, History, Pencil } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
+import { BacktestPanel } from "@/console/components/BacktestPanel"
 import { RuleParamsEditor } from "@/console/components/RuleParamsEditor"
 import { useMe } from "@/lib/api/auth"
 import {
@@ -46,8 +47,8 @@ export function RulesPage() {
           Mỗi lần sửa tạo một phiên bản mới; quyết định cũ vẫn trỏ đúng phiên
           bản đã dùng lúc đó.
           {canEdit
-            ? " Chỉ được sửa con số, cấu trúc luật được giữ nguyên."
-            : " Vai trò của bạn chỉ được xem."}
+            ? " Chỉ được sửa con số, cấu trúc luật được giữ nguyên. Nên chạy thử trên dữ liệu cũ trước khi lưu."
+            : " Vai trò của bạn được chạy thử tham số khác nhưng không được lưu."}
         </p>
       </div>
       {rules.isPending ? (
@@ -144,18 +145,22 @@ function RuleCard({ rule, canEdit }: { rule: Rule; canEdit: boolean }) {
             onChange={setDraft}
           />
 
-          {canEdit && !editing && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-fit"
-              onClick={startEdit}
-            >
-              <Pencil /> Sửa (tạo phiên bản mới)
+          {!editing && (
+            <Button variant="outline" size="sm" className="w-fit" onClick={startEdit}>
+              {canEdit ? <Pencil /> : <FlaskConical />}
+              {canEdit ? "Sửa (tạo phiên bản mới)" : "Thử tham số khác"}
             </Button>
           )}
 
-          {editing && (
+          {editing && <BacktestPanel rule={rule} params={draft} enabled={enabled} />}
+
+          {editing && !canEdit && (
+            <Button size="sm" variant="ghost" className="w-fit" onClick={() => setEditing(false)}>
+              Đóng
+            </Button>
+          )}
+
+          {editing && canEdit && (
             <div className="grid gap-3 rounded-lg border p-3">
               <label className="flex items-center gap-2">
                 <input

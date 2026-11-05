@@ -13,7 +13,8 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 - Danh sách sản phẩm: sắp xếp theo giá, lọc khoảng giá, từ chối tham số sai (`test_catalog.py`); Console Đơn hàng: lọc trạng thái, tìm mã đơn, phân trang, đếm theo trạng thái (`test_order.py`); robots.txt, sitemap (`test_seo.py`).
 - Điểm tin cậy và túi voucher (`test_trust.py`); khóa quyền mua hàng tự động, gỡ khóa, khiếu nại gỡ khóa (`test_restrictions.py`).
 - Né lệnh khóa bằng tài khoản mới, gia đình chung máy, chung IP, khóa thủ công (`test_linked_ban.py`, `test_restrictions.py`).
-- Lần chạy gần nhất: **203 test qua** (2026-11-06).
+- Chạy thử luật trên quyết định cũ: không đổi tham số thì không đổi gì và phát lại khớp 100%; giảm điểm thì đúng lượt bị nới; chỉ đọc; khách bị chặn (`test_backtest.py`).
+- Lần chạy gần nhất: **207 test qua** (2026-11-06).
 
 ## 2. Thực nghiệm mô phỏng (`backend/simulator`)
 ```

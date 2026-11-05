@@ -142,6 +142,46 @@ export function useCreateRuleVersion() {
   })
 }
 
+// ---------- Chạy thử luật trên quyết định cũ (backtest, chỉ đọc) ----------
+export interface BacktestSide {
+  decisions: number
+  accounts: number
+  confirmed_abuse: number // tài khoản từng có case kết luận lạm dụng
+  cleared: number // tài khoản từng có case kết luận không vi phạm
+  loyal: number // khách có từ 10 đơn giao thành công
+  samples: {
+    public_id: string
+    created_at: string
+    context: RiskContext
+    user_email: string
+    before: Decision
+    after: Decision
+  }[]
+}
+
+export interface BacktestResult {
+  rule: string
+  days: number
+  decisions_scanned: number
+  truncated: boolean
+  replay_agreement: number | null
+  hits_old: number
+  hits_new: number
+  stricter: BacktestSide
+  looser: BacktestSide
+  limits: string[]
+}
+
+export function useBacktest() {
+  return useMutation({
+    mutationFn: ({ code, ...body }: { code: string; params: Record<string, unknown>; enabled: boolean; days: number }) =>
+      apiFetch<BacktestResult>(`/api/console/risk/rules/${code}/backtest`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+  })
+}
+
 // ---------- Đồ thị liên kết tài khoản ----------
 export interface GraphNode {
   id: string

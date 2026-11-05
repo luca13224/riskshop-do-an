@@ -5,8 +5,9 @@ from app.core.db import get_db
 from app.modules.auth.deps import require_roles
 from app.modules.auth.models import ADMIN, RISK_MANAGER, STAFF_ROLES, User
 from app.core.errors import AppError
-from app.modules.risk import graph, rules_admin, service
+from app.modules.risk import backtest, graph, rules_admin, service
 from app.modules.risk.schemas import (
+    BacktestIn,
     DecisionOut,
     LiftRestrictionIn,
     NewVersionIn,
@@ -46,6 +47,12 @@ def new_rule_version(
     db: Session = Depends(get_db),
 ):
     return rules_admin.create_version(db, user, code, data.params, data.enabled, data.change_note)
+
+
+# Chạy thử luật trên quyết định cũ: chỉ đọc, nên mọi nhân viên đều dùng được (sửa luật thật vẫn cần Risk Manager)
+@router.post("/rules/{code}/backtest")
+def backtest_rule(code: str, data: BacktestIn, db: Session = Depends(get_db)) -> dict:
+    return backtest.backtest(db, code, data.params, data.enabled, data.days)
 
 
 # Đồ thị liên kết: các tài khoản dính với nhau qua thiết bị / IP / địa chỉ giao hàng (2 bước, 30 ngày)

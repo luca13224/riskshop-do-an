@@ -92,3 +92,10 @@ class NewVersionIn(BaseModel):
         if len(v) < 10:
             raise ValueError("Cần ghi lý do thay đổi (tối thiểu 10 ký tự)")
         return v
+
+
+class BacktestIn(BaseModel):
+    """Chạy thử tham số mới của một luật trên các quyết định cũ (không lưu gì)."""
+    params: dict
+    enabled: bool = True
+    days: int = Field(default=30, ge=1, le=90)
