@@ -23,7 +23,7 @@ type Panel = "categories" | "search" | "mobile"
 // 1) đã cuộn thì thu thấp lại và thành kính mờ; 2) cuộn xuống thì ẩn để nhường chỗ cho nội dung,
 // cuộn lên là hiện lại ngay.
 export function ShopHeader() {
-  const { data: user } = useMe()
+  const { data: user, isPending: checkingSession } = useMe()
   const logout = useLogout()
   const navigate = useNavigate()
   const location = useLocation()
@@ -131,7 +131,10 @@ export function ShopHeader() {
             >
               <Search className="size-5" />
             </IconButton>
-            {user ? (
+            {checkingSession ? (
+              // Đang hỏi máy chủ đã đăng nhập chưa: giữ chỗ thay vì nháy nút "Đăng nhập"
+              <span aria-hidden className="h-9 w-24 animate-pulse rounded-full bg-secondary motion-reduce:animate-none" />
+            ) : user ? (
               <>
                 <span className="hidden max-w-36 truncate px-2 text-sm text-muted-foreground xl:inline">
                   {user.full_name}
