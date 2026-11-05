@@ -236,7 +236,7 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 
 ## ADR-014: Bùng hàng COD lịch sử ngắn và tài khoản mới treo nhiều đơn COD
 - Ngày: 2026-11-05
-- Trạng thái: Proposed (Luca đã chọn ngưỡng R17 = 2 đơn treo ngày 2026-11-05; chờ Luca duyệt toàn bộ ADR)
+- Trạng thái: Accepted (Luca chọn ngưỡng R17 = 2 đơn treo ngày 2026-11-05, duyệt toàn bộ ADR ngày 2026-11-06)
 - Bối cảnh: thí nghiệm baseline (TEST_PLAN 3j) cho thấy Risk Engine chỉ bắt 6/15 kẻ bùng hàng COD, trong khi luật thủ công bắt 15/15. Nguyên nhân: R07 dùng tỷ lệ thất bại làm mượt (cộng thêm 10 đơn giả định, 10% thất bại), kẻ có 2/3 hoặc 3/5 đơn thất bại chỉ còn 0,23–0,29, rơi vào bậc 0,20 (+25), chưa đủ ngưỡng ẩn COD (40). Ngoài ra "tài khoản mới treo nhiều đơn COD" (cod_hoarder) chưa bao giờ bị bắt: R10 cần ≥ 3 đơn treo và chỉ +25.
 - Các phương án:
   - (1) Bỏ làm mượt, dùng tỷ lệ thô như luật thủ công: bắt hết kẻ ít đơn, nhưng phạt khách quen vì một lần giao thất bại (luật thủ công bắt nhầm 30/40 khách quen).
