@@ -13,8 +13,9 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 - Danh sách sản phẩm: sắp xếp theo giá, lọc khoảng giá, từ chối tham số sai (`test_catalog.py`); Console Đơn hàng: lọc trạng thái, tìm mã đơn, phân trang, đếm theo trạng thái (`test_order.py`); robots.txt, sitemap (`test_seo.py`).
 - Điểm tin cậy và túi voucher (`test_trust.py`); khóa quyền mua hàng tự động, gỡ khóa, khiếu nại gỡ khóa (`test_restrictions.py`).
 - Né lệnh khóa bằng tài khoản mới, gia đình chung máy, chung IP, khóa thủ công (`test_linked_ban.py`, `test_restrictions.py`).
+- Cụm tài khoản mới nối chuỗi (R18); gia đình và cụm chỉ một loại điểm chung không bị bắt; chuẩn hóa địa chỉ ngõ / ngách / tỉnh, không gộp "12/5" (`test_cluster_chain.py`, `test_order.py`).
 - Chạy thử luật trên quyết định cũ: không đổi tham số thì không đổi gì và phát lại khớp 100%; giảm điểm thì đúng lượt bị nới; chỉ đọc; khách bị chặn (`test_backtest.py`).
-- Lần chạy gần nhất: **207 test qua** (2026-11-06).
+- Lần chạy gần nhất: **215 test qua** (2026-11-06).
 
 ## 2. Thực nghiệm mô phỏng (`backend/simulator`)
 ```
@@ -48,6 +49,29 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Bùng hàng COD chỉ bắt được ~50–67%: kẻ có lịch sử ngắn (dưới 3 đơn) chưa đủ dữ liệu cho luật tỉ lệ thất bại.
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
+
+## 3m. Cụm tài khoản mới nối chuỗi (2026-11-06, ADR-016)
+Đổi: đặc trưng F18 (cụm liên thông qua thiết bị / điểm nhận hàng, chỉ tài khoản mới) + luật R18; mở rộng chuẩn hóa địa chỉ. Bộ dữ liệu mới dev_v5 / test_v5 (định nghĩa trước khi code): farm nối chuỗi (đã biết), farm nối chuỗi có mắt xích đứt (chưa biết, chỉ test), đại gia đình dùng chung máy và ký túc xá (hard negative).
+
+| | dev_v5 seed 1, trước | dev_v5 seed 1, R18 | **test_v5 seed 12, R18 (bản sửa)** |
+|---|---|---|---|
+| Farm nối chuỗi: farm bị phát hiện | 0/4 | 4/4 | **5/5** |
+| Farm nối chuỗi: tài khoản bị gắn cờ | 0/27 | 4/27 | 6/41 |
+| Chuỗi có mắt xích đứt (chưa biết): farm bị phát hiện | — | — | 1/4 |
+| Bị hạn chế chỉ vì R18: lạm dụng / hợp lệ | — | 4 / 0 | 15 / 2 (ký túc xá) |
+| Đại gia đình / ký túc xá / nhóm ở trọ bị gắn cờ | 3/26 · 10/27 · 2/27 | 3/26 · 10/27 · 2/27 | 1/42 · 10/38 · 3/39 |
+| Precision / Recall / F1 toàn tập | 69,9% / 51,3% / 59,2% | 71,3% / 54,9% / 62,0% | 75,0% / 39,5% / 51,7% |
+| Luật thủ công (B1), cùng lần chạy: F1 | — | — | 43,5% |
+| Chấm điểm p95 (mô phỏng, tuần tự) | 20,2 ms | 20,0 ms | 51,0 ms |
+
+Ngưỡng R18 thử trên dev: 4 / 5 / 6 tài khoản ([n4](experiments/dev_v5_seed1_scale1_r18n4.md), [n5](experiments/dev_v5_seed1_scale1_r18n5.md), [n6](experiments/dev_v5_seed1_scale1_r18n6.md)); chọn 5. Chi tiết: [test v5 seed 12](experiments/test_v5_seed12_scale1.md), [test v5 seed 11, bản trước khi sửa](experiments/test_v5_seed11_scale1.md), [dev v5 trước](experiments/dev_v5_seed1_scale1_before.md), [dev v5 R18](experiments/dev_v5_seed1_scale1_r18.md).
+
+### Đọc kết quả (trung thực)
+- **Phát hiện farm theo nhóm đạt 5/5, theo tài khoản chỉ 6/41.** Chuỗi lộ dần nên các tài khoản đầu đã lấy mã trước khi cụm đủ lớn; khi một mắt xích bị gỡ mã và bỏ đơn thì chuỗi đứt. Muốn thu hồi thiệt hại cần mở case cho cả cụm (hướng tiếp, chưa làm).
+- **Seed 11 là bản lỗi** (đếm SĐT và địa chỉ là hai loại cạnh): 7 tài khoản gia đình chung SĐT ở một địa chỉ bị R18 bắt nhầm. Sửa theo đúng bản thiết kế và đánh giá lại trên seed mới 12, không chạy lại seed 11.
+- **Độ trễ:** phần tính cụm đo riêng p95 7,3 ms; p95 cả lượt mô phỏng test_v5 là 51,0 ms, vượt nhẹ mục tiêu O5 (≤ 50 ms). Mô phỏng chạy tuần tự, không phải đo tải; **O5 cần đo lại bằng load test E2** trước khi kết luận.
+- test_v5 khác dân số với test_v4, nên F1 51,7% không so trực tiếp với 64,7% ở mục 3l; so công bằng là với luật thủ công cùng lần chạy.
+- Lần đầu chạy dev, persona dùng mã thiết bị có dấu "_" nên hệ thống bỏ qua, cạnh "thiết bị" không tồn tại; đã sửa persona và chạy lại toàn bộ dev trước khi chọn ngưỡng.
 
 ## 3l. Khóa kẻ né lệnh khóa thao tác như bot ngay ở bước áp mã (2026-11-06, ADR-015, mục tiêu O7)
 Đổi: chung 1 loại điểm với tài khoản bị khóa + dùng mã người mới + vừa đăng ký dưới 60 giây, chưa xem sản phẩm → khóa thanh toán 30 ngày ngay ở bước áp mã. Chọn trên dev_v4, rồi chạy **test_v4 seed 10** một lần:

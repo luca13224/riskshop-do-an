@@ -102,6 +102,29 @@ DATASETS["test_v4"] = {
     "new_multi_cod": {"n": 12, "orders": (2, 4)},
 }
 
+# ---- Bộ dữ liệu cho R18 (2026-11-06, ADR-016): farm NỐI CHUỖI. Định nghĩa TRƯỚC khi code luật. ----
+# - farm_chain (đã biết, có ở dev để hiệu chỉnh): 6–9 tài khoản mới, mỗi tài khoản chung đúng MỘT thứ với tài khoản
+#   kế tiếp, xoay vòng thiết bị -> SĐT nhận hàng -> địa chỉ; không thứ gì dùng cho quá 2 tài khoản. Đều dùng mã người mới.
+# - farm_chain_sparse (CHƯA BIẾT, chỉ test): như trên nhưng có 1–2 mắt xích đứt, chuỗi bị tách.
+# - big_family_chain (hard negative): đại gia đình 4–6 tài khoản mới, dùng chung 1–2 máy, phần lớn giao về nhà
+#   bố mẹ, SĐT riêng; khoảng một nửa dùng mã người mới; có xem sản phẩm.
+# - dorm (hard negative): 5–8 sinh viên cùng ký túc xá, chung địa chỉ, 2–3 người dùng chung một máy tính, SĐT riêng;
+#   60% dùng mã người mới.
+DATASETS["dev_v5"] = {
+    **DATASETS["dev_v4"],
+    "farm_chain": {"n": 4, "accounts": (6, 8)},
+    "big_family_chain": {"n": 5, "size": (4, 6)},
+    "dorm": {"n": 4, "size": (5, 8)},
+}
+DATASETS["test_v5"] = {
+    **DATASETS["test_v4"],
+    "farm_chain": {"n": 5, "accounts": (6, 9)},
+    "farm_chain_sparse": {"n": 4, "accounts": (7, 10), "breaks": (1, 2)},
+    "big_family_chain": {"n": 8, "size": (4, 6)},
+    "dorm": {"n": 6, "size": (5, 8)},
+}
+CHAIN_LINKS = ("device", "phone", "address")
+
 FARM_ADDRESS_VARIANTS = [
     "Số 5 Ngõ 12 Láng Hạ", "so 05 ngo 12 lang ha", "5, Ngõ 12, Láng Hạ", "Số 05 - Ngõ 12 Láng Hạ",
 ]
@@ -285,6 +308,66 @@ def build_population(dataset: str, rng: random.Random, scale: float, actions) ->
                 steps += [lambda a=a: actions.add(a, rng.choice(MID), 1),
                           lambda a=a, ad=addr: actions.checkout(a, ad, cod=True, abandon_if_no_cod=True)]
             groups.append(Group(a.group, [a], steps))
+
+    # ---- Bộ v5: farm nối chuỗi và hard negative tương ứng ----
+    def chain(persona: str, tag: str, n: int, breaks: set[int]) -> Group:
+        """Tài khoản i và i+1 chung đúng một thứ (xoay vòng), trừ các vị trí trong `breaks` (mắt xích đứt)."""
+        start = rng.randrange(3)
+        devices = [f"sim-{tag.replace('_', '-')}-d{i}" for i in range(n)]  # mã thiết bị chỉ nhận chữ, số, "-"
+        addrs = [_address(rng, f"{tag}x{i}") for i in range(n)]
+        for i in range(n - 1):
+            if i in breaks:
+                continue
+            kind = CHAIN_LINKS[(start + i) % 3]
+            if kind == "device":
+                devices[i + 1] = devices[i]
+            elif kind == "phone":
+                addrs[i + 1] = {**addrs[i + 1], "phone": addrs[i]["phone"]}
+            else:
+                addrs[i + 1] = {**addrs[i], "phone": addrs[i + 1]["phone"]}
+        unseen = persona == "farm_chain_sparse"
+        members = [acc(persona, tag, True, device=devices[i], unseen=unseen) for i in range(n)]
+        grp = Group(tag, members)
+        for a, ad in zip(members, addrs, strict=True):
+            grp.steps += [lambda a=a: actions.register(a), lambda a=a: actions.view(a, rng.choice(CHEAP + MID)),
+                          lambda a=a: actions.add(a, "AU-001", 1), lambda a=a: actions.voucher(a, "NGUOIMOI"),
+                          lambda a=a, ad=ad: actions.checkout_if_voucher(a, ad)]
+        return grp
+
+    if "farm_chain" in cfg:
+        for g in range(n_of("farm_chain")):
+            groups.append(chain("farm_chain", f"farm_chain{g}", rng.randint(*cfg["farm_chain"]["accounts"]), set()))
+    if "farm_chain_sparse" in cfg:
+        p = cfg["farm_chain_sparse"]
+        for g in range(n_of("farm_chain_sparse")):
+            n = rng.randint(*p["accounts"])
+            groups.append(chain("farm_chain_sparse", f"farm_chain_sparse{g}", n,
+                                set(rng.sample(range(1, n - 2), rng.randint(*p["breaks"])))))
+
+    def shared_home(persona: str, tag: str, size: int, n_devices: int, home_share: float, voucher_prob: float) -> Group:
+        """Hard negative: nhiều tài khoản mới hợp lệ dùng chung vài máy và một địa chỉ nhà, SĐT riêng, có xem hàng."""
+        home = _address(rng, tag)
+        devices = [f"sim-{tag.replace('_', '-')}-d{k}" for k in range(n_devices)]
+        members = [acc(persona, tag, False, hard_negative=True, device=rng.choice(devices) if rng.random() < 0.7
+                       else None) for _ in range(size)]
+        grp = Group(tag, members)
+        for a in members:
+            own = _address(rng, a.key)
+            ad = {**home, "phone": own["phone"]} if rng.random() < home_share else own
+            voucher = rng.random() < voucher_prob
+            grp.steps += [lambda a=a: actions.register(a), lambda a=a: actions.view(a, rng.choice(CHEAP + MID)),
+                          lambda a=a: actions.add(a, rng.choice(CHEAP + MID), 1),
+                          *([lambda a=a: actions.voucher(a, "NGUOIMOI")] if voucher else []),
+                          lambda a=a, ad=ad: actions.checkout(a, ad, cod=rng.random() < 0.5, abandon_if_no_cod=False)]
+        return grp
+
+    if "big_family_chain" in cfg:
+        for g in range(n_of("big_family_chain")):
+            groups.append(shared_home("big_family_chain", f"big_family_chain{g}",
+                                      rng.randint(*cfg["big_family_chain"]["size"]), rng.randint(1, 2), 0.7, 0.5))
+    if "dorm" in cfg:
+        for g in range(n_of("dorm")):
+            groups.append(shared_home("dorm", f"dorm{g}", rng.randint(*cfg["dorm"]["size"]), 1, 1.0, 0.6))
 
     # ---- Bộ v4 ----
     if "new_multi_cod" in cfg:  # hard negative: khách mới đặt nhiều đơn COD liền nhau, vẫn mua nếu phải trả trước

@@ -19,6 +19,10 @@ PERSONA_LABELS = {
     "ban_evader_one_link": "Né lệnh khóa: chỉ giữ SĐT nhận hàng cũ",
     "banned_relative": "Người nhà dùng chung máy với tài khoản bị khóa",
     "new_multi_cod": "Khách mới đặt nhiều đơn COD liền nhau",
+    "farm_chain": "Farm nối chuỗi (thiết bị → SĐT → địa chỉ)",
+    "farm_chain_sparse": "Farm nối chuỗi có mắt xích đứt",
+    "big_family_chain": "Đại gia đình dùng chung máy, giao về nhà bố mẹ",
+    "dorm": "Ký túc xá chung địa chỉ, chung máy tính",
 }
 
 LOCK_LABELS = {"purchase_linked": "khóa do liên kết", "purchase_cooldown": "khóa 24 giờ", "purchase_ban": "khóa vô thời hạn"}
