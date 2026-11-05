@@ -139,8 +139,9 @@ def cod_bad_history(r: Runner) -> str:
     c = r.customer("khang", "may-khang")
     item = r.product(c, "Ổ cắm")
     c.get(f"/products/{item['slug']}")
-    # Tạo lịch sử 5 đơn COD: 1 giao thành công, 4 giao thất bại (giả lập đơn vị vận chuyển)
-    for n, result in enumerate(["DELIVERED"] + ["DELIVERY_FAILED"] * 4, start=1):
+    # Tạo lịch sử 3 đơn COD: 1 giao thành công, 2 giao thất bại (giả lập đơn vị vận chuyển).
+    # Từ ADR-014, chừng đó đã đủ để R07 ẩn COD (tỷ lệ làm mượt 3/13 = 0,23 >= 0,20).
+    for n, result in enumerate(["DELIVERED"] + ["DELIVERY_FAILED"] * 2, start=1):
         c.post("/cart/items", json={"product_id": item["id"], "quantity": 1})
         res = r.checkout(c, ADDRESS_FAMILY, "COD")
         if res.status_code != 201:
@@ -159,7 +160,7 @@ def cod_bad_history(r: Runner) -> str:
            _outcome(res) == "COD_NOT_AVAILABLE")
     res = r.checkout(c, ADDRESS_FAMILY, "PREPAID")
     r.step("khang", "Đặt hàng trả trước", _outcome(res), "CONFIRMED", res.status_code == 201)
-    return "Khách bùng hàng 4/5 đơn không còn được COD nhưng vẫn mua được bằng trả trước."
+    return "Khách bùng hàng 2/3 đơn không còn được COD nhưng vẫn mua được bằng trả trước."
 
 
 SCENARIOS: dict[str, Scenario] = {
@@ -175,7 +176,7 @@ SCENARIOS: dict[str, Scenario] = {
                  "Tài khoản mới tạo đặt màn hình 5,49 triệu và chọn thanh toán khi nhận hàng.",
                  "Đơn được tạo nhưng ở trạng thái Chờ xác minh; mở case COD.", cod_high_value),
         Scenario("cod_bad_history", "Lịch sử bùng hàng COD", "Cảnh 5a",
-                 "Khách có 5 đơn COD trước đó, 4 đơn giao thất bại, đặt đơn mới.",
+                 "Khách có 3 đơn COD trước đó, 2 đơn giao thất bại, đặt đơn mới.",
                  "COD bị ẩn và bị từ chối kể cả khi gọi thẳng API; trả trước vẫn được.", cod_bad_history),
     ]
 }

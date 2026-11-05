@@ -298,3 +298,51 @@ def test_console_lists_decisions_with_reasons(shop, db):
     items = staff.get("/api/console/risk/decisions").json()
     assert items[0]["user_email"] == "mi***@example.com"  # Console chỉ thấy email đã che
     assert items[0]["hits"][0]["reason_text"].startswith("Tài khoản mới tạo")
+
+
+# ---------- ADR-014: bùng hàng COD với lịch sử ngắn, tài khoản mới treo nhiều đơn COD ----------
+
+def test_short_history_cod_bomber_loses_cod(shop, db):
+    c = customer("bom3@example.com", "device-bom3-0001")
+    add_history(db, "bom3@example.com", cod_delivered=1, cod_failed=2)  # làm mượt: 3/13 = 0,23
+    browse(c)
+    c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
+    assert c.get("/api/orders/payment-options").json()["cod_allowed"] is False
+    assert "COD_FAIL_RATE" in hit_codes(db, last_decision(db, "bom3@example.com"))
+    assert checkout(c, PREPAID).status_code == 201  # vẫn mua được bằng trả trước
+
+
+@pytest.mark.parametrize("delivered, failed", [(2, 1), (10, 1), (20, 2)])  # 0,15 · 0,10 · 0,10
+def test_one_off_delivery_failure_keeps_cod(shop, db, delivered, failed):
+    email = f"lo{delivered}x{failed}@example.com"
+    c = customer(email, f"device-lo{delivered}x{failed}-01")
+    add_history(db, email, cod_delivered=delivered, cod_failed=failed)
+    browse(c)
+    c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
+    assert c.get("/api/orders/payment-options").json()["cod_allowed"] is True
+
+
+def test_new_account_third_open_cod_order_must_prepay(shop, db):
+    c = customer("treo@example.com", "device-treo-0001")
+    for _ in range(2):
+        browse(c)
+        c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
+        assert checkout(c, COD).json()["status"] == "CONFIRMED"
+    browse(c)
+    c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
+    assert c.get("/api/orders/payment-options").json()["cod_allowed"] is False
+    assert "COD_OPEN_NEW_ACCOUNT" in hit_codes(db, last_decision(db, "treo@example.com"))
+    assert checkout(c, PREPAID).status_code == 201
+
+
+def test_customer_with_a_delivered_order_can_keep_two_open_cod(shop, db):
+    c = customer("mua2@example.com", "device-mua2-0001")
+    add_history(db, "mua2@example.com", cod_delivered=1)
+    for _ in range(2):
+        browse(c)
+        c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
+        checkout(c, COD)
+    browse(c)
+    c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
+    assert c.get("/api/orders/payment-options").json()["cod_allowed"] is True
+    assert "COD_OPEN_NEW_ACCOUNT" not in hit_codes(db, last_decision(db, "mua2@example.com"))

@@ -48,8 +48,11 @@ RULES = [
     dict(code="COD_FAIL_RATE", name="R07 · Tỷ lệ giao COD thất bại cao", rule_type="rate_threshold_tiers",
          strength="medium", policies=[C], contexts=[PAYMENT_OPTIONS, PLACE_ORDER],
          params={"rate_feature": "cod_fail_rate_smoothed", "count_feature": "cod_finished", "min_count": 3,
-                 "tiers": [{"gte": 0.30, "points": 45, "strength": "strong"}, {"gte": 0.20, "points": 25}]},
-         reason_template="Tỷ lệ giao COD thất bại {rate} trên {count} đơn (ngưỡng {threshold})"),
+                 "tiers": [{"gte": 0.30, "points": 45, "strength": "strong"}, {"gte": 0.20, "points": 40}]},
+         reason_template="Tỷ lệ giao COD thất bại {rate} trên {count} đơn (ngưỡng {threshold})",
+         # ADR-014: bậc 0,20 (gấp đôi mức nền 10% của phép làm mượt) từ +25 lên +40 để TỰ MÌNH đủ ngưỡng ẩn COD.
+         # Kẻ bùng hàng ít đơn (2/3, 3/5 thất bại) bị làm mượt xuống 0,23–0,29 nên trước đây lọt.
+         note="ADR-014: bậc 0,20 → +40, đủ để ẩn COD (chỉ còn trả trước)"),
     dict(code="COD_HIGH_VALUE_LOW_HISTORY", name="R08 · COD giá trị cao, ít lịch sử", rule_type="compound",
          strength="medium", policies=[C], contexts=[PAYMENT_OPTIONS, PLACE_ORDER],
          params={"conditions": [{"feature": "payment_cod", "op": "eq", "value": True},
@@ -107,6 +110,15 @@ RULES = [
     # ---- ADR-011: né lệnh khóa bằng tài khoản mới ----
     # Một điểm chung mạnh với tài khoản đang bị ban: trừ đủ mạnh để mã người mới bị khóa (tin cậy < 50) và mở case,
     # nhưng KHÔNG tự khóa thanh toán (bố bị ban, con dùng chung máy). Khóa thanh toán xử lý riêng ở service.
+    # ADR-014: tài khoản chưa có đơn giao thành công nào mà đã có từ 2 đơn COD đang chờ giao -> đơn COD thứ 3
+    # phải trả trước. Hard negative: khách mới mua nhiều đợt liền nhau (vẫn mua được, chỉ không dùng COD).
+    # Độ mạnh "vừa": chỉ ẩn COD, không giữ hay chặn đơn.
+    dict(code="COD_OPEN_NEW_ACCOUNT", name="R17 · Tài khoản mới treo nhiều đơn COD", rule_type="compound",
+         strength="medium", policies=[C], contexts=[PAYMENT_OPTIONS, PLACE_ORDER],
+         params={"conditions": [{"feature": "delivered_orders", "op": "lt", "value": 1},
+                                {"feature": "open_cod_orders", "op": "gte", "value": 2}], "points": 40},
+         reason_template="Tài khoản chưa nhận đơn nào đã có {open_cod_orders} đơn COD đang chờ giao",
+         note="ADR-014: luật mới"),
     # ADR-013: R16 CHỈ trừ điểm tin cậy tài khoản (contexts rỗng: không cộng vào điểm voucher / COD của giao dịch).
     # Chung 1 điểm (người nhà dùng chung máy) thì không bị gỡ mã sớm; kẻ né khóa đi tiếp tới bước đặt hàng, nơi biết
     # đủ thiết bị + SĐT + địa chỉ, và bị khóa thanh toán khi chung >= 2 điểm (service._linked_enforcement).
@@ -124,7 +136,8 @@ RULES = [
 # Mã giảm giá bị khóa theo min_trust của từng mã (bảng vouchers). Bỏ khóa "trust" là tắt cả lớp 1 (dùng cho thực nghiệm).
 # Bộ luật v3.1 (2026-11-03, ADR-012): luật chỉ mô tả ĐƠN đang đặt (giá trị, phương thức) không trừ vào điểm tin cậy
 # TÀI KHOẢN. Nó vẫn tính vào điểm COD của chính giao dịch đó. Trước v3.1, khách mới mua COD giá trị cao rớt xuống ~30 điểm.
-TRUST = {"case_below": 30, "cod_off_at_or_below": 0, "exclude_rules": ["COD_HIGH_VALUE_LOW_HISTORY"]}
+TRUST = {"case_below": 30, "cod_off_at_or_below": 0,
+         "exclude_rules": ["COD_HIGH_VALUE_LOW_HISTORY", "COD_OPEN_NEW_ACCOUNT"]}  # R17 cũng chỉ mô tả đơn đang đặt (ADR-014)
 
 POLICIES = {
     VOUCHER_APPLY: {V: {"restrict": 50, "open_case": 80}, "trust": TRUST},

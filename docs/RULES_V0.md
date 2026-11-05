@@ -79,7 +79,7 @@ Mọi đặc trưng được tính **tại thời điểm đánh giá**, chỉ t
 | R04 | `IP_MULTI_NEW_ACCOUNTS` | voucher_apply | F04 ≥ 3 | +10 | W | Có giá trị khi đi kèm tín hiệu khác | **V5.1 gia đình chung Wi-Fi**, ký túc xá |
 | R05 | `VCH_VELOCITY` | voucher_apply | F05 ≥ 5 | +25 | **S** | Thử voucher liên tục là hành vi dò mã hoặc tự động hóa | Người dùng gõ sai mã vài lần (ngưỡng 5 để chừa chỗ) |
 | R06 | `BOT_SPEED` (Recommended) | place_order | F06: đăng ký → đặt hàng < 60 giây **và** 0 lượt xem sản phẩm | +20 | M | Người thật hiếm khi mua mà không xem sản phẩm nào | Khách mua lại qua link trực tiếp (giảm thiểu: chỉ áp cho tài khoản mới) |
-| R07 | `COD_FAIL_RATE` | payment_options, place_order (COD) | F07 `cod_finished` ≥ 3 **và** F08 ≥ 0,30 → +45; F08 ≥ 0,20 → +25 | +45 / +25 | **S** (bậc 0,30) / M | Lịch sử bùng hàng là căn cứ trực tiếp nhất cho rủi ro COD | Khách gặp sự cố giao hàng thật (giảm thiểu: làm mượt + tối thiểu 3 đơn) |
+| R07 | `COD_FAIL_RATE` | payment_options, place_order (COD) | F07 `cod_finished` ≥ 3 **và** F08 ≥ 0,30 → +45; F08 ≥ 0,20 → +40 (ADR-014; trước đó +25) | +45 / +40 | **S** (bậc 0,30) / M | Lịch sử bùng hàng là căn cứ trực tiếp nhất cho rủi ro COD | Khách gặp sự cố giao hàng thật (giảm thiểu: làm mượt + tối thiểu 3 đơn) |
 | R08 | `COD_HIGH_VALUE_LOW_HISTORY` | place_order (COD) | F11 ≥ 3.000.000đ **và** F09 < 2 → +40; F11 ≥ 5.000.000đ **và** F09 < 2 → +70 | +40 / +70 | M / **S** (bậc 5 triệu) | Đơn COD giá trị cao từ người chưa có lịch sử: thiệt hại lớn nếu bùng | Khách mới mua món đắt thật (được giữ đơn và gọi xác minh, không bị chặn) |
 | R09 | `GOOD_HISTORY` (luật tích cực) | payment_options, place_order | F09 ≥ 10 **và** tỷ lệ thất bại thực ≤ 5% | **−30** | — | Ghi nhận khách uy tín, giảm chặn nhầm | — (đây là luật giảm chặn nhầm cho **V5.2, V5.3**) |
 | R11 | `ADDR_VOUCHER_RING` (v2) | place_order | Voucher tân thủ **và** F12 ≥ 5 **và** F13 ≥ 0,75 | +25 | M | Farm phân tán: nhiều tài khoản mới cùng nhà nhưng mỗi người một mạng | **Nhóm ở trọ dùng 4G riêng** (≈15% bị gỡ voucher trên tập test v2); giảm thiểu: chỉ gỡ voucher, khiếu nại được |
@@ -88,6 +88,7 @@ Mọi đặc trưng được tính **tại thời điểm đánh giá**, chỉ t
 | R14 | `VOUCHER_SUBSIDY_HIGH` (v3) | voucher_apply, place_order | F16 ≥ 15% → +10; ≥ 25% → +20 | 10 / 20 | M | Sàn bù quá nhiều tiền cho một tài khoản | Khách chỉ mua khi có khuyến mãi |
 | R15 | `PROFITABLE_CUSTOMER` (v3, tích cực) | voucher_apply, place_order | F09 ≥ 3 **và** F16 < 10% | **−15** | — | Hồi điểm cho khách mua đều, ít phụ thuộc voucher | — |
 | R10 | `COD_OPEN_ORDERS` | payment_options, place_order (COD) | F10 ≥ 3 | +25 | M | "Treo" nhiều đơn COD cùng lúc (từ kịch bản 4 của đề cương) | Khách mua nhiều đợt khuyến mãi liền nhau |
+| R17 | `COD_OPEN_NEW_ACCOUNT` | payment_options, place_order (COD) | F09 `delivered_orders` < 1 **và** F10 `open_cod_orders` ≥ 2 (ADR-014) | +40 | M | Tài khoản chưa nhận đơn nào đã treo nhiều đơn COD: đơn thứ 3 phải trả trước | Khách mới mua nhiều đợt liền nhau (giảm thiểu: chỉ ẩn COD, vẫn mua được bằng trả trước; không trừ điểm tin cậy) |
 
 Ngưỡng tiền (3 triệu, 5 triệu) là **giả định** cho shop mô phỏng [XM], cấu hình được.
 

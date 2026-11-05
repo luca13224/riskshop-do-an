@@ -233,3 +233,22 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
   - O7 (≥ 90% bị khóa) vẫn chưa đạt. Phần còn lại: kẻ né khóa thao tác như bot (R06) bị điểm tin cậy kéo xuống dưới 50, bị gỡ mã ở bước áp mã rồi bỏ đơn: không lấy được lợi ích nhưng không bị ghi lệnh khóa.
   - R16 không còn xuất hiện trong danh sách "luật khớp" của giao dịch, chỉ trong "sổ trừ điểm"; lý do khóa vẫn ghi rõ tài khoản và loại điểm chung. Trang Luật hiển thị "chỉ điểm tin cậy tài khoản".
   - Seed đổi luôn: phiên bản luật mới tạo từ seed lấy ghi chú `note` của luật làm lý do thay đổi.
+
+## ADR-014: Bùng hàng COD lịch sử ngắn và tài khoản mới treo nhiều đơn COD
+- Ngày: 2026-11-05
+- Trạng thái: Proposed (Luca đã chọn ngưỡng R17 = 2 đơn treo ngày 2026-11-05; chờ Luca duyệt toàn bộ ADR)
+- Bối cảnh: thí nghiệm baseline (TEST_PLAN 3j) cho thấy Risk Engine chỉ bắt 6/15 kẻ bùng hàng COD, trong khi luật thủ công bắt 15/15. Nguyên nhân: R07 dùng tỷ lệ thất bại làm mượt (cộng thêm 10 đơn giả định, 10% thất bại), kẻ có 2/3 hoặc 3/5 đơn thất bại chỉ còn 0,23–0,29, rơi vào bậc 0,20 (+25), chưa đủ ngưỡng ẩn COD (40). Ngoài ra "tài khoản mới treo nhiều đơn COD" (cod_hoarder) chưa bao giờ bị bắt: R10 cần ≥ 3 đơn treo và chỉ +25.
+- Các phương án:
+  - (1) Bỏ làm mượt, dùng tỷ lệ thô như luật thủ công: bắt hết kẻ ít đơn, nhưng phạt khách quen vì một lần giao thất bại (luật thủ công bắt nhầm 30/40 khách quen).
+  - (2) Giữ làm mượt, nâng bậc 0,20 của R07 từ +25 lên +40 để bậc này tự đủ ẩn COD. Bậc 0,20 = gấp đôi mức nền 10%; muốn chạm cần ≥ 2 lần thất bại trên ≤ 5 đơn, hoặc ≥ 3 trên ≤ 10 đơn. Khách quen có 1 lần thất bại không chạm.
+  - (3) Thêm luật mới R17 `COD_OPEN_NEW_ACCOUNT`: tài khoản chưa có đơn giao thành công nào và đã có ≥ 2 đơn COD đang chờ giao → +40 (đơn COD thứ 3 phải trả trước). Độ mạnh vừa: chỉ ẩn COD, không giữ hay chặn đơn; không trừ điểm tin cậy (cùng lý do ADR-012). Biến thể ngưỡng 3 đơn treo cũng được đo.
+- Quyết định: (2) + (3) với ngưỡng 2 đơn treo (Luca chọn).
+- Lý do: giữ nguyên tắc không phạt khách quen vì một lần (ADR-009) mà vẫn chặn kẻ có lịch sử ngắn; hành động nhẹ (vẫn mua được bằng trả trước) nên cái giá của bắt nhầm thấp. Số điểm và ngưỡng chọn trên dev_v4, không chỉnh theo tập test.
+- Dữ liệu: thêm bộ dev_v4 / test_v4, định nghĩa trước khi đổi luật: dev có thêm cod_hoarder; hard negative MỚI `new_multi_cod` (khách mới hợp lệ đặt 2–4 đơn COD liền nhau và nhận đủ hàng), là người dễ bị R17 bắt nhầm nhất.
+- Kết quả đo:
+  - dev_v4 seed 1, trước → sau: bùng hàng 7/12 → 12/12; treo đơn 0/5 → 5/5; khách mới đặt nhiều đơn COD 0/8 → 5/8 phải trả trước ở đơn thứ 3; FPR hard negative 14,5% → 21,1%; F1 67,1% → 73,2%. Ngưỡng 3 đơn treo: treo đơn 3/5, khách mới 0/8, F1 73,9%.
+  - test_v4 seed 9 (seed mới, chạy một lần, dấu vân tay `e0240c5bbcce8604…`): bùng hàng 15/15; treo đơn 6/6; khách mới đặt nhiều đơn COD 7/12 phải trả trước; khách quen 0/40. Precision 78,5%, recall 54,0%, F1 64,0%, FPR 8,4%. Luật thủ công cùng lần chạy: F1 49,5%, FPR 12,0%.
+- Hệ quả / rủi ro:
+  - Khách mới mua nhiều đợt liền nhau phải trả trước từ đơn thứ 3 cho tới khi nhận được đơn đầu tiên: đánh đổi có chủ đích, cần ghi trong thông điệp và chính sách.
+  - Kẻ treo đơn vẫn treo được 2 đơn COD trước khi bị chặn.
+  - Bộ luật có 17 luật; RULES_V0 cập nhật R07 và R17.
