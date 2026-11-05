@@ -13,7 +13,7 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 - Danh sách sản phẩm: sắp xếp theo giá, lọc khoảng giá, từ chối tham số sai (`test_catalog.py`); Console Đơn hàng: lọc trạng thái, tìm mã đơn, phân trang, đếm theo trạng thái (`test_order.py`); robots.txt, sitemap (`test_seo.py`).
 - Điểm tin cậy và túi voucher (`test_trust.py`); khóa quyền mua hàng tự động, gỡ khóa, khiếu nại gỡ khóa (`test_restrictions.py`).
 - Né lệnh khóa bằng tài khoản mới, gia đình chung máy, chung IP, khóa thủ công (`test_linked_ban.py`, `test_restrictions.py`).
-- Lần chạy gần nhất: **202 test qua** (2026-11-05).
+- Lần chạy gần nhất: **203 test qua** (2026-11-06).
 
 ## 2. Thực nghiệm mô phỏng (`backend/simulator`)
 ```
@@ -47,6 +47,27 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Bùng hàng COD chỉ bắt được ~50–67%: kẻ có lịch sử ngắn (dưới 3 đơn) chưa đủ dữ liệu cho luật tỉ lệ thất bại.
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
+
+## 3l. Khóa kẻ né lệnh khóa thao tác như bot ngay ở bước áp mã (2026-11-06, ADR-015, mục tiêu O7)
+Đổi: chung 1 loại điểm với tài khoản bị khóa + dùng mã người mới + vừa đăng ký dưới 60 giây, chưa xem sản phẩm → khóa thanh toán 30 ngày ngay ở bước áp mã. Chọn trên dev_v4, rồi chạy **test_v4 seed 10** một lần:
+```
+.venv/Scripts/python -m simulator --dataset test_v4 --seed 10 --confirm-test
+```
+
+| | dev_v4 seed 1, trước | dev_v4 seed 1, sau | **test_v4 seed 10, sau** |
+|---|---|---|---|
+| Né khóa chung ≥ 2 điểm: bị khóa thanh toán (O7) | 2/7 | 7/7 | **14/14 = 100%** (KTC 95%: 78,5%–100%) |
+| Né khóa cùng máy gom mã: bị khóa | 5/8 | 8/8 | 12/12 |
+| Né khóa chỉ giữ SĐT (chưa biết): lấy được mã | — | — | 6/6 (không đổi, ngoài phạm vi) |
+| Người nhà dùng chung máy: bị hạn chế | 0/5 | 0/5 | **0/8** (KTC 95%: 0%–32,4%) |
+| Precision / Recall / F1 toàn tập | 79,0% / 68,2% / 73,2% | 79,0% / 68,2% / 73,2% | 78,4% / 55,1% / 64,7% |
+
+Precision/recall không đổi trên dev vì kẻ né khóa vốn đã bị gắn cờ 100%; ADR-015 chỉ đổi gắn cờ thành **khóa**. Chi tiết: [test v4 seed 10](experiments/test_v4_seed10_scale1.md), [dev v4 sau ADR-015](experiments/dev_v4_seed1_scale1_adr015.md).
+
+### Đọc kết quả (trung thực)
+- **O7 đạt theo ước lượng điểm (100% ≥ 90%)**, nhưng mẫu chỉ 14 tài khoản: cận dưới KTC 95% là 78,5%, nên nói "đạt trong lần đo này", chưa khẳng định chắc chắn ≥ 90%.
+- Người nhà 0/8 là **lạc quan**: persona người nhà trong mô phỏng luôn xem sản phẩm trước khi mua. Người nhà vừa đăng ký đã áp mã ngay sẽ bị khóa nhầm (đã biết, ghi ở ADR-015; xử lý bằng khiếu nại).
+- Kết quả phụ thuộc giả định "kẻ né khóa thao tác như bot". Kẻ gian biết luật sẽ xem vài sản phẩm trước, khi đó quay về trường hợp ADR-013.
 
 ## 3k. Bùng hàng COD lịch sử ngắn, tài khoản mới treo đơn COD (2026-11-05, ADR-014)
 Đổi: R07 bậc 0,20 từ +25 lên +40; luật mới R17 (chưa nhận đơn nào và ≥ 2 đơn COD đang chờ giao → +40, ẩn COD từ đơn thứ 3). Bộ dữ liệu mới dev_v4 / test_v4 (định nghĩa trước khi đổi luật): dev có thêm cod_hoarder; hard negative mới "khách mới đặt nhiều đơn COD liền nhau". Chọn trên dev_v4, rồi chạy **test_v4 seed 9** một lần:
