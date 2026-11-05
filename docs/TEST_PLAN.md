@@ -13,7 +13,7 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 - Danh sách sản phẩm: sắp xếp theo giá, lọc khoảng giá, từ chối tham số sai (`test_catalog.py`); Console Đơn hàng: lọc trạng thái, tìm mã đơn, phân trang, đếm theo trạng thái (`test_order.py`); robots.txt, sitemap (`test_seo.py`).
 - Điểm tin cậy và túi voucher (`test_trust.py`); khóa quyền mua hàng tự động, gỡ khóa, khiếu nại gỡ khóa (`test_restrictions.py`).
 - Né lệnh khóa bằng tài khoản mới, gia đình chung máy, chung IP, khóa thủ công (`test_linked_ban.py`, `test_restrictions.py`).
-- Lần chạy gần nhất: **196 test qua** (2026-11-05).
+- Lần chạy gần nhất: **202 test qua** (2026-11-05).
 
 ## 2. Thực nghiệm mô phỏng (`backend/simulator`)
 ```
@@ -47,6 +47,30 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Bùng hàng COD chỉ bắt được ~50–67%: kẻ có lịch sử ngắn (dưới 3 đơn) chưa đủ dữ liệu cho luật tỉ lệ thất bại.
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
+
+## 3k. Bùng hàng COD lịch sử ngắn, tài khoản mới treo đơn COD (2026-11-05, ADR-014)
+Đổi: R07 bậc 0,20 từ +25 lên +40; luật mới R17 (chưa nhận đơn nào và ≥ 2 đơn COD đang chờ giao → +40, ẩn COD từ đơn thứ 3). Bộ dữ liệu mới dev_v4 / test_v4 (định nghĩa trước khi đổi luật): dev có thêm cod_hoarder; hard negative mới "khách mới đặt nhiều đơn COD liền nhau". Chọn trên dev_v4, rồi chạy **test_v4 seed 9** một lần:
+```
+.venv/Scripts/python -m simulator --dataset test_v4 --seed 9 --confirm-test
+```
+
+| | dev_v4 seed 1, luật cũ | dev_v4 seed 1, luật mới | **test_v4 seed 9, luật mới** |
+|---|---|---|---|
+| Bùng hàng COD bị gắn cờ | 7/12 | 12/12 | **15/15** |
+| Tài khoản mới treo đơn COD | 0/5 | 5/5 | **6/6** |
+| Khách mới đặt nhiều đơn COD phải trả trước | 0/8 | 5/8 | **7/12** |
+| Khách quen bị gắn cờ | 0/30 | 0/30 | 0/40 |
+| FPR hard negative | 14,5% | 21,1% | 21,9% |
+| Precision / Recall / F1 | 82,0% / 56,8% / 67,1% | 79,0% / 68,2% / 73,2% | 78,5% / 54,0% / **64,0%** |
+| Luật thủ công (B1), cùng lần chạy: F1 / FPR | 63,0% / 12,1% | 63,0% / 12,1% | 49,5% / 12,0% |
+
+Hai cột dev cùng dân số (B1 ra cùng con số ở cả hai lần chạy). Ngưỡng R17 = 3 đơn treo (đo trên dev, không chọn): treo đơn 3/5, khách mới 0/8, F1 73,9%. Dấu vân tay `e0240c5bbcce8604…`. Chi tiết: [test v4 seed 9](experiments/test_v4_seed9_scale1.md), [dev v4 trước](experiments/dev_v4_seed1_scale1_before.md), [dev v4 sau](experiments/dev_v4_seed1_scale1.md), [dev v4 ngưỡng 3](experiments/dev_v4_seed1_scale1_open3.md).
+
+### Đọc kết quả (trung thực)
+- Đạt mục đích: bắt trọn kẻ bùng hàng có lịch sử ngắn và tài khoản treo đơn, **không bắt nhầm khách quen nào** (luật thủ công bắt nhầm 30/40). Kẻ bùng hàng không còn đơn COD nào được xác nhận.
+- Cái giá: 7/12 khách mới hợp lệ đặt từ 3 đơn COD liền nhau phải trả trước ở đơn thứ 3 (vẫn mua được). FPR hard negative tăng khoảng 7 điểm. Đây là đánh đổi Luca chọn so với ngưỡng 3.
+- test_v4 là dân số khác test_v3 seed 8, nên không so trực tiếp F1 64,0% với 59,8% ở mục 3j; so sánh công bằng là với B1 trong cùng lần chạy (F1 49,5%).
+- Biến thể chưa biết vẫn gần như lọt hết (1/46), giới hạn đã nêu ở mục 3.
 
 ## 3j. So với baseline (2026-11-05, theo góp ý của GVHD: kết quả phải so với một cách làm đơn giản)
 Câu hỏi: Risk Engine tốt hơn **cái gì**? So 4 cách làm trên **cùng tài khoản, cùng nhãn**:

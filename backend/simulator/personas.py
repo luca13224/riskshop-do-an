@@ -88,6 +88,20 @@ DATASETS["test_v3"] = {
     "banned_relative": {"n": 8},
 }
 
+# ---- Bộ dữ liệu cho bộ luật v4 (2026-11-05, ADR-014): bùng hàng COD. Định nghĩa TRƯỚC khi đổi luật. ----
+# - cod_hoarder có thêm ở dev (trước đây chỉ có ở test) để hiệu chỉnh trên dev.
+# - new_multi_cod (hard negative MỚI): khách mới hợp lệ đặt 2–4 đơn COD liên tiếp (mua quà, mua cho cả nhà) và
+#   nhận đủ hàng. Đây là người dễ bị luật "tài khoản mới treo nhiều đơn COD" bắt nhầm; bị ẩn COD thì trả trước.
+DATASETS["dev_v4"] = {
+    **DATASETS["dev_v3"],
+    "cod_hoarder": {"n": 5, "orders": (3, 4), "unseen": False},
+    "new_multi_cod": {"n": 8, "orders": (2, 3)},
+}
+DATASETS["test_v4"] = {
+    **DATASETS["test_v3"],
+    "new_multi_cod": {"n": 12, "orders": (2, 4)},
+}
+
 FARM_ADDRESS_VARIANTS = [
     "Số 5 Ngõ 12 Láng Hạ", "so 05 ngo 12 lang ha", "5, Ngõ 12, Láng Hạ", "Số 05 - Ngõ 12 Láng Hạ",
 ]
@@ -270,6 +284,18 @@ def build_population(dataset: str, rng: random.Random, scale: float, actions) ->
             for _ in range(rng.randint(*cfg["cod_hoarder"]["orders"])):
                 steps += [lambda a=a: actions.add(a, rng.choice(MID), 1),
                           lambda a=a, ad=addr: actions.checkout(a, ad, cod=True, abandon_if_no_cod=True)]
+            groups.append(Group(a.group, [a], steps))
+
+    # ---- Bộ v4 ----
+    if "new_multi_cod" in cfg:  # hard negative: khách mới đặt nhiều đơn COD liền nhau, vẫn mua nếu phải trả trước
+        for g in range(n_of("new_multi_cod")):
+            a = acc("new_multi_cod", f"new_multi_cod{g}", False, hard_negative=True)
+            addr = _address(rng, a.key)
+            steps = [lambda a=a: actions.register(a)]
+            for _ in range(rng.randint(*cfg["new_multi_cod"]["orders"])):
+                steps += [lambda a=a: actions.view(a, rng.choice(CHEAP + MID)),
+                          lambda a=a: actions.add(a, rng.choice(CHEAP + MID), 1),
+                          lambda a=a, ad=addr: actions.checkout(a, ad, cod=True, abandon_if_no_cod=False)]
             groups.append(Group(a.group, [a], steps))
 
     # ---- Bộ v2 ----
