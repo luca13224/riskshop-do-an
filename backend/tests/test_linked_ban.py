@@ -1,8 +1,9 @@
 """Test né lệnh khóa bằng tài khoản mới (ADR-011).
 
 Khóa thanh toán khi chung >= 2 loại điểm mạnh (thiết bị, SĐT nhận hàng, địa chỉ) với tài khoản đang bị ban,
-hoặc chung 1 loại VÀ spam mã người mới. Chung 1 loại mà không spam (người nhà dùng chung máy): chỉ trừ điểm tin cậy
-và mở case. Chung IP: không tính.
+hoặc chung 1 loại VÀ spam mã người mới, hoặc chung 1 loại VÀ dùng mã người mới như bot (ADR-015).
+Chung 1 loại mà không spam, không như bot (người nhà dùng chung máy): chỉ trừ điểm tin cậy và mở case.
+Chung IP: không tính.
 """
 
 import uuid
@@ -74,6 +75,7 @@ def test_evader_who_keeps_the_code_is_locked_at_checkout(shop, db):
     hệ thống thấy thêm địa chỉ / SĐT của tài khoản bị khóa (>= 2 điểm) thì chặn đơn và khóa thanh toán."""
     dad = banned_dad(db)
     alt = customer("ne-khoa@example.com", "device-nha-0001", ip="198.51.100.22")
+    browse(alt)  # có xem sản phẩm: không mang dấu hiệu bot, nên chưa bị khóa ở bước áp mã
     assert try_voucher(alt).status_code == 200
     blocked = order(alt, HOME)  # giao về đúng địa chỉ / SĐT của tài khoản bị khóa
     assert blocked.status_code == 403
@@ -81,10 +83,21 @@ def test_evader_who_keeps_the_code_is_locked_at_checkout(shop, db):
     assert f"#{dad}" in lock.reason
 
 
+def test_bot_like_evader_is_locked_at_voucher_step(shop, db):
+    """ADR-015: chung máy với tài khoản bị khóa, vừa đăng ký đã áp mã người mới, chưa xem sản phẩm nào."""
+    dad = banned_dad(db)
+    alt = customer("bot-moi@example.com", "device-nha-0001", ip="198.51.100.23")
+    r = try_voucher(alt)  # lần thử ĐẦU TIÊN, chưa phải spam
+    assert r.status_code == 409 and "khiếu nại" in r.json()["error"]["message"]
+    (lock,) = linked_locks(db, "bot-moi@example.com")
+    assert f"#{dad}" in lock.reason
+
+
 def test_new_account_spamming_welcome_code_gets_30_day_lock(shop, db):
     dad = banned_dad(db)
     alt = customer("acc-moi@example.com", "device-nha-0001", ip="198.51.100.21")
-    try_voucher(alt)
+    browse(alt)  # không như bot: chỉ bị khóa vì thử mã lần thứ 2 (spam)
+    assert try_voucher(alt).status_code == 200
     r = alt.post("/api/cart/voucher", json={"code": "NGUOIMOI"})  # lần thử thứ 2 trên cùng máy: spam
     assert r.status_code == 409 and "khiếu nại" in r.json()["error"]["message"]
     (lock,) = linked_locks(db, "acc-moi@example.com")

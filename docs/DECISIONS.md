@@ -252,3 +252,20 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
   - Khách mới mua nhiều đợt liền nhau phải trả trước từ đơn thứ 3 cho tới khi nhận được đơn đầu tiên: đánh đổi có chủ đích, cần ghi trong thông điệp và chính sách.
   - Kẻ treo đơn vẫn treo được 2 đơn COD trước khi bị chặn.
   - Bộ luật có 17 luật; RULES_V0 cập nhật R07 và R17.
+
+## ADR-015: Khóa ngay ở bước áp mã khi tài khoản mới chung máy với tài khoản bị khóa và thao tác như bot
+- Ngày: 2026-11-06
+- Trạng thái: Accepted (Luca chọn 2026-11-06; bổ sung ADR-011 và ADR-013, không thay thế)
+- Bối cảnh: sau ADR-013, O7 vẫn chưa đạt (66,7%). Chẩn đoán trên test_v4 seed 9: kẻ né khóa không bị khóa đều là tài khoản đầu tiên tạo trên máy của người bị khóa. Ở bước áp mã chỉ thấy 1 điểm chung (thiết bị, chưa có địa chỉ / SĐT). Điểm tin cậy tính trên MỌI luật nên bị trừ R16 (−35), R01 (−10) và R06 (−20, vừa đăng ký dưới 60 giây, chưa xem sản phẩm) → 35 < 50 = `min_trust` của NGUOIMOI. Mã bị gỡ, chúng bỏ đơn, không tới bước đặt hàng nơi đủ ≥ 2 điểm để khóa. Người nhà có xem sản phẩm nên còn 55 điểm và vẫn dùng được mã.
+- Các phương án:
+  - (1) Hoãn xét đến bước đặt hàng: có liên kết với tài khoản bị khóa thì bước áp mã chưa gỡ mã theo điểm tin cậy; xét lại ở bước đặt hàng (≥ 2 điểm → chặn + khóa; 1 điểm → gỡ mã + mở case). Không thêm người bị bắt nhầm, nhưng luồng phức tạp hơn và mã hiện "đã áp" rồi bị gỡ ở bước cuối.
+  - (2) Khóa ngay ở bước áp mã khi: chung 1 loại điểm với tài khoản bị khóa + dùng mã người mới + thao tác như bot (khớp điều kiện R06: dưới 60 giây kể từ lúc đăng ký, chưa xem sản phẩm nào). Cùng dạng "1 điểm + tín hiệu hành vi mạnh" như điều kiện spam của ADR-011.
+- Quyết định: (2) (Luca chọn).
+- Lý do: khóa sớm, đơn giản, giải thích được bằng hai bằng chứng độc lập (liên kết thiết bị + hành vi bot); khác phương án (1) bị bỏ ở ADR-013 ở chỗ có thêm điều kiện hành vi, nên người nhà dùng máy bình thường không bị ảnh hưởng.
+- Kết quả đo:
+  - dev_v4 seed 1: né khóa chung ≥ 2 điểm bị khóa 2/7 → 7/7; né khóa cùng máy gom mã 5/8 → 8/8; người nhà 0/5.
+  - test_v4 seed 10 (seed mới, chạy một lần): né khóa chung ≥ 2 điểm 14/14 = 100% bị khóa (KTC 95%: 78,5%–100%); gom mã 12/12; người nhà 0/8 (KTC 95%: 0%–32,4%). O7 đạt theo ước lượng điểm; mẫu nhỏ nên cận dưới KTC còn dưới 90%.
+- Hệ quả / rủi ro:
+  - Cái giá đã biết, chưa đo bằng mô phỏng: người nhà vừa đăng ký đã áp mã ngay, không xem sản phẩm (ví dụ mở từ link được chia sẻ), sẽ bị khóa thanh toán 30 ngày nhầm và phải khiếu nại. Persona người nhà trong mô phỏng đều xem sản phẩm, nên FPR 0/8 là lạc quan.
+  - Kẻ gian học được luật (xem vài sản phẩm trước khi áp mã) sẽ quay về trường hợp ADR-013: bị gỡ mã hoặc bị khóa ở bước đặt hàng nếu lộ ≥ 2 điểm.
+  - Cảnh demo 5e đổi: tài khoản né khóa bị khóa ngay ở lần áp mã đầu tiên.

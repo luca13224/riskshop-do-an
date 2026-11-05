@@ -95,9 +95,9 @@
 
 ## Cảnh 5e — Né lệnh khóa bằng tài khoản mới (0:45)
 - Manager mở Case của Khang → **Khóa vô thời hạn** (ghi lý do).
-- Chạy `scripts/demo_attack.py evade`: tạo tài khoản mới trên cùng máy, áp NGUOIMOI lần 1 (bị gỡ mã, điểm tin cậy tụt nhưng chưa khóa), lần 2 (spam) → **khóa thanh toán 30 ngày**; đặt hàng trả trước cũng bị chặn.
+- Chạy `scripts/demo_attack.py evade`: tạo tài khoản mới trên cùng máy, vừa đăng ký đã áp NGUOIMOI, chưa xem sản phẩm nào (dấu hiệu bot) → **khóa thanh toán 30 ngày ngay lần 1** (ADR-015); lần 2 và đặt hàng trả trước đều bị chặn.
 - Console: case mới, lý do "Liên kết với tài khoản đang bị khóa #… qua thiết bị"; đồ thị liên kết có vòng đỏ đặc ở Khang.
-- Điểm nhấn khi bị hỏi: con dùng chung máy của bố bị khóa thì chỉ bị trừ điểm và mở case, không bị khóa (test `test_family_member_on_shared_device_is_not_locked`); chung IP không bao giờ tính.
+- Điểm nhấn khi bị hỏi: con dùng chung máy của bố bị khóa, có xem sản phẩm như người bình thường, thì chỉ bị trừ điểm và mở case, không bị khóa (test `test_family_member_on_shared_device_is_not_locked`); chung IP không bao giờ tính. Cái giá đã biết: người nhà vừa đăng ký đã áp mã ngay, không xem sản phẩm, sẽ bị khóa nhầm và phải khiếu nại.
 
 ## Cảnh 5d — Khiếu nại khi bị chặn nhầm (1:00)
 - **Bên trái:** tài khoản mới ở cảnh 5b (đơn đang bị giữ) mở trang **Khiếu nại**.

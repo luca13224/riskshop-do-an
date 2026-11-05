@@ -77,6 +77,9 @@ REPEAT_WINDOW = timedelta(days=30)
 LINKED_LOCK_FIRST = timedelta(days=30)
 LINKED_LOCK_REPEAT = timedelta(days=60)  # đã từng bị khóa do liên kết
 SPAM_ATTEMPTS = 2
+# ADR-015: chung 1 loại + dùng mã người mới + thao tác như bot (khớp điều kiện R06: dưới 60 giây kể từ lúc đăng ký,
+# chưa xem sản phẩm nào) cũng bị khóa ngay ở bước áp mã. Người nhà thao tác nhanh như vậy sẽ bị khóa nhầm (khiếu nại).
+BOT_SIGNUP_SECONDS = 60
 
 # Đơn COD từ mức này trở lên: nếu Risk Engine lỗi thì KHÔNG cho COD (fail-closed). Còn lại fail-open.
 FAIL_CLOSED_COD_VALUE = 3_000_000
@@ -394,7 +397,10 @@ def _linked_enforcement(req: EvaluationRequest, features: dict, decision: str, a
         return decision, None
     actions["open_case"] = True  # có liên kết với tài khoản bị ban: luôn để analyst xem
     spam = req.voucher_new_user is True and (features.get("voucher_attempts_device_10m") or 0) >= SPAM_ATTEMPTS
-    if links < 2 and not spam:
+    signup_sec = features.get("signup_to_checkout_sec")
+    bot = (req.voucher_new_user is True and signup_sec is not None and signup_sec < BOT_SIGNUP_SECONDS
+           and features.get("product_views_24h") == 0)
+    if links < 2 and not spam and not bot:
         return decision, None
     features["linked_lock"] = True
     actions["restrict_account"] = True
