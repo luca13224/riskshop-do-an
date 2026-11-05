@@ -140,10 +140,10 @@ export function ConsoleOrdersPage() {
               <thead className="bg-muted/50 text-left text-muted-foreground">
                 <tr>
                   <th scope="col" className="px-3 py-2 font-medium">Mã đơn</th>
-                  <th scope="col" className="px-3 py-2 font-medium">Khách hàng</th>
-                  <th scope="col" className="px-3 py-2 font-medium">Thanh toán</th>
-                  <th scope="col" className="px-3 py-2 text-right font-medium">Số SP</th>
-                  <th scope="col" className="px-3 py-2 text-right font-medium">Tổng</th>
+                  <th scope="col" className="hidden px-3 py-2 font-medium md:table-cell">Khách hàng</th>
+                  <th scope="col" className="hidden px-3 py-2 font-medium lg:table-cell">Thanh toán</th>
+                  <th scope="col" className="hidden px-3 py-2 text-right font-medium lg:table-cell">Số SP</th>
+                  <th scope="col" className="hidden px-3 py-2 text-right font-medium sm:table-cell">Tổng</th>
                   <th scope="col" className="px-3 py-2 font-medium">Trạng thái</th>
                   <th scope="col" className="px-3 py-2 font-medium">Thao tác</th>
                 </tr>
@@ -156,16 +156,22 @@ export function ConsoleOrdersPage() {
                       <span className="block text-xs text-muted-foreground">
                         {formatDateTime(o.created_at)}
                       </span>
+                      {/* Màn hẹp: gom khách, thanh toán, tổng tiền vào cột đầu */}
+                      <span className="block text-xs text-muted-foreground md:hidden">{o.customer_email}</span>
+                      <span className="block text-xs text-muted-foreground lg:hidden">
+                        {PAYMENT_LABELS[o.payment_method]}
+                        <span className="sm:hidden"> · {formatVND(o.total)}</span>
+                      </span>
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="hidden px-3 py-2 md:table-cell">
                       {o.customer_name}
                       <span className="block text-xs text-muted-foreground">
                         {o.customer_email}
                       </span>
                     </td>
-                    <td className="px-3 py-2">{PAYMENT_LABELS[o.payment_method]}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{o.item_count}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{formatVND(o.total)}</td>
+                    <td className="hidden px-3 py-2 lg:table-cell">{PAYMENT_LABELS[o.payment_method]}</td>
+                    <td className="hidden px-3 py-2 text-right tabular-nums lg:table-cell">{o.item_count}</td>
+                    <td className="hidden px-3 py-2 text-right whitespace-nowrap tabular-nums sm:table-cell">{formatVND(o.total)}</td>
                     <td className="px-3 py-2">
                       <OrderStatusBadge status={o.status} />
                     </td>

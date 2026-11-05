@@ -97,19 +97,24 @@ export function AuditLogPage() {
             <thead className="bg-muted/50 text-left text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 font-medium">Thời gian</th>
-                <th className="px-3 py-2 font-medium">Người thực hiện</th>
-                <th className="px-3 py-2 font-medium">Thao tác</th>
-                <th className="px-3 py-2 font-medium">Đối tượng</th>
+                <th className="hidden px-3 py-2 font-medium sm:table-cell">Người thực hiện</th>
+                <th className="hidden px-3 py-2 font-medium sm:table-cell">Thao tác</th>
+                <th className="hidden px-3 py-2 font-medium md:table-cell">Đối tượng</th>
                 <th className="px-3 py-2 font-medium">Thay đổi / ghi chú</th>
               </tr>
             </thead>
             <tbody>
               {logs.data.map((a) => (
                 <tr key={a.id} className="border-t align-top">
-                  <td className="px-3 py-2 whitespace-nowrap tabular-nums">
-                    {formatDateTime(a.created_at)}
-                  </td>
                   <td className="px-3 py-2">
+                    <span className="whitespace-nowrap tabular-nums">{formatDateTime(a.created_at)}</span>
+                    {/* Điện thoại: gom người làm, thao tác, đối tượng vào cột đầu thay vì 5 cột hẹp */}
+                    <span className="mt-1 block font-medium sm:hidden">{ACTION_LABELS[a.action] ?? a.action}</span>
+                    <span className="block text-xs text-muted-foreground sm:hidden">
+                      {a.actor_name ?? "Hệ thống"} · <span className="font-mono">{a.entity_type}:{a.entity_id}</span>
+                    </span>
+                  </td>
+                  <td className="hidden px-3 py-2 sm:table-cell">
                     {a.actor_name ?? "Hệ thống"}
                     {a.actor_role && (
                       <span className="block text-xs text-muted-foreground">
@@ -117,10 +122,10 @@ export function AuditLogPage() {
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="hidden px-3 py-2 sm:table-cell">
                     {ACTION_LABELS[a.action] ?? a.action}
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs">
+                  <td className="hidden px-3 py-2 font-mono text-xs md:table-cell">
                     {a.entity_type}:{a.entity_id}
                   </td>
                   <td className="px-3 py-2">
