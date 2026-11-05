@@ -39,11 +39,14 @@ from app.modules.risk.seed import seed_rules
 
 ACCOUNTS_FILE = BACKEND_DIR / ".env.accounts"
 
+# Tài khoản demo đặt tên theo số cho dễ nhớ khi trình chiếu; mật khẩu chung lấy từ cấu hình demo_password
+# (chỉ có tác dụng khi DEMO_MODE=true, vì reset từ chối chạy ở chế độ khác).
 STAFF = [
-    ("analyst@riskshop.test", "Analyst Demo", ANALYST),
-    ("manager@riskshop.test", "Risk Manager Demo", RISK_MANAGER),
-    ("admin@riskshop.test", "Admin Demo", ADMIN),
+    ("admin1@test.com", "Admin Demo", ADMIN),
+    ("admin2@test.com", "Risk Manager Demo", RISK_MANAGER),
+    ("admin3@test.com", "Analyst Demo", ANALYST),
 ]
+MINH, KHANG, LAN = "user1@test.com", "user2@test.com", "user3@test.com"  # khách mới / bùng COD / khách uy tín
 
 
 def _wipe(db: Session) -> None:
@@ -97,21 +100,21 @@ def reset(db: Session) -> dict[str, str]:
     credentials: dict[str, str] = {}
 
     def password_for(email: str) -> str:
-        credentials[email] = secrets.token_urlsafe(9)
+        credentials[email] = get_settings().demo_password
         return credentials[email]
 
     for email, name, role in STAFF:
         make_user(db, email, name, role, password_for(email), timedelta(days=60))
 
     cheap = db.query(Product).filter(Product.sku == "SM-002").one()  # Ổ cắm thông minh (món rẻ)
-    minh = make_user(db, "minh@shop.test", "Nguyễn Minh", CUSTOMER, password_for("minh@shop.test"), timedelta(hours=20),
+    minh = make_user(db, MINH, "Nguyễn Minh", CUSTOMER, password_for(MINH), timedelta(hours=20),
                  phone="0901111111")
     db.flush()
     promotion.grant(db, minh, promotion_seed.WELCOME_CODE)  # như khi đăng ký qua API: có sẵn NGUOIMOI trong túi
-    khang = make_user(db, "khang@shop.test", "Phạm Khang", CUSTOMER, password_for("khang@shop.test"),
+    khang = make_user(db, KHANG, "Phạm Khang", CUSTOMER, password_for(KHANG),
                   timedelta(days=90), phone="0902222222")
     add_history(db, khang, cheap, [DELIVERED] + [DELIVERY_FAILED] * 4)
-    lan = make_user(db, "lan@shop.test", "Trần Lan", CUSTOMER, password_for("lan@shop.test"), timedelta(days=365),
+    lan = make_user(db, LAN, "Trần Lan", CUSTOMER, password_for(LAN), timedelta(days=365),
                 phone="0903333333")
     add_history(db, lan, cheap, [DELIVERED] * 30)
     db.commit()

@@ -3,7 +3,7 @@
 Chỉ dùng trên máy local khi chạy demo. Backend phải đang chạy ở http://127.0.0.1:8000.
 
     # Cảnh 5c: khách đã bị ẩn COD vẫn cố gửi đơn COD nhiều lần -> lần thứ 4 bị chặn và khóa mua 24 giờ
-    .venv/Scripts/python scripts/demo_attack.py spam-cod khang@shop.test --times 4
+    .venv/Scripts/python scripts/demo_attack.py spam-cod user2@test.com --times 4
 
     # Cảnh 5e: (sau khi Risk Manager khóa vô thời hạn tài khoản trên trong Console)
     # tạo tài khoản mới trên CÙNG máy rồi spam mã NGUOIMOI -> bị khóa thanh toán 30 ngày (ADR-011)

@@ -50,7 +50,26 @@ export interface Dashboard {
     user_email: string // đã che ở backend
     order_code: string | null
     case_code: string | null
+    reason: string // một câu lý do dễ đọc (luật khớp nhiều điểm nhất, lệnh khóa, hoặc điểm tin cậy)
   }[]
+  // Trang Tổng quan (2026-11-05)
+  pipeline: {
+    scored: number
+    flagged: number
+    cases_opened: number
+    in_review: number // hiện tại, không theo kỳ
+    appeals: number
+    resolved: number
+  }
+  saved: { voucher_vnd: number; voucher_blocks: number } // ước tính
+  system: {
+    rules_enabled: number
+    latency_p95_ms: number | null
+    worker_ok: boolean
+    jobs_lagging: number
+    engine_errors_24h: number
+    active_restrictions: number
+  }
 }
 
 export function useDashboard(days: number) {

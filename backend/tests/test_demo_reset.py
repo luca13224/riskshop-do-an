@@ -9,7 +9,7 @@ from app.main import app
 from app.modules.auth.models import User
 from app.modules.catalog.models import Product
 from app.modules.catalog.seed import PRODUCTS
-from app.modules.lab.reset import reset
+from app.modules.lab.reset import KHANG, LAN, MINH, reset
 from app.modules.order.models import Order
 from app.modules.risk.models import Rule
 from app.modules.risk.seed import RULES
@@ -31,10 +31,10 @@ def product_id(db, sku: str) -> int:
 
 def test_reset_creates_baseline(db):
     creds = reset(db)
-    assert set(creds) >= {"minh@shop.test", "khang@shop.test", "lan@shop.test", "admin@riskshop.test"}
+    assert set(creds) >= {MINH, KHANG, LAN, "admin1@test.com"}
     assert db.scalar(select(func.count()).select_from(Product)) == len(PRODUCTS)
     assert db.scalar(select(func.count()).select_from(Rule)) == len(RULES)
-    lan_id = db.scalar(select(User.id).where(User.email == "lan@shop.test"))
+    lan_id = db.scalar(select(User.id).where(User.email == LAN))
     assert db.scalar(select(func.count()).select_from(Order).where(Order.user_id == lan_id)) == 30
 
     # Chạy lại lần 2: vẫn đúng trạng thái chuẩn (không cộng dồn dữ liệu)
@@ -51,17 +51,17 @@ def assert_demo_personas(db, creds: dict[str, str]) -> None:
     aria, viewpro = product_id(db, "AU-001"), product_id(db, "CP-003")
 
     # Cảnh 1: Minh (khách mới hợp lệ) dùng NGUOIMOI được
-    minh = login("minh@shop.test", creds["minh@shop.test"], "device-minh-demo")
+    minh = login(MINH, creds[MINH], "device-minh-demo")
     minh.post("/api/cart/items", json={"product_id": aria, "quantity": 1})
     assert minh.post("/api/cart/voucher", json={"code": "NGUOIMOI"}).status_code == 200
 
     # Cảnh 5a: Khang (4/5 đơn COD thất bại) không được COD
-    khang = login("khang@shop.test", creds["khang@shop.test"], "device-khang-demo")
+    khang = login(KHANG, creds[KHANG], "device-khang-demo")
     khang.post("/api/cart/items", json={"product_id": aria, "quantity": 1})
     assert khang.get("/api/orders/payment-options").json()["cod_allowed"] is False
 
     # Cảnh 5c: Lan (30 đơn giao thành công) đặt COD 5,49 triệu vẫn được xác nhận ngay
-    lan = login("lan@shop.test", creds["lan@shop.test"], "device-lan-demo")
+    lan = login(LAN, creds[LAN], "device-lan-demo")
     lan.post("/api/cart/items", json={"product_id": viewpro, "quantity": 1})
     r = lan.post("/api/orders/checkout", json={"address": ADDRESS, "payment_method": "COD"},
                  headers={"Idempotency-Key": str(uuid.uuid4())})

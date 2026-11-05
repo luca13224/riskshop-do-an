@@ -3,6 +3,8 @@ import { useState } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { DecisionBadge } from "@/console/components/DecisionBadge"
+import { RiskAnalytics } from "@/console/components/RiskAnalytics"
+import { useDashboard } from "@/lib/api/dashboard"
 import { CONTEXT_LABELS, type Decision, type RiskContext } from "@/lib/api/risk"
 import { useKpi, type Kpi } from "@/lib/api/reports"
 import { formatVND } from "@/lib/format"
@@ -21,6 +23,7 @@ const BAR_TONE: Record<Decision, string> = {
 export function ReportsPage() {
   const [days, setDays] = useState(7)
   const kpi = useKpi(days)
+  const dash = useDashboard(days)
 
   return (
     <div className="grid gap-6">
@@ -58,6 +61,15 @@ export function ReportsPage() {
       ) : (
         <KpiContent k={kpi.data} />
       )}
+
+      <section className="grid gap-4">
+        <h2 className="text-lg font-semibold">Phân tích chi tiết</h2>
+        {dash.data ? (
+          <RiskAnalytics data={dash.data} />
+        ) : (
+          <Skeleton className="h-96 w-full rounded-xl" />
+        )}
+      </section>
     </div>
   )
 }

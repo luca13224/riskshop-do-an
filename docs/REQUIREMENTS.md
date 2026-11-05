@@ -79,7 +79,7 @@
 | NFR-09 | Toàn vẹn dữ liệu | Giao dịch ACID cho đơn, tồn kho, lượt dùng voucher; ràng buộc UNIQUE chống trùng | — | Có test |
 | NFR-10 | Cấu hình được | Luật và ngưỡng quyết định là dữ liệu, sửa qua Console, không cần sửa code | — | Có test |
 | NFR-11 | Khả dụng | Shop dùng được ở 375 px và 1440 px, dùng được bằng bàn phím, có chế độ giảm chuyển động | — | Kiểm thủ công (TEST_PLAN 3b); 768 px chưa kiểm |
-| NFR-12 | Khả năng kiểm thử | Toàn bộ test tự động chạy trên CSDL riêng, qua migration thật | — | 193 test qua (2026-11-03) |
+| NFR-12 | Khả năng kiểm thử | Toàn bộ test tự động chạy trên CSDL riêng, qua migration thật | — | 194 test qua (2026-11-05) |
 
 ## 4. Business Rules
 | Mã | Quy tắc | Nguồn |

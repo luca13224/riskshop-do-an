@@ -85,3 +85,23 @@ def test_risk_patterns_are_consistent(shop, db):
     assert len(body["heatmap"]) == 7 and all(len(r) == 24 for r in body["heatmap"])
     assert sum(map(sum, body["heatmap"])) == body["current"]["intervened"]
     assert sum(x["total"] for x in body["by_context"]) == decisions
+
+
+def test_overview_pipeline_saved_and_system(shop, db):
+    """Các khối của trang Tổng quan mới: dải quy trình, ưu đãi giữ lại, trạng thái hệ thống, lý do dễ đọc."""
+    # Một farm nhỏ cùng thiết bị: tài khoản thứ 3 trở đi bị gỡ mã NGUOIMOI
+    for i in range(4):
+        c = customer(f"farmd{i}@example.com", "device-farm-dash")
+        c.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
+        c.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
+    body = staff(db, "an@riskshop.test", ANALYST).get("/api/console/dashboard", params={"days": 7}).json()
+
+    p = body["pipeline"]
+    assert p["scored"] == body["current"]["decisions"] and p["flagged"] == body["current"]["intervened"]
+    assert p["flagged"] >= 1 and p["in_review"] == 0 and p["resolved"] == 0
+    assert body["saved"]["voucher_blocks"] >= 1
+    assert body["saved"]["voucher_vnd"] == 50_000 * body["saved"]["voucher_blocks"]
+    s = body["system"]
+    assert s["rules_enabled"] >= 10 and s["engine_errors_24h"] == 0 and s["active_restrictions"] == 0
+    assert all(r["reason"] for r in body["recent_interventions"])  # mọi dòng đều có câu lý do
+    assert not any("ngưỡng" in r["reason"] for r in body["recent_interventions"])

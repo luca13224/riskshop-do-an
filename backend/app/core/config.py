@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     # Attack Lab: nút "tạo hàng loạt tài khoản giả" KHÔNG được tồn tại trên hệ thống thật,
     # nên mặc định tắt; chỉ bật bằng cấu hình ở môi trường demo.
     demo_mode: bool = False
+    # Mật khẩu chung của các tài khoản demo do demo reset tạo (adminN / userN @test.com). Chỉ dùng local.
+    demo_password: str = "11111111"
     lab_api_base: str = "http://127.0.0.1:8000/api"
 
     @property

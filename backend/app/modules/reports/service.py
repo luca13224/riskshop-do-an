@@ -5,6 +5,7 @@ và chỉ phản ánh dữ liệu trong hệ thống (kể cả dữ liệu do A
 """
 
 import math
+import re
 from datetime import datetime, timedelta
 
 from sqlalchemy import bindparam, text
@@ -226,14 +227,20 @@ def dashboard(db: Session, days: int) -> dict:
             "SELECT COUNT(*) FROM risk_decisions WHERE created_at >= :since AND error IS NOT NULL"), {"since": since}).scalar()),
     }
 
-    # Các quyết định can thiệp gần nhất (email đã che, như mọi API Console)
+    # Các quyết định can thiệp gần nhất (email đã che, như mọi API Console), kèm MỘT câu lý do dễ đọc:
+    # luật khớp nhiều điểm nhất; nếu không có luật nào (bị chặn vì đang khóa, hoặc do điểm tin cậy) thì lấy lý do đó.
     recent = [
         {"public_id": pid, "created_at": created, "context": ctx, "decision": dec, "score": int(score),
-         "user_email": mask_email(email), "order_code": order_code, "case_code": case_code}
-        for pid, created, ctx, dec, score, email, order_code, case_code in db.execute(text("""
+         "user_email": mask_email(email), "order_code": order_code, "case_code": case_code,
+         "reason": _plain(reason) or (f"Tài khoản đang bị khóa: {restricted}" if restricted
+                                      else "Điểm tin cậy tài khoản thấp")}
+        for pid, created, ctx, dec, score, email, order_code, case_code, reason, restricted in db.execute(text("""
             SELECT d.public_id, d.created_at, d.context, d.decision, d.score, u.email, o.order_code,
                    (SELECT c.case_code FROM case_decisions cd JOIN risk_cases c ON c.id = cd.case_id
-                    WHERE cd.decision_id = d.id ORDER BY c.id DESC LIMIT 1)
+                    WHERE cd.decision_id = d.id ORDER BY c.id DESC LIMIT 1),
+                   (SELECT h.reason_text FROM rule_hits h WHERE h.decision_id = d.id
+                    ORDER BY h.points DESC, h.id LIMIT 1),
+                   JSON_UNQUOTE(JSON_EXTRACT(d.features_snapshot, '$.account_restriction.reason'))
             FROM risk_decisions d JOIN users u ON u.id = d.user_id LEFT JOIN orders o ON o.id = d.order_id
             WHERE d.decision <> 'ALLOW' ORDER BY d.id DESC LIMIT 6
         """))
@@ -249,7 +256,69 @@ def dashboard(db: Session, days: int) -> dict:
         "top_rules": top_rules,
         "attention": attention,
         "recent_interventions": recent,
+        "pipeline": _pipeline(db, since),
+        "saved": _saved(db, since),
+        "system": _system(db, now, latencies),
         **_risk_patterns(db, since, now),
+    }
+
+
+def _plain(reason: str | None) -> str | None:
+    """Bỏ phần kỹ thuật "(ngưỡng N)" khỏi câu lý do để trang Tổng quan dễ đọc; trang chi tiết vẫn hiện đủ."""
+    return re.sub(r"\s*\(ngưỡng[^)]*\)", "", reason).strip() if reason else None
+
+
+def _pipeline(db: Session, since) -> dict:
+    """Dải quy trình xử lý rủi ro trong kỳ: chấm điểm -> gắn cờ -> mở case -> đang xử lý -> khiếu nại -> kết luận.
+    "Đang xử lý" là số case đang được nhận xử lý ở THỜI ĐIỂM HIỆN TẠI (không theo kỳ)."""
+    scored, flagged = db.execute(text("""
+        SELECT COUNT(*), COALESCE(SUM(decision <> 'ALLOW'), 0) FROM risk_decisions WHERE created_at >= :since
+    """), {"since": since}).one()
+    one = lambda sql: int(db.execute(text(sql), {"since": since}).scalar())  # noqa: E731
+    return {
+        "scored": int(scored),
+        "flagged": int(flagged),
+        "cases_opened": one("SELECT COUNT(*) FROM risk_cases WHERE opened_at >= :since"),
+        "in_review": one("SELECT COUNT(*) FROM risk_cases WHERE status = 'IN_REVIEW'"),
+        "appeals": one("SELECT COUNT(*) FROM appeals WHERE created_at >= :since"),
+        "resolved": one("SELECT COUNT(*) FROM risk_cases WHERE closed_at >= :since"),
+    }
+
+
+def _saved(db: Session, since) -> dict:
+    """Ưu đãi giữ lại (ƯỚC TÍNH, cùng giả định với báo cáo KPI): mỗi (tài khoản, mã giảm cố định) bị gỡ tính một lần."""
+    amount, accounts = db.execute(text("""
+        SELECT COALESCE(SUM(v.amount), 0), COUNT(*) FROM (
+            SELECT DISTINCT d.user_id, JSON_UNQUOTE(JSON_EXTRACT(d.features_snapshot, '$.voucher_code')) AS code
+            FROM risk_decisions d
+            WHERE d.created_at >= :since AND JSON_EXTRACT(d.actions, '$.remove_voucher') = true
+        ) x JOIN vouchers v ON v.code = x.code AND v.discount_type = 'fixed'
+    """), {"since": since}).one()
+    return {"voucher_vnd": int(amount), "voucher_blocks": int(accounts)}
+
+
+WORKER_LAG_MINUTES = 2  # việc chờ quá lâu chưa được chạy -> worker có thể đang tắt
+
+
+def _system(db: Session, now, latencies: list[float]) -> dict:
+    rules_enabled = int(db.execute(text("""
+        SELECT COUNT(*) FROM rules r JOIN rule_versions v ON v.id = r.active_version_id WHERE v.enabled
+    """)).scalar())
+    lagging = int(db.execute(text("""
+        SELECT COUNT(*) FROM jobs WHERE status = 'queued' AND run_after < :t
+    """), {"t": now - timedelta(minutes=WORKER_LAG_MINUTES)}).scalar())
+    return {
+        "rules_enabled": rules_enabled,
+        "latency_p95_ms": _percentile(latencies, 95),
+        "worker_ok": lagging == 0,
+        "jobs_lagging": lagging,
+        "engine_errors_24h": int(db.execute(text(
+            "SELECT COUNT(*) FROM risk_decisions WHERE created_at >= :t AND error IS NOT NULL"
+        ), {"t": now - timedelta(hours=24)}).scalar()),
+        "active_restrictions": int(db.execute(text("""
+            SELECT COUNT(DISTINCT user_id) FROM account_restrictions
+            WHERE lifted_at IS NULL AND (expires_at IS NULL OR expires_at > :now)
+        """), {"now": now}).scalar()),
     }
 
 
