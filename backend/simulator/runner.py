@@ -38,6 +38,7 @@ from app.modules.risk.models import DecisionPolicy, Rule, RuleVersion
 from app.modules.risk import service as risk_service
 from app.modules.risk.seed import seed_rules
 from app.modules.simulation.models import SimLabel, SimRun
+from simulator.baselines import evaluate_baselines
 from simulator.personas import Account, Group, build_population
 
 PASSWORD = "sim-matkhau-123"
@@ -173,7 +174,7 @@ def _prepare(db: Session, disable_rules: tuple[str, ...] = (), no_trust: bool = 
 
 def run(session_factory: Callable[[], Session], dataset: str, seed: int, scale: float = 1.0,
         progress: Callable[[str], None] = print, disable_rules: tuple[str, ...] = (), no_trust: bool = False,
-        trust_all_rules: bool = False) -> dict:
+        trust_all_rules: bool = False, no_control: bool = False) -> dict:
     rng = random.Random(seed)
     db = session_factory()
     skus = _prepare(db, disable_rules, no_trust, trust_all_rules)
@@ -187,6 +188,11 @@ def run(session_factory: Callable[[], Session], dataset: str, seed: int, scale: 
 
     previous = app.dependency_overrides.get(get_db)
     app.dependency_overrides[get_db] = _get_db
+    # Baseline B0 chạy thật: ngoài việc tắt mọi luật (do __main__ truyền vào), tắt cả cơ chế khóa kẻ né
+    # lệnh khóa (ADR-013), vì cơ chế này đọc thẳng đặc trưng liên kết chứ không đi qua luật.
+    linked_enforcement = risk_service._linked_enforcement
+    if no_control:
+        risk_service._linked_enforcement = lambda req, features, decision, actions: (decision, None)
     try:
         actions = Actions(db, skus)
         groups = build_population(dataset, rng, scale, actions)
@@ -204,7 +210,7 @@ def run(session_factory: Callable[[], Session], dataset: str, seed: int, scale: 
         sim_run = SimRun(dataset=dataset, seed=seed, rules_fingerprint=_rules_fingerprint(db),
                          config={"scale": scale, "groups": len(groups), "accounts": len(accounts),
                                  "disabled_rules": list(disable_rules), "no_trust": no_trust,
-                                 "trust_all_rules": trust_all_rules})
+                                 "trust_all_rules": trust_all_rules, "no_control": no_control})
         db.add(sim_run)
         db.commit()
         progress(f"Dân số: {len(accounts)} tài khoản trong {len(groups)} nhóm. Đang chạy hành vi…")
@@ -238,8 +244,9 @@ def run(session_factory: Callable[[], Session], dataset: str, seed: int, scale: 
         db.commit()
         return {"run_id": sim_run.id, "dataset": dataset, "seed": seed, "scale": scale,
                 "rules_fingerprint": sim_run.rules_fingerprint, "disabled_rules": list(disable_rules),
-                "no_trust": no_trust, "trust_all_rules": trust_all_rules, **metrics}
+                "no_trust": no_trust, "trust_all_rules": trust_all_rules, "no_control": no_control, **metrics}
     finally:
+        risk_service._linked_enforcement = linked_enforcement
         if previous is None:
             app.dependency_overrides.pop(get_db, None)
         else:
@@ -263,6 +270,11 @@ def evaluate(db: Session, run_id: int) -> dict:
 
     def rate(k, n):
         return {"k": k, "n": n, "value": round(k / n, 4) if n else None, "ci95": wilson(k, n)}
+
+    # F1: trung bình điều hòa của precision và recall. Accuracy: tỷ lệ đoán đúng trên mọi tài khoản
+    # (dễ đánh lừa khi đa số là khách hợp lệ, nên luôn đọc kèm recall và so với baseline).
+    f1 = round(2 * tp / (2 * tp + fp + fn), 4) if tp + fp + fn else None
+    accuracy = round((tp + tn) / len(rows), 4) if rows else None
 
     per_persona = defaultdict(lambda: {"n": 0, "flagged": 0, "is_abuse": False, "hard_negative": False, "unseen": False})
     for r in rows:
@@ -314,6 +326,9 @@ def evaluate(db: Session, run_id: int) -> dict:
         "precision": rate(tp, tp + fp),
         "recall": rate(tp, tp + fn),
         "fpr": rate(fp, fp + tn),
+        "f1": f1,
+        "accuracy": accuracy,
+        "baselines": evaluate_baselines(db, run_id, {int(r.user_id) for r in rows if r.flagged}),
         "fpr_normal": rate(sum(1 for r in normal_legit if r.flagged), len(normal_legit)),
         "fpr_hard_negative": rate(sum(1 for r in hard if r.flagged), len(hard)),
         "recall_seen_variants": rate(sum(1 for r in seen_abuse if r.flagged), len(seen_abuse)),

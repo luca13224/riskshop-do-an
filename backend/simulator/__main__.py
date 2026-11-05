@@ -41,7 +41,13 @@ def main() -> int:
                         help="tắt lớp điểm tin cậy (bậc Trust và min_trust của mã), để so với bộ luật v3")
     parser.add_argument("--trust-all-rules", action="store_true",
                         help="mọi luật đều trừ điểm tin cậy (bộ luật v3, bỏ danh sách loại trừ của v3.1)")
+    parser.add_argument("--no-control", action="store_true",
+                        help="baseline B0 chạy thật: tắt mọi luật và lớp điểm tin cậy, đo thiệt hại khi không kiểm soát")
     args = parser.parse_args()
+    if args.no_control:
+        from app.modules.risk.seed import RULES
+        args.disable_rule = [r["code"] for r in RULES]
+        args.no_trust = True
 
     url = get_settings().sim_database_url
     if not url or "sim" not in url:
@@ -54,13 +60,16 @@ def main() -> int:
 
     session_factory = sessionmaker(bind=make_engine(url), autoflush=False, expire_on_commit=False)
     result = run(session_factory, args.dataset, args.seed, args.scale, disable_rules=tuple(args.disable_rule),
-                 no_trust=args.no_trust, trust_all_rules=args.trust_all_rules)
+                 no_trust=args.no_trust, trust_all_rules=args.trust_all_rules,
+                 no_control=args.no_control)
 
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     stem = f"{args.dataset}_seed{args.seed}_scale{args.scale:g}"
-    if args.disable_rule:
+    if args.no_control:
+        stem += "_no-control"
+    elif args.disable_rule:
         stem += "_without-" + "-".join(sorted(args.disable_rule))
-    if args.no_trust:
+    if args.no_trust and not args.no_control:
         stem += "_no-trust"
     if args.trust_all_rules:
         stem += "_trust-all-rules"
@@ -68,7 +77,8 @@ def main() -> int:
                                              encoding="utf-8")
     (REPORT_DIR / f"{stem}.md").write_text(render_markdown(result), encoding="utf-8")
     m = result
-    print(f"Precision {m['precision']['value']} · Recall {m['recall']['value']} · FPR {m['fpr']['value']}")
+    print(f"Precision {m['precision']['value']} · Recall {m['recall']['value']} · F1 {m['f1']} · "
+          f"FPR {m['fpr']['value']} · Accuracy {m['accuracy']}")
     print(f"Báo cáo: docs/experiments/{stem}.md")
     return 0
 

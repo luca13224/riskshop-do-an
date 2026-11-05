@@ -3,6 +3,7 @@
 import random
 
 from conftest import TestSession
+from simulator.baselines import manual_rules, scores
 from simulator.personas import build_population
 from simulator.report import render_markdown
 from simulator.runner import run, wilson
@@ -32,6 +33,23 @@ def test_small_run_metrics_are_consistent():
     # Khách hợp lệ thông thường (không phải hard negative) không bị gắn cờ trong kịch bản chuẩn
     assert m["fpr_normal"]["k"] == 0
     assert "Toàn bộ dữ liệu là mô phỏng" in render_markdown(m)
+    # Baseline chấm trên cùng tài khoản: tổng ma trận nhầm lẫn khớp; B0 không bắt được ai
+    b = m["baselines"]
+    assert b["engine"]["confusion"] == c and b["engine"]["f1"] == m["f1"]
+    assert b["no_control"]["recall"] == 0 and b["no_control"]["fpr"] == 0
+    assert sum(b["manual_rules"]["confusion"].values()) == sum(c.values())
+    assert "So với baseline" in render_markdown(m)
+
+
+def test_scores_and_manual_rules():
+    s = scores(tp=8, fp=2, tn=88, fn=2)
+    assert s["precision"] == 0.8 and s["recall"] == 0.8 and s["f1"] == 0.8 and s["accuracy"] == 0.96
+    # Không gắn cờ ai: accuracy vẫn 90% dù không bắt được kẻ lạm dụng nào
+    assert scores(tp=0, fp=0, tn=90, fn=10)["accuracy"] == 0.9
+    assert manual_rules({"voucher_new_user": True, "new_accounts_on_device_30d": 2})
+    assert not manual_rules({"voucher_new_user": True, "new_accounts_on_device_30d": 1})
+    assert manual_rules({"payment_cod": True, "cod_failed": 1})
+    assert not manual_rules({"payment_cod": False, "cod_failed": 3})
 
 
 def test_ban_evaders_are_locked_but_relatives_are_not():

@@ -9,11 +9,11 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 - Checkout: idempotency, khóa tồn kho, lượt dùng voucher (`test_order.py`, `test_cart.py`).
 - Case, phân quyền, audit log, Attack Lab, trang luật, báo cáo, demo reset.
 - Giới hạn đăng nhập sai, che email trên Console, xem liên hệ có lý do + audit (`test_privacy.py`).
-- Bộ mô phỏng: khoảng tin cậy Wilson, tái lập theo seed, chạy quy mô nhỏ (`test_simulator.py`).
+- Bộ mô phỏng: khoảng tin cậy Wilson, tái lập theo seed, chạy quy mô nhỏ, F1, accuracy và baseline (`test_simulator.py`).
 - Danh sách sản phẩm: sắp xếp theo giá, lọc khoảng giá, từ chối tham số sai (`test_catalog.py`); Console Đơn hàng: lọc trạng thái, tìm mã đơn, phân trang, đếm theo trạng thái (`test_order.py`); robots.txt, sitemap (`test_seo.py`).
 - Điểm tin cậy và túi voucher (`test_trust.py`); khóa quyền mua hàng tự động, gỡ khóa, khiếu nại gỡ khóa (`test_restrictions.py`).
 - Né lệnh khóa bằng tài khoản mới, gia đình chung máy, chung IP, khóa thủ công (`test_linked_ban.py`, `test_restrictions.py`).
-- Lần chạy gần nhất: **193 test qua** (2026-11-03).
+- Lần chạy gần nhất: **196 test qua** (2026-11-05).
 
 ## 2. Thực nghiệm mô phỏng (`backend/simulator`)
 ```
@@ -47,6 +47,43 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Bùng hàng COD chỉ bắt được ~50–67%: kẻ có lịch sử ngắn (dưới 3 đơn) chưa đủ dữ liệu cho luật tỉ lệ thất bại.
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
+
+## 3j. So với baseline (2026-11-05, theo góp ý của GVHD: kết quả phải so với một cách làm đơn giản)
+Câu hỏi: Risk Engine tốt hơn **cái gì**? So 4 cách làm trên **cùng tài khoản, cùng nhãn**:
+- **B0 · Không kiểm soát:** chạy thật với mọi luật, lớp điểm tin cậy và cơ chế khóa kẻ né lệnh khóa đều tắt (`--no-control`). Cho biết thiệt hại khi không làm gì.
+- **B1 · Luật thủ công:** 2 luật cứng một shop nhỏ hay tự đặt, **chốt trước khi chạy, không tinh chỉnh theo kết quả**: (a) dùng mã người mới trên thiết bị đã có ≥ 2 tài khoản mới trong 30 ngày; (b) đặt COD khi đã từng có đơn COD giao thất bại. Chấm bằng cách phát lại trên ảnh chụp đặc trưng mà Risk Engine thấy ở từng lần chấm điểm (`simulator/baselines.py`).
+- **B2 · Ngẫu nhiên:** gắn cờ ngẫu nhiên đúng bằng tỷ lệ Risk Engine gắn cờ (tính theo kỳ vọng).
+- Chỉ số thêm: **F1** (trung bình điều hòa precision và recall) và **accuracy** (tỷ lệ đoán đúng trên mọi tài khoản).
+
+Chạy trên dev_v3 seed 1 (kiểm tra cách đo), rồi **test_v3 seed 8** (seed mới), mỗi cách đúng một lần, dấu vân tay `f270cd66dfcbe367…`:
+```
+.venv/Scripts/python -m simulator --dataset test_v3 --seed 8 --confirm-test
+.venv/Scripts/python -m simulator --dataset test_v3 --seed 8 --confirm-test --no-control
+```
+
+| test_v3 seed 8 (474 tài khoản, 36,5% lạm dụng) | Precision | Recall | F1 | FPR | Accuracy |
+|---|---|---|---|---|---|
+| **Risk Engine** | **78,5%** (84/107) | **48,3%** (84/174) | **59,8%** | **7,6%** (23/300) | **76,3%** |
+| B0 · Không kiểm soát | — | 0% | 0% | 0% | 63,4% |
+| B1 · Luật thủ công | 66,7% (74/111) | 42,5% (74/174) | 51,9% | 12,2% (37/300) | 71,2% |
+| B2 · Ngẫu nhiên cùng tỷ lệ | 36,5% | 22,5% | 27,8% | 22,5% | 57,4% |
+
+| Tác động nghiệp vụ (test_v3 seed 8) | B0 không kiểm soát | Risk Engine |
+|---|---|---|
+| Lượt mã người mới kẻ lạm dụng dùng được | 153 | **75** (−51%) |
+| Lượt mã người mới khách hợp lệ dùng được | 132 | 119 (−10%) |
+| Đơn COD của nhóm bùng hàng được xác nhận | 15 | 9 |
+| Đơn COD khách mới giá trị cao bị giữ chờ duyệt | 0 | 2 (cái giá của fail-closed) |
+
+Dev_v3 seed 1 cho cùng thứ tự: Risk Engine F1 69,4% · FPR 5,5%; B1 F1 65,0% · FPR 12,5%; B0 accuracy 70,7%. Chi tiết: [test v3 seed 8](experiments/test_v3_seed8_scale1.md), [B0 test v3 seed 8](experiments/test_v3_seed8_scale1_no-control.md), [dev v3](experiments/dev_v3_seed1_scale1_baseline.md), [B0 dev v3](experiments/dev_v3_seed1_scale1_no-control.md).
+
+### Đọc kết quả (trung thực)
+- **Accuracy dễ đánh lừa:** không làm gì (B0) vẫn được 63,4% vì đa số tài khoản là hợp lệ. Vì vậy báo cáo dùng precision, recall, F1, FPR làm chỉ số chính, accuracy chỉ để minh họa.
+- Risk Engine hơn ngẫu nhiên rõ ràng (F1 59,8% so với 27,8%), hơn luật thủ công ở cả 4 chỉ số, nhưng **khoảng cách F1 với B1 chỉ ~8 điểm** trên một dân số 474 tài khoản; chưa kiểm định thống kê cặp (ví dụ McNemar), nên chỉ nói "tốt hơn trong lần đo này", không nói "tốt hơn có ý nghĩa thống kê".
+- Điểm khác biệt chính là **bắt nhầm ai**: 37 FP của B1 gồm 30/40 khách quen (chỉ cần từng có 1 đơn COD giao thất bại) và 7/8 người nhà của tài khoản bị khóa. Risk Engine không bắt nhầm khách quen nào nhờ tỷ lệ thất bại làm trơn và luật lịch sử tốt; FP của nó rơi vào nhóm "khó": khách mới mua COD giá trị cao (10/10 bị giữ chờ duyệt), nhóm ở trọ chung nhà, gia đình đông người.
+- **Chỗ B1 làm tốt hơn:** bắt được 15/15 kẻ bùng hàng COD (Risk Engine 6/15). Luật cứng "từng thất bại là chặn" bắt hết kẻ có lịch sử ngắn nhưng phải trả bằng khách quen. Đây là đánh đổi có chủ đích (ADR-009: không phạt khách quen vì một lần), và là gợi ý cải tiến: dùng ngưỡng riêng cho tài khoản ít đơn.
+- B1 được chấm trên hành trình có Risk Engine (kẻ bị gỡ mã có thể bỏ đơn sớm), nên B1 có thể thấy ít điểm chấm hơn khi chạy thật một mình.
+- Biến thể chưa biết vẫn lọt 0/39 với Risk Engine (B1 cũng không bắt được farm phân tán gom hàng). Giới hạn đã nêu ở mục 3.
 
 ## 3i. Sau ADR-013: R16 chỉ trừ điểm tin cậy, khóa ở bước đặt hàng (2026-11-03, mục tiêu O7)
 Đổi: R16 không cộng vào điểm voucher / COD (contexts rỗng), bậc 1 điểm chung 45 → 35 (chọn trên dev_v3). Chạy **test_v3 seed 7** (seed mới), một lần:

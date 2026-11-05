@@ -30,6 +30,38 @@ def _r(rate: dict) -> str:
     return f"{rate['value']:.1%} ({rate['k']}/{rate['n']}; KTC 95%: {ci[0]:.1%}–{ci[1]:.1%})"
 
 
+def _v(x) -> str:
+    return "—" if x is None else f"{x:.1%}"
+
+
+BASELINE_LABELS = [
+    ("engine", "Risk Engine (lần chạy này)"),
+    ("no_control", "B0 · Không kiểm soát"),
+    ("manual_rules", "B1 · Luật thủ công (2 luật cứng)"),
+    ("random_same_rate", "B2 · Ngẫu nhiên, cùng tỷ lệ gắn cờ (kỳ vọng)"),
+]
+
+
+def _baselines(m: dict) -> list[str]:
+    b = m.get("baselines")
+    if not b:
+        return []
+    lines = ["", "## So với baseline (cùng tài khoản, cùng nhãn)",
+             f"Tỷ lệ kẻ lạm dụng trong dân số: {_v(b['abuse_rate'])}; Risk Engine gắn cờ {_v(b['engine_flag_rate'])} tài khoản. "
+             "B1 được chấm bằng cách phát lại trên ảnh chụp đặc trưng của từng lần chấm điểm (xem `simulator/baselines.py`).",
+             "", "| Cách làm | Precision | Recall | F1 | FPR | Accuracy | TP / FP / FN |", "|---|---|---|---|---|---|---|"]
+    for key, label in BASELINE_LABELS:
+        r = b[key]
+        c = r["confusion"]
+        lines.append(f"| {label} | {_v(r['precision'])} | {_v(r['recall'])} | {_v(r['f1'])} | {_v(r['fpr'])} | "
+                     f"{_v(r['accuracy'])} | {c['TP']:g} / {c['FP']:g} / {c['FN']:g} |")
+    by = {k: v for k, v in b.get("manual_by_persona", {}).items() if v}
+    if by:
+        lines += ["", "B1 gắn cờ theo persona: " + ", ".join(
+            f"{PERSONA_LABELS.get(k, k)} {v}/{m['per_persona'][k]['n']}" for k, v in by.items() if k in m["per_persona"]) + "."]
+    return lines
+
+
 def render_markdown(m: dict) -> str:
     c = m["confusion"]
     lines = [
@@ -37,8 +69,9 @@ def render_markdown(m: dict) -> str:
         "",
         f"> Tạo lúc {utcnow():%Y-%m-%d %H:%M} UTC · Lần chạy #{m['run_id']} · "
         f"Dấu vân tay bộ luật: `{m['rules_fingerprint'][:16]}…`"
-        + (f" · Luật bị tắt: {', '.join(m['disabled_rules'])}" if m.get("disabled_rules") else "")
-        + (" · Tắt lớp điểm tin cậy" if m.get("no_trust") else ""),
+        + (" · **B0 không kiểm soát**: tắt mọi luật, lớp điểm tin cậy và khóa kẻ né lệnh khóa" if m.get("no_control")
+           else f" · Luật bị tắt: {', '.join(m['disabled_rules'])}" if m.get("disabled_rules") else "")
+        + (" · Tắt lớp điểm tin cậy" if m.get("no_trust") and not m.get("no_control") else ""),
         "> **Toàn bộ dữ liệu là mô phỏng.** Kết quả phản ánh giả định của bộ mô phỏng (`backend/simulator/personas.py`),"
         " không chứng minh hiệu quả trên sàn thật.",
         "",
@@ -59,6 +92,8 @@ def render_markdown(m: dict) -> str:
         f"| FPR (tất cả khách hợp lệ) | {_r(m['fpr'])} |",
         f"| FPR: khách hợp lệ thông thường | {_r(m['fpr_normal'])} |",
         f"| FPR: hard negative | {_r(m['fpr_hard_negative'])} |",
+        f"| F1 | {_v(m.get('f1'))} |",
+        f"| Accuracy | {_v(m.get('accuracy'))} |",
         "",
         "## Theo persona",
         "| Persona | Loại | Số tài khoản | Bị gắn cờ | Tỷ lệ | Bị khóa tài khoản | Voucher đã dùng |",
@@ -74,6 +109,8 @@ def render_markdown(m: dict) -> str:
               "| Kiểu lạm dụng | Nhóm bị phát hiện / tổng |", "|---|---|"]
     for key, g in m["group_recall"].items():
         lines.append(f"| {PERSONA_LABELS.get(key, key)} | {g['caught']}/{g['groups']} |")
+
+    lines += _baselines(m)
 
     b = m["business"]
     lines += [
