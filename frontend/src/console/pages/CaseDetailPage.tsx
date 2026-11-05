@@ -246,7 +246,7 @@ function ActionPanel({ kase: c }: { kase: CaseDetail }) {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={3}
-                placeholder="Ví dụ: 6 tài khoản mới cùng thiết bị, cùng địa chỉ, cùng dùng voucher tân thủ"
+                placeholder="Ví dụ: 6 tài khoản mới cùng thiết bị, cùng địa chỉ, cùng dùng mã người mới"
                 className="rounded-md border bg-transparent px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>

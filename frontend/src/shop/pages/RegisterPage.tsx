@@ -71,7 +71,7 @@ export function RegisterPage() {
         <CardHeader>
           <CardTitle>Tạo tài khoản</CardTitle>
           <CardDescription>
-            Thành viên mới được tặng voucher tân thủ.
+            Thành viên mới được tặng mã giảm giá người mới.
           </CardDescription>
         </CardHeader>
         <CardContent>

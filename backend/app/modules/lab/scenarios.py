@@ -166,7 +166,7 @@ SCENARIOS: dict[str, Scenario] = {
     s.code: s
     for s in [
         Scenario("farm_voucher", "Farm voucher", "Cảnh 2",
-                 "6 tài khoản mới trên CÙNG một thiết bị lần lượt áp mã tân thủ NGUOIMOI rồi đặt hàng về cùng địa chỉ.",
+                 "6 tài khoản mới trên CÙNG một thiết bị lần lượt áp mã người mới NGUOIMOI rồi đặt hàng về cùng địa chỉ.",
                  "Tài khoản 1–2 được dùng voucher; từ tài khoản thứ 3 bị gỡ voucher; mở case cụm.", farm_voucher),
         Scenario("family_wifi", "Gia đình chung Wi-Fi", "Cảnh 4",
                  "4 người trong một nhà, mỗi người một điện thoại, cùng Wi-Fi và cùng địa chỉ, mỗi người dùng 1 voucher.",

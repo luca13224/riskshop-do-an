@@ -78,7 +78,7 @@ def render_markdown(m: dict) -> str:
     b = m["business"]
     lines += [
         "", "## Tác động nghiệp vụ trong lần chạy",
-        f"- Voucher tân thủ bị kẻ lạm dụng dùng thành công: **{b['vouchers_redeemed_by_abuse']}** lượt; "
+        f"- Mã người mới bị kẻ lạm dụng dùng thành công: **{b['vouchers_redeemed_by_abuse']}** lượt; "
         f"khách hợp lệ dùng: {b['vouchers_redeemed_by_legit']} lượt.",
         "- Đơn COD theo persona và trạng thái: "
         + ", ".join(f"{PERSONA_LABELS.get(k.split(':')[0], k.split(':')[0])} {k.split(':')[1]} = {v}"

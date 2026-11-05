@@ -16,7 +16,7 @@ from app.core.time import utcnow
 from app.modules.auth.models import User
 from app.modules.promotion.models import PERCENT, UserVoucher, Voucher, VoucherRedemption
 
-# Voucher tân thủ: chỉ cho tài khoản tạo trong vòng N ngày
+# Mã người mới (voucher tân thủ): chỉ cho tài khoản tạo trong vòng N ngày
 NEW_USER_WINDOW_DAYS = 30
 
 

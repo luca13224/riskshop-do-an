@@ -17,7 +17,7 @@ const FEATURE_LABELS: Record<string, string> = {
   cod_fail_rate_smoothed: "Tỷ lệ giao COD thất bại (đã làm mượt)",
   cod_finished: "Số đơn COD đã kết thúc",
   account_age_hours: "Tuổi tài khoản (giờ)",
-  voucher_new_user: "Dùng voucher tân thủ",
+  voucher_new_user: "Dùng mã người mới",
   signup_to_checkout_sec: "Thời gian từ đăng ký đến đặt hàng (giây)",
   product_views_24h: "Số lượt xem sản phẩm (24 giờ)",
   payment_cod: "Thanh toán COD",

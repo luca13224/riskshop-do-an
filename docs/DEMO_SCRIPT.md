@@ -81,7 +81,7 @@
 - **Chuẩn bị (dữ liệu seed):**
   - Tài khoản "Khang" có lịch sử 5 đơn COD, 4 đơn giao thất bại.
   - Tài khoản "Lan" là khách quen, 30 đơn, giao thành công 100%.
-- **5a.** Khang đặt đơn mới → bước chọn thanh toán **không còn COD**, chỉ còn trả trước (`ALLOW_WITH_RESTRICTION`). Thông điệp lịch sự: *"Đơn hàng này hỗ trợ thanh toán trước."*
+- **5a.** Khang đặt đơn mới → bước chọn thanh toán **không còn COD**, chỉ còn trả trước (`ALLOW_WITH_RESTRICTION`). Thông điệp lịch sự: *"Đơn này chưa dùng được thanh toán khi nhận hàng. Bạn chọn trả trước để tiếp tục."*
 - **5b.** Một tài khoản mới đặt đơn COD giá trị cao **bất thường** → `REVIEW` → đơn ở trạng thái **"Chờ xác minh"**, chưa bàn giao vận chuyển. Bên phải, analyst mở case, duyệt → đơn chuyển sang "Đã xác nhận".
 - **5c.** Lan đặt COD giá trị cao → `ALLOW` (hard negative). Mở chi tiết: **luật tín hiệu tích cực** (lịch sử giao thành công dài) đã kéo điểm xuống.
 - **Chứng minh:** cùng mức rủi ro nhưng hành động khác nhau theo chính sách; vòng đời đơn hàng có bước giữ đơn chờ duyệt; lịch sử tốt được ghi nhận.
@@ -89,7 +89,7 @@
 
 ## Cảnh 5c — Cố tình đặt lặp sau khi bị từ chối (0:45)
 - Khang bị ẩn COD. Người thuyết trình nói: "kẻ gian bỏ qua giao diện, gọi thẳng API đặt COD nhiều lần".
-- Gửi 4 lần (công cụ API hoặc script): 3 lần đầu bị từ chối "Đơn hàng này hỗ trợ thanh toán trước"; lần thứ 4 bị **chặn** và tài khoản **tạm khóa mua hàng 24 giờ**; tái phạm trong 30 ngày thì khóa vô thời hạn.
+- Gửi 4 lần (công cụ API hoặc script): 3 lần đầu bị từ chối "Đơn này chưa dùng được thanh toán khi nhận hàng…"; lần thứ 4 bị **chặn** và tài khoản **tạm khóa mua hàng 24 giờ**; tái phạm trong 30 ngày thì khóa vô thời hạn.
 - Console: case tự mở, dải đỏ "Tạm khóa mua hàng", khung "Quyền mua hàng" có nút Gỡ khóa (chỉ Risk Manager, bắt buộc lý do, ghi audit).
 - Điểm nhấn: hoàn toàn tự động nhưng không có quyết định nào "không thể đảo ngược"; khách vẫn đăng nhập và khiếu nại được (chuyển sang cảnh 5d).
 
@@ -172,7 +172,7 @@
 
 | Luật | Tín hiệu | Cảnh |
 |---|---|---|
-| Tài khoản mới dùng voucher tân thủ | tuổi tài khoản | 2 |
+| Tài khoản mới dùng mã người mới | tuổi tài khoản | 2 |
 | Nhiều tài khoản mới trên cùng thiết bị | đếm theo cửa sổ thời gian | 2, 6 |
 | Nhiều tài khoản trên cùng địa chỉ nhận hàng | đếm sau khi chuẩn hóa địa chỉ | 2 |
 | Nhiều tài khoản trên cùng IP | tín hiệu **yếu**, điểm thấp | 4 |

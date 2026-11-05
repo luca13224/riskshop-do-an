@@ -18,11 +18,12 @@ from app.modules.risk.models import PAYMENT_OPTIONS, PLACE_ORDER, VOUCHER_APPLY,
 V, C = "voucher", "cod"
 
 RULES = [
-    dict(code="VCH_NEW_ACCOUNT", name="R01 · Tài khoản mới dùng voucher tân thủ", rule_type="compound",
+    dict(code="VCH_NEW_ACCOUNT", name="R01 · Tài khoản mới dùng mã người mới", rule_type="compound",
          strength="weak", policies=[V], contexts=[VOUCHER_APPLY, PLACE_ORDER],
          params={"conditions": [{"feature": "voucher_new_user", "op": "eq", "value": True},
                                 {"feature": "account_age_hours", "op": "lt", "value": 24}], "points": 10},
-         reason_template="Tài khoản mới tạo {account_age_hours} giờ dùng voucher tân thủ"),
+         reason_template="Tài khoản mới tạo {account_age_hours} giờ dùng mã người mới",
+         note="Đổi từ \"voucher tân thủ\" sang \"mã người mới\" cho dễ hiểu (rà soát 05/11)"),
     dict(code="DEV_MULTI_NEW_ACCOUNTS", name="R02 · Nhiều tài khoản mới trên cùng thiết bị", rule_type="count_threshold_tiers",
          strength="strong", policies=[V], contexts=[VOUCHER_APPLY, PLACE_ORDER],
          params={"feature": "new_accounts_on_device_30d", "tiers": [{"gte": 5, "points": 50}, {"gte": 3, "points": 35}]},
@@ -139,6 +140,7 @@ def seed_rules(db: Session) -> int:
     for spec in RULES:
         rule = db.scalar(select(Rule).where(Rule.code == spec["code"]))
         if rule:
+            rule.name = spec["name"]  # tên chỉ để hiển thị, không ảnh hưởng chấm điểm nên cập nhật thẳng
             current = db.get(RuleVersion, rule.active_version_id)
             if (current.contexts, current.params, current.reason_template) != (
                 spec["contexts"], spec["params"], spec["reason_template"]
