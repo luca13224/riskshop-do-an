@@ -49,11 +49,31 @@ SHIPMENT_TRANSITIONS = {
 
 # ---------- Địa chỉ ----------
 
+# Đồng nghĩa CHẮC CHẮN (ADR-016). Cố ý KHÔNG gộp dạng "12/5": Hà Nội và TP.HCM hiểu thứ tự số nhà / số hẻm
+# khác nhau, gộp sai sẽ biến hai nhà khác nhau thành một.
+PROVINCE_ALIASES = [  # chỉ áp cho ô tỉnh / thành, tránh "dn", "hn" trong tên đường bị đổi nhầm
+    (r"^(thanh pho|tp)?\.?\s*(hcm|ho chi minh|sai gon|sg)$", "ho chi minh"),
+    (r"^(thanh pho|tp)?\.?\s*(hn|ha noi)$", "ha noi"),
+    (r"^(thanh pho|tp)?\.?\s*(dn|da nang)$", "da nang"),
+]
+LANE_ALIASES = [(r"\bngh\.?\s*(?=\d)", "ngach "), (r"\bng\.?\s*(?=\d)", "ngo "), (r"\bh\.?\s*(?=\d)", "hem ")]
+
+
+def _ascii(text: str) -> str:
+    text = text.replace("đ", "d").replace("Đ", "D")
+    return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower().strip()
+
+
 def normalize_address(a: AddressIn) -> str:
-    """Chuẩn hóa để so khớp: bỏ dấu, chữ thường, bỏ ký tự đặc biệt, "số 05" -> "5"."""
-    raw = "|".join([a.line, a.ward, a.district, a.province])
-    raw = raw.replace("đ", "d").replace("Đ", "D")
-    raw = unicodedata.normalize("NFKD", raw).encode("ascii", "ignore").decode().lower()
+    """Chuẩn hóa để so khớp: bỏ dấu, chữ thường, bỏ ký tự đặc biệt, "số 05" -> "5", "ng. 12" -> "ngo 12",
+    "TP.HCM" / "Sài Gòn" -> "ho chi minh", "HN" -> "ha noi"."""
+    line = _ascii(a.line)
+    for pattern, canon in LANE_ALIASES:
+        line = re.sub(pattern, canon, line)
+    province = _ascii(a.province)
+    for pattern, canon in PROVINCE_ALIASES:
+        province = re.sub(pattern, canon, province)
+    raw = "|".join([line, _ascii(a.ward), _ascii(a.district), province])
     raw = re.sub(r"\b(p|q)\.?(?=\d)", " ", raw)  # "Q1", "P.12" viết liền với số
     raw = re.sub(r"\b(so|duong|phuong|quan|huyen|xa|tinh|thanh pho|tp|p|q)\b\.?", " ", raw)
     raw = re.sub(r"\b0+(\d)", r"\1", raw)  # 05 -> 5

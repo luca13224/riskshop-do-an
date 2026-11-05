@@ -1,6 +1,6 @@
 # Thiết kế: phát hiện cụm tài khoản theo chuỗi liên kết + chuẩn hóa địa chỉ (2026-11-06)
 
-> Tư vấn, chưa phải quyết định. Cần Luca duyệt trước khi code; nếu duyệt sẽ ghi ADR-016.
+> Luca đã duyệt 2026-11-06 → ADR-016. Kết quả đo: TEST_PLAN mục 3m. Khác biệt khi cài đặt: SĐT và địa chỉ gộp thành một nhóm cạnh "điểm nhận hàng" (xem ADR-016).
 
 ## 1. Bài toán, nói lại cho đúng
 - Mục tiêu ban đầu: kéo recall của biến thể chưa biết lên (test_v4: farm gom hàng về 2–3 điểm nhận chỉ bắt 1/40).

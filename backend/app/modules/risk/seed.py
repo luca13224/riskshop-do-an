@@ -119,6 +119,18 @@ RULES = [
                                 {"feature": "open_cod_orders", "op": "gte", "value": 2}], "points": 40},
          reason_template="Tài khoản chưa nhận đơn nào đã có {open_cod_orders} đơn COD đang chờ giao",
          note="ADR-014: luật mới"),
+    # ADR-016: farm nối chuỗi (thiết bị -> SĐT -> địa chỉ), mỗi cặp chung một thứ nên R02/R03/R12 không thấy.
+    # Chỉ xét cụm tài khoản MỚI nối qua CẢ thiết bị LẪN điểm nhận hàng (SĐT / địa chỉ); cụm chỉ chung nơi nhận hàng
+    # đã có R03 / R11, chỉ chung máy đã có R02. Độ mạnh "vừa":
+    # chỉ gỡ mã người mới. Hard negative: đại gia đình / ký túc xá dùng chung máy và địa chỉ. Ngưỡng chọn trên dev_v5.
+    dict(code="CLUSTER_CHAIN", name="R18 · Cụm tài khoản mới nối chuỗi cùng gom mã", rule_type="compound",
+         strength="medium", policies=[V], contexts=[VOUCHER_APPLY, PLACE_ORDER],
+         params={"conditions": [{"feature": "voucher_new_user", "op": "eq", "value": True},
+                                {"feature": "cluster_link_types", "op": "gte", "value": 2},
+                                {"feature": "cluster_voucher_accounts_30d", "op": "gte", "value": 5}], "points": 40},
+         reason_template="{cluster_voucher_accounts_30d} tài khoản mới nối nhau qua {cluster_link_types} loại điểm chung "
+                         "cùng thử mã giảm giá",
+         note="ADR-016: luật mới"),
     # ADR-013: R16 CHỈ trừ điểm tin cậy tài khoản (contexts rỗng: không cộng vào điểm voucher / COD của giao dịch).
     # Chung 1 điểm (người nhà dùng chung máy) thì không bị gỡ mã sớm; kẻ né khóa đi tiếp tới bước đặt hàng, nơi biết
     # đủ thiết bị + SĐT + địa chỉ, và bị khóa thanh toán khi chung >= 2 điểm (service._linked_enforcement).

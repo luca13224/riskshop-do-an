@@ -1,4 +1,4 @@
-"""Tính đặc trưng F01–F16 (docs/RULES_V0.md, mục 2; F12–F13 thêm ở bộ luật v2, F14–F16 ở v3).
+"""Tính đặc trưng F01–F18 (docs/RULES_V0.md, mục 2; F12–F13 thêm ở bộ luật v2, F14–F16 ở v3, F17–F18 sau v3).
 
 Đây là lớp "feature store" của Risk Engine: ĐỌC (chỉ đọc) các bảng của module khác bằng SQL thuần,
 không import code của cart/order, nên không tạo vòng phụ thuộc. Lý do: ADR-004.
@@ -10,7 +10,7 @@ Index tương ứng cho từng truy vấn: docs/ERD.md, mục 4.
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from sqlalchemy import text
+from sqlalchemy import bindparam, text
 from sqlalchemy.orm import Session
 
 # Tham số làm mượt tỷ lệ COD thất bại: (thất bại + A) / (đã kết thúc + A + B), tỷ lệ nền A/(A+B) = 10%
@@ -31,6 +31,72 @@ class FeatureInput:
     payment_cod: bool | None  # None: chưa biết phương thức thanh toán
     order_value: int
     as_of: datetime
+
+
+# F18 (ADR-016): duyệt cụm tài khoản mới nối chuỗi. Giới hạn để giữ độ trễ chấm điểm (mục tiêu O5).
+CLUSTER_MAX_NODES = 60
+CLUSTER_MAX_ROUNDS = 8
+# Cạnh của đồ thị: chung thiết bị, chung SĐT nhận hàng, chung địa chỉ (đã chuẩn hóa). IP cố ý không tính (ADR-011).
+# SĐT và địa chỉ cùng thuộc nhóm "điểm nhận hàng": cả nhà dùng chung một SĐT ở một địa chỉ chỉ là MỘT nơi nhận hàng
+# (R03 / R11 xử lý), không phải chuỗi. R18 chỉ xét cụm nối qua CẢ thiết bị LẪN điểm nhận hàng.
+_GROUP = {"device": "thiết bị", "phone": "điểm nhận hàng", "address": "điểm nhận hàng"}
+_NEW = "JOIN users u ON u.id = b.user_id AND u.created_at >= :t30 AND u.role = 'customer'"
+# Một truy vấn cho mỗi vòng duyệt (thay vì 3) để giữ độ trễ chấm điểm
+_NEIGHBORS = text(f"""
+    SELECT DISTINCT 'device' AS kind, b.user_id FROM user_devices a JOIN user_devices b ON b.device_id = a.device_id {_NEW}
+     WHERE a.user_id IN :f AND b.last_seen_at >= :t30
+    UNION ALL
+    SELECT DISTINCT 'phone', b.user_id FROM addresses a JOIN addresses b ON b.phone = a.phone {_NEW}
+     WHERE a.user_id IN :f AND b.created_at >= :t30
+    UNION ALL
+    SELECT DISTINCT 'address', b.user_id FROM addresses a JOIN addresses b ON b.norm_hash = a.norm_hash {_NEW}
+     WHERE a.user_id IN :f AND b.created_at >= :t30""").bindparams(bindparam("f", expanding=True))
+# Điểm chung của chính lần chấm này (địa chỉ / SĐT của đơn đang đặt chưa được lưu vào bảng addresses)
+_SEED = text(f"""
+    SELECT DISTINCT 'device' AS kind, b.user_id FROM user_devices b {_NEW} WHERE b.device_id = :d AND b.last_seen_at >= :t30
+    UNION ALL
+    SELECT DISTINCT 'phone', b.user_id FROM addresses b {_NEW} WHERE b.phone = :p AND b.created_at >= :t30
+    UNION ALL
+    SELECT DISTINCT 'address', b.user_id FROM addresses b {_NEW} WHERE b.norm_hash = :h AND b.created_at >= :t30""")
+
+
+def _chain_cluster(db: Session, f: FeatureInput, now: datetime) -> dict:
+    """Thành phần liên thông chứa tài khoản đang chấm, chỉ đi qua tài khoản MỚI (tạo trong 30 ngày).
+
+    Farm nối chuỗi: A chung máy với B, B chung SĐT với C, C chung địa chỉ với D... Không cặp nào đủ ngưỡng của
+    từng luật đếm (R02, R03, R12) nhưng cả chuỗi là một cụm. Trả về số tài khoản trong cụm, số tài khoản đã thử
+    mã giảm giá, số NHÓM cạnh (thiết bị / điểm nhận hàng) và các loại cạnh cụ thể (để giải thích).
+    """
+    t30 = now - timedelta(days=30)
+    visited = {f.user_id}
+    kinds: set[str] = set()
+
+    def absorb(rows) -> set[int]:
+        found = set()
+        for kind, user_id in rows:
+            if user_id not in visited:
+                kinds.add(kind)
+                found.add(user_id)
+        return found
+
+    frontier = absorb(db.execute(_SEED, {"d": f.device_id, "p": f.address_phone, "h": f.address_hash, "t30": t30}))
+    visited |= frontier
+    frontier.add(f.user_id)
+    for _ in range(CLUSTER_MAX_ROUNDS):
+        if not frontier or len(visited) >= CLUSTER_MAX_NODES:
+            break
+        frontier = absorb(db.execute(_NEIGHBORS, {"f": sorted(frontier), "t30": t30}))
+        visited |= frontier
+    members = sorted(visited)[:CLUSTER_MAX_NODES]
+    q = text("""SELECT COUNT(DISTINCT user_id) FROM events WHERE user_id IN :m AND event_type = 'voucher_attempt'
+                AND occurred_at >= :t30 AND occurred_at <= :now""").bindparams(bindparam("m", expanding=True))
+    vouchers = int(db.execute(q, {"m": members, "t30": t30, "now": now}).scalar() or 0)
+    return {
+        "cluster_new_accounts_30d": len(members),
+        "cluster_voucher_accounts_30d": vouchers,
+        "cluster_link_types": len({_GROUP[k] for k in kinds}),  # 2 = nối qua cả thiết bị lẫn điểm nhận hàng
+        "cluster_links": sorted(kinds),  # để giải thích, không phải đặc trưng chấm điểm
+    }
 
 
 def _scalar(db: Session, sql: str, **params) -> int:
@@ -140,6 +206,13 @@ def compute(db: Session, f: FeatureInput) -> dict:
     linked = {k: v for k, v in links.items() if v}
     features["banned_link_types_90d"] = len(linked)  # F17
     features["banned_links"] = {k: v[:3] for k, v in linked.items()}  # để giải thích: loại điểm chung -> tài khoản bị ban
+
+    # F18 (ADR-016): cụm tài khoản MỚI nối chuỗi. Chỉ tính khi đang dùng mã người mới (tiết kiệm truy vấn).
+    if f.voucher_new_user:
+        features.update(_chain_cluster(db, f, now))
+    else:
+        features["cluster_new_accounts_30d"] = features["cluster_voucher_accounts_30d"] = None
+        features["cluster_link_types"] = None
 
     # F04: số tài khoản mới dùng cùng IP trong 24 giờ (tín hiệu yếu)
     features["new_accounts_on_ip_24h"] = (

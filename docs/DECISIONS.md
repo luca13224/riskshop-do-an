@@ -269,3 +269,24 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
   - Cái giá đã biết, chưa đo bằng mô phỏng: người nhà vừa đăng ký đã áp mã ngay, không xem sản phẩm (ví dụ mở từ link được chia sẻ), sẽ bị khóa thanh toán 30 ngày nhầm và phải khiếu nại. Persona người nhà trong mô phỏng đều xem sản phẩm, nên FPR 0/8 là lạc quan.
   - Kẻ gian học được luật (xem vài sản phẩm trước khi áp mã) sẽ quay về trường hợp ADR-013: bị gỡ mã hoặc bị khóa ở bước đặt hàng nếu lộ ≥ 2 điểm.
   - Cảnh demo 5e đổi: tài khoản né khóa bị khóa ngay ở lần áp mã đầu tiên.
+
+## ADR-016: Phát hiện cụm tài khoản mới nối chuỗi (R18) và mở rộng chuẩn hóa địa chỉ
+- Ngày: 2026-11-06
+- Trạng thái: Accepted (Luca duyệt thiết kế `docs/reviews/2026-11-06_CUM_LIEN_KET_DESIGN.md` ngày 2026-11-06; ngưỡng chọn trên dev theo thiết kế)
+- Bối cảnh: các luật đếm (R02 thiết bị, R03 / R11 địa chỉ, R12 SĐT) mỗi luật chỉ nhìn một loại điểm chung. Farm "nối chuỗi" (A chung máy với B, B chung SĐT với C, C chung địa chỉ với D…) không cặp nào chạm ngưỡng nên lọt hoàn toàn (dev_v5: 0/27 tài khoản, 0/4 farm). Rà lại cũng cho thấy farm gom hàng nhiều điểm (`farm_multi_drop`) không có mối nối nào giữa các điểm nhận, nên gom cụm không giải được và không nhắm tới.
+- Các phương án: (A) cụm liên thông theo chuỗi + luật R18; (B) chỉ mở rộng chuẩn hóa địa chỉ; (C) dừng. Chi tiết ở bản thiết kế.
+- Quyết định: (A) + (B).
+  - F18: thành phần liên thông chứa tài khoản đang chấm, chỉ đi qua tài khoản mới (< 30 ngày), cạnh là chung thiết bị / SĐT nhận hàng / địa chỉ chuẩn hóa (không tính IP), tối đa 60 nút, 8 vòng, một truy vấn mỗi vòng. Chỉ tính khi đang dùng mã người mới.
+  - R18 `CLUSTER_CHAIN` (voucher, độ mạnh vừa, +40): dùng mã người mới **và** cụm nối qua **cả thiết bị lẫn điểm nhận hàng** (SĐT hoặc địa chỉ gộp làm một nhóm) **và** ≥ 5 tài khoản mới trong cụm đã thử mã.
+  - Chuẩn hóa địa chỉ: "ng. / ngh. / h." + số → ngõ / ngách / hẻm; tỉnh "HN", "TP.HCM", "Sài Gòn", "ĐN" → tên chuẩn (chỉ ở ô tỉnh). Cố ý không gộp dạng "12/5" vì quy ước số nhà / số hẻm khác nhau giữa các thành phố.
+- Lý do: nhắm đúng chỗ mù của các luật đếm, giải thích được bằng đồ thị liên kết, không cần thư viện hay CSDL đồ thị.
+- Quá trình và kết quả đo (trung thực, gồm cả lỗi):
+  - Lần đầu, persona mô phỏng dùng mã thiết bị có dấu "_" bị hệ thống bỏ qua nên cạnh "thiết bị" không tồn tại; đã sửa persona và chạy lại toàn bộ dev.
+  - Ngưỡng trên dev_v5 seed 1: 4 thì bắt nhầm thêm 4 người ở trọ + 1 gia đình mà không bắt thêm farm; 5 và 6 giống hệt nhau (phát hiện 4/4 farm, không thêm bắt nhầm). Chọn 5 để chặn sớm hơn một mắt xích.
+  - Bản đầu đếm "SĐT" và "địa chỉ" là hai loại cạnh khác nhau. test_v5 seed 11 (chạy một lần) cho thấy gia đình 5–6 người dùng chung SĐT ở một địa chỉ bị R18 bắt nhầm (7 tài khoản), và một test cũ của R11 cũng hỏng vì cùng lý do. Đây là sai so với chính bản thiết kế ("cụm chỉ chung nơi nhận hàng đã có luật đếm riêng"), nên sửa thành nhóm "điểm nhận hàng" và đánh giá lại trên **seed mới 12**, không chạy lại seed 11.
+  - test_v5 seed 12 (bản sửa, chạy một lần): farm nối chuỗi phát hiện **5/5 farm** (6/41 tài khoản); chuỗi có mắt xích đứt (chưa biết) 1/4 farm. Tài khoản bị hạn chế chỉ vì R18: 15 lạm dụng (farm 8, chuỗi 6, chuỗi đứt 1), 2 hợp lệ (ký túc xá). F1 toàn tập 51,7%, luật thủ công cùng lần chạy 43,5%.
+- Hệ quả / rủi ro:
+  - **Phát hiện theo nhóm tốt, theo tài khoản thấp:** chuỗi lộ dần, các tài khoản đầu đã lấy mã trước khi cụm đủ 5; khi một mắt xích bị gỡ mã và bỏ đơn thì chuỗi đứt. Hướng tiếp: khi R18 khớp, mở một case cho cả cụm để analyst rà các tài khoản trước đó (chưa làm).
+  - Độ trễ: tính cụm đo riêng p50 2,3 ms, p95 7,3 ms. p95 chấm điểm của cả lượt mô phỏng test_v5 là 51,0 ms (test_v4: 39,9 ms), vượt nhẹ mục tiêu O5 ≤ 50 ms; mô phỏng chạy tuần tự trên máy phát triển, không phải đo tải. Cần chạy lại load test E2 để kết luận O5.
+  - Dấu vân tay bộ luật của seed 11 và seed 12 giống nhau vì thay đổi nằm ở code tính đặc trưng, không ở tham số luật; báo cáo ghi rõ seed 11 là bản trước khi sửa.
+  - Chuẩn hóa địa chỉ đổi cách băm: địa chỉ lưu trước đó không khớp băm mới cho tới khi hết cửa sổ 30 ngày; CSDL demo được tạo lại bằng demo reset.

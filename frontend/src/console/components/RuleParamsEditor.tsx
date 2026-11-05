@@ -14,6 +14,8 @@ const FEATURE_LABELS: Record<string, string> = {
   new_accounts_on_ip_24h: "Số tài khoản mới cùng IP (24 giờ)",
   voucher_attempts_device_10m: "Số lần thử mã từ cùng thiết bị (10 phút)",
   open_cod_orders: "Số đơn COD đang chờ giao",
+  cluster_link_types: "Số loại điểm chung trong cụm",
+  cluster_voucher_accounts_30d: "Số tài khoản mới trong cụm đã thử mã",
   cod_fail_rate_smoothed: "Tỷ lệ giao COD thất bại (đã làm mượt)",
   cod_finished: "Số đơn COD đã kết thúc",
   account_age_hours: "Tuổi tài khoản (giờ)",

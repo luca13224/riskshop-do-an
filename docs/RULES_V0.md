@@ -32,6 +32,8 @@ Những điểm dưới đây được điều chỉnh khi lập trình Risk Eng
 - **F17** `banned_link_types_90d`: số loại điểm chung (thiết bị, SĐT nhận hàng, địa chỉ) với tài khoản **đang bị khóa vô thời hạn** trong 90 ngày. IP không tính. Chỉ tài khoản bị ban làm nguồn (không lây dây chuyền).
 - **R16** `LINKED_TO_BANNED` (voucher + COD, mọi context): F17 ≥ 1 → +45; ≥ 2 → +60. Độ mạnh vừa.
 - Khóa thanh toán (ngoài ma trận điểm): F17 ≥ 2, **hoặc** F17 ≥ 1 **và** đang thử mã người mới với F05 ≥ 2 lần/10 phút → khóa 30 ngày, đã từng bị khóa do liên kết → 60 ngày. F17 = 1 mà không spam → chỉ R16 + mở case.
+- ADR-015: thêm điều kiện khóa ngay ở bước áp mã: F17 ≥ 1 **và** đang dùng mã người mới **và** vừa đăng ký < 60 giây, chưa xem sản phẩm (dấu hiệu bot, khớp R06).
+- **F18** (ADR-016) `cluster_new_accounts_30d`, `cluster_voucher_accounts_30d`, `cluster_link_types` (số nhóm cạnh: thiết bị / điểm nhận hàng = SĐT hoặc địa chỉ): thành phần liên thông chứa tài khoản đang chấm, chỉ đi qua tài khoản **mới** (tạo trong 30 ngày), cạnh là chung thiết bị / SĐT nhận hàng / địa chỉ chuẩn hóa (không tính IP), tối đa 60 nút, 8 vòng. Chỉ tính khi đang dùng mã người mới.
 - Đồ thị liên kết đánh dấu tài khoản đang bị khóa. Risk Manager khóa vô thời hạn thủ công được (sau khi xem case).
 
 ## 1. Ba điểm kiểm soát (evaluation context)
@@ -89,6 +91,7 @@ Mọi đặc trưng được tính **tại thời điểm đánh giá**, chỉ t
 | R15 | `PROFITABLE_CUSTOMER` (v3, tích cực) | voucher_apply, place_order | F09 ≥ 3 **và** F16 < 10% | **−15** | — | Hồi điểm cho khách mua đều, ít phụ thuộc voucher | — |
 | R10 | `COD_OPEN_ORDERS` | payment_options, place_order (COD) | F10 ≥ 3 | +25 | M | "Treo" nhiều đơn COD cùng lúc (từ kịch bản 4 của đề cương) | Khách mua nhiều đợt khuyến mãi liền nhau |
 | R17 | `COD_OPEN_NEW_ACCOUNT` | payment_options, place_order (COD) | F09 `delivered_orders` < 1 **và** F10 `open_cod_orders` ≥ 2 (ADR-014) | +40 | M | Tài khoản chưa nhận đơn nào đã treo nhiều đơn COD: đơn thứ 3 phải trả trước | Khách mới mua nhiều đợt liền nhau (giảm thiểu: chỉ ẩn COD, vẫn mua được bằng trả trước; không trừ điểm tin cậy) |
+| R18 | `CLUSTER_CHAIN` | voucher_apply, place_order (voucher) | dùng mã người mới **và** cụm nối qua cả thiết bị lẫn điểm nhận hàng (F18 `cluster_link_types` = 2) **và** `cluster_voucher_accounts_30d` ≥ 5 (ADR-016) | +40 | M | Farm nối chuỗi: mỗi cặp tài khoản chỉ chung một thứ nên R02/R03/R12 không thấy, cả chuỗi là một cụm gom mã | Đại gia đình, ký túc xá dùng chung máy và địa chỉ (giảm thiểu: chỉ đi qua tài khoản mới, cần ≥ 2 loại điểm chung, chỉ gỡ mã) |
 
 Ngưỡng tiền (3 triệu, 5 triệu) là **giả định** cho shop mô phỏng [XM], cấu hình được.
 

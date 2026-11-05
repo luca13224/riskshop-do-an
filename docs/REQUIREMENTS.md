@@ -33,7 +33,7 @@
 |---|---|---|---|
 | FR-10 | Chấm điểm đồng bộ tại 3 điểm kiểm soát: áp voucher, lấy phương thức thanh toán, đặt hàng | MVP | `test_risk_scenarios.py` |
 | FR-11 | Tính đặc trưng F01–F17 từ dữ liệu các module khác ở chế độ chỉ đọc (ADR-004) | MVP | `test_risk_rules.py` |
-| FR-12 | Luật là dữ liệu có phiên bản (R01–R17), 3 kiểu: ngưỡng đếm, ngưỡng tỉ lệ, kết hợp | MVP | `test_risk_rules.py` |
+| FR-12 | Luật là dữ liệu có phiên bản (R01–R18), 3 kiểu: ngưỡng đếm, ngưỡng tỉ lệ, kết hợp | MVP | `test_risk_rules.py` |
 | FR-13 | Điểm theo từng chính sách (voucher, COD) + ma trận quyết định ALLOW / STEP_UP / REVIEW / BLOCK; REVIEW, BLOCK bắt buộc có luật mạnh | MVP | `test_risk_rules.py` |
 | FR-14 | Điểm tin cậy tài khoản = 100 − tổng điểm luật đã khớp; cắt quyền lợi theo bậc (khóa voucher theo `min_trust`, mở case, tắt COD) (ADR-009) | Recommended | `test_trust.py` |
 | FR-15 | Lưu mỗi quyết định kèm luật đã khớp, giá trị đặc trưng, phiên bản luật; bản ghi không bị sửa sau khi tạo | MVP | `test_risk_rules.py` |
@@ -80,7 +80,7 @@
 | NFR-09 | Toàn vẹn dữ liệu | Giao dịch ACID cho đơn, tồn kho, lượt dùng voucher; ràng buộc UNIQUE chống trùng | — | Có test |
 | NFR-10 | Cấu hình được | Luật và ngưỡng quyết định là dữ liệu, sửa qua Console, không cần sửa code | — | Có test |
 | NFR-11 | Khả dụng | Shop dùng được ở 375 px và 1440 px, dùng được bằng bàn phím, có chế độ giảm chuyển động | — | Kiểm thủ công (TEST_PLAN 3b); 768 px chưa kiểm |
-| NFR-12 | Khả năng kiểm thử | Toàn bộ test tự động chạy trên CSDL riêng, qua migration thật | — | 207 test qua (2026-11-06) |
+| NFR-12 | Khả năng kiểm thử | Toàn bộ test tự động chạy trên CSDL riêng, qua migration thật | — | 215 test qua (2026-11-06) |
 
 ## 4. Business Rules
 | Mã | Quy tắc | Nguồn |

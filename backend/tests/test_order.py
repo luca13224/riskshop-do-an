@@ -247,6 +247,26 @@ def test_address_normalization_matches_variants():
     assert normalize_address(a) == normalize_address(b)
 
 
+@pytest.mark.parametrize("line, province", [
+    ("Số 5 ng. 12 Láng Hạ", "HN"),
+    ("so 05 ngo 12 lang ha", "Thành phố Hà Nội"),
+    ("5 Ng12 Láng Hạ", "ha noi"),
+])
+def test_address_normalization_lane_and_province_aliases(line, province):
+    base = AddressIn(**{**ADDRESS, "line": "Số 5 Ngõ 12 Láng Hạ", "province": "Hà Nội"})
+    assert normalize_address(AddressIn(**{**ADDRESS, "line": line, "province": province})) == normalize_address(base)
+
+
+def test_address_normalization_keeps_different_houses_apart():
+    a = AddressIn(**{**ADDRESS, "line": "12/5 Nguyễn Trãi"})
+    b = AddressIn(**{**ADDRESS, "line": "5/12 Nguyễn Trãi"})
+    assert normalize_address(a) != normalize_address(b)  # không đoán thứ tự số nhà / số hẻm
+    hcm = AddressIn(**{**ADDRESS, "province": "TP.HCM"})
+    assert normalize_address(hcm) == normalize_address(AddressIn(**{**ADDRESS, "province": "Sài Gòn"}))
+    # "dn" trong tên đường không bị đổi thành Đà Nẵng
+    assert "dn" in normalize_address(AddressIn(**{**ADDRESS, "line": "Kho DN 3"}))
+
+
 def test_console_orders_filter_search_and_paginate(minh, admin, shop):
     codes = []
     for _ in range(3):
