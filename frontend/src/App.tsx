@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router"
 
 import { ScrollToTop } from "@/components/scroll-to-top"
 import { ConsoleLayout } from "@/console/ConsoleLayout"
+import { RequireRole } from "@/console/RequireRole"
 import { RequireStaff } from "@/console/RequireStaff"
 import { ConsoleHomePage } from "@/console/pages/ConsoleHomePage"
 import { ConsoleOrdersPage } from "@/console/pages/ConsoleOrdersPage"
@@ -14,6 +15,7 @@ import { RulesPage } from "@/console/pages/RulesPage"
 import { ReportsPage } from "@/console/pages/ReportsPage"
 import { AuditLogPage } from "@/console/pages/AuditLogPage"
 import { CaseDetailPage } from "@/console/pages/CaseDetailPage"
+import { AUDIT_ROLES, LAB_ROLES } from "@/lib/api/auth"
 import { CatalogPage } from "@/shop/pages/CatalogPage"
 import { ShopLayout } from "@/shop/ShopLayout"
 import { AppealsPage } from "@/shop/pages/AppealsPage"
@@ -55,10 +57,14 @@ export function App() {
             <Route path="cases/:code" element={<CaseDetailPage />} />
             <Route path="appeals" element={<ConsoleAppealsPage />} />
             <Route path="appeals/:code" element={<AppealDetailPage />} />
-            <Route path="lab" element={<AttackLabPage />} />
+            <Route element={<RequireRole roles={LAB_ROLES} />}>
+              <Route path="lab" element={<AttackLabPage />} />
+            </Route>
             <Route path="rules" element={<RulesPage />} />
             <Route path="reports" element={<ReportsPage />} />
-            <Route path="audit" element={<AuditLogPage />} />
+            <Route element={<RequireRole roles={AUDIT_ROLES} />}>
+              <Route path="audit" element={<AuditLogPage />} />
+            </Route>
           </Route>
         </Route>
 

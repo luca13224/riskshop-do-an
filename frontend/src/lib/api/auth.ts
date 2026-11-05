@@ -36,6 +36,15 @@ export function isStaff(user: User | null | undefined): boolean {
   return !!user && STAFF_ROLES.includes(user.role)
 }
 
+// Trang Console chỉ dành cho một số vai trò. Phải khớp require_roles của backend:
+// Attack Lab: lab/router.py (ADMIN); Audit Log: reports/router.py (RISK_MANAGER, ADMIN).
+export const LAB_ROLES: Role[] = ["admin"]
+export const AUDIT_ROLES: Role[] = ["risk_manager", "admin"]
+
+export function hasRole(user: User | null | undefined, roles?: Role[]): boolean {
+  return !roles || (!!user && roles.includes(user.role))
+}
+
 const ME_KEY = ["auth", "me"]
 
 // Người dùng hiện tại. Trả về null nếu chưa đăng nhập (thay vì báo lỗi).

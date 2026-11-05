@@ -17,7 +17,7 @@ import {
 import { useState, type FormEvent } from "react"
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router"
 
-import { ROLE_LABELS, useLogout, useMe } from "@/lib/api/auth"
+import { AUDIT_ROLES, LAB_ROLES, ROLE_LABELS, hasRole, useLogout, useMe, type Role } from "@/lib/api/auth"
 import { useDashboard } from "@/lib/api/dashboard"
 import { useHealth } from "@/lib/api/health"
 import { Seo } from "@/lib/seo"
@@ -30,6 +30,7 @@ interface NavItem {
   icon: LucideIcon
   end?: boolean
   badge?: BadgeKey
+  roles?: Role[] // bỏ trống: mọi nhân viên đều thấy
 }
 
 // Menu chia theo công việc của người vận hành: theo dõi -> xử lý -> cấu hình -> kiểm soát
@@ -59,12 +60,12 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: "Cấu hình",
     items: [
       { to: "/console/rules", label: "Luật rủi ro", icon: SlidersHorizontal },
-      { to: "/console/lab", label: "Attack Lab", icon: FlaskConical },
+      { to: "/console/lab", label: "Attack Lab", icon: FlaskConical, roles: LAB_ROLES },
     ],
   },
   {
     title: "Kiểm soát",
-    items: [{ to: "/console/audit", label: "Audit Log", icon: ScrollText }],
+    items: [{ to: "/console/audit", label: "Audit Log", icon: ScrollText, roles: AUDIT_ROLES }],
   },
 ]
 const ALL_ITEMS = NAV_GROUPS.flatMap((g) => g.items)
@@ -73,6 +74,10 @@ const ALL_ITEMS = NAV_GROUPS.flatMap((g) => g.items)
 export function ConsoleLayout() {
   const { data: user } = useMe()
   const logout = useLogout()
+  // Chỉ hiện mục người dùng được phép mở (Analyst không thấy Attack Lab, Audit Log)
+  const groups = NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((i) => hasRole(user, i.roles)) })).filter(
+    (g) => g.items.length > 0
+  )
   const navigate = useNavigate()
   // Dùng chung bộ nhớ đệm với trang Tổng quan (cùng queryKey) nên không tốn thêm request
   const dash = useDashboard(7)
@@ -109,7 +114,7 @@ export function ConsoleLayout() {
           </span>
         </Link>
         <nav className="flex-1 overflow-y-auto px-3" aria-label="Menu Console">
-          {NAV_GROUPS.map((g) => (
+          {groups.map((g) => (
             <div key={g.title} className="mb-5">
               <p className="mb-1.5 px-2 text-[10px] font-medium tracking-[0.14em] text-muted-foreground/80 uppercase">
                 {g.title}
@@ -187,7 +192,7 @@ export function ConsoleLayout() {
           aria-label="Menu Console"
           className="flex [scrollbar-width:none] gap-1 overflow-x-auto border-b px-3 py-2 text-sm md:hidden"
         >
-          {ALL_ITEMS.map((item) => (
+          {groups.flatMap((g) => g.items).map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
