@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 
+import { useMe } from "./auth"
 import { apiFetch } from "./client"
 
 // Khớp với schema bên backend (app/modules/order/schemas.py)
@@ -106,9 +107,11 @@ export function useCheckout() {
 }
 
 export function useMyOrders() {
+  const { data: user } = useMe()
   return useQuery({
     queryKey: ["orders"],
     queryFn: () => apiFetch<OrderSummary[]>("/api/orders"),
+    enabled: user?.role === "customer", // chưa đăng nhập thì không gọi (tránh 401 thừa)
   })
 }
 

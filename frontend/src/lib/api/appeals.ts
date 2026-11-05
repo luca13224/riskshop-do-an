@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
+import { useMe } from "./auth"
 import { apiFetch } from "./client"
 import type { RiskDecision } from "./risk"
 
@@ -55,16 +56,23 @@ export interface StaffAppealDetail extends StaffAppeal {
 }
 
 // ---------- Khách hàng ----------
+// Chỉ gọi khi đã biết là khách hàng: tránh request 401 thừa lúc chưa đăng nhập
+function useIsCustomer() {
+  return useMe().data?.role === "customer"
+}
+
 export const useEligible = () =>
   useQuery({
     queryKey: ["appeals", "eligible"],
     queryFn: () => apiFetch<Eligible[]>("/api/appeals/eligible"),
+    enabled: useIsCustomer(),
   })
 
 export const useMyAppeals = () =>
   useQuery({
     queryKey: ["appeals", "mine"],
     queryFn: () => apiFetch<Appeal[]>("/api/appeals"),
+    enabled: useIsCustomer(),
   })
 
 export function useCreateAppeal() {
