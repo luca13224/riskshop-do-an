@@ -50,6 +50,26 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
 
+## 3n. Đo lại độ trễ sau R18 (2026-11-06, kịch bản E2, mục tiêu O5)
+Thêm chế độ `--mode welcome` cho [`load_test.py`](../backend/scripts/load_test.py): mỗi lượt là một khách **mới** (thiết bị, địa chỉ, SĐT riêng) đăng ký → thêm giỏ → áp NGUOIMOI → đặt hàng, để đo đúng luồng có tính cụm F18. Đo **đối chứng**: cùng luồng, cùng CSDL vừa tạo lại, một server thật (B) và một server thay phần tính cụm bằng hàm rỗng (A, script tạm, không sửa code). Lặp lại thêm luồng trả trước (code luồng này không đổi so với 03/11). Cùng máy, 1 tiến trình uvicorn, 3 lượt × 200 đơn mỗi mức.
+
+| p95 chấm điểm, ms (nhỏ nhất – lớn nhất của 3 lượt) | 1 người | 10 người | 50 người |
+|---|---|---|---|
+| Mã người mới, **không** tính cụm (A): bước đặt hàng | 22,1–23,8 | 56,2–80,7 | 73,1–86,2 |
+| Mã người mới, **có** tính cụm (B): bước đặt hàng | 17,7–25,6 | 73,2–113,7 | 85,9–101,4 |
+| Mã người mới, A / B: bước áp mã | 19,2–20,0 / 15,9–21,2 | 119–140 / 122–140 | 90–107 / 122–136 |
+| Trả trước, lượt 1 hôm nay | 16,1–19,7 | 42,0–67,3 | 44,1–52,3 |
+| Trả trước, lượt 2 hôm nay | 35,1–36,5 | 42,2–81,0 | 47,2–52,4 |
+| Trả trước, 03/11 (mục 3f) | 15,1–16,1 | 32,6–35,5 | 34,0–36,2 |
+
+Ở 50 người, luồng mã người mới có 10–26 / 200 request lỗi kết nối (server quá tải) ở cả A và B. Mọi đơn khách mới từ lượt thứ 3 bị gỡ mã (409) vì mọi khách ảo cùng một IP 127.0.0.1 nên luật "nhiều tài khoản mới cùng IP" khớp; như nhau ở A và B. Dữ liệu: [welcome A](experiments/load_test_20261106_welcome_nocluster.json), [welcome B](experiments/load_test_20261106_welcome.json), [trả trước lượt 1](experiments/load_test_20261106_prepaid.json), [lượt 2](experiments/load_test_20261106_prepaid_r2.json).
+
+### Đọc kết quả (trung thực)
+- **R18 không phải nút thắt:** ở 1 người, có hay không tính cụm như nhau (≤ 26 ms); dưới tải, tính cụm làm p95 bước đặt hàng tăng khoảng 10–30 ms, nằm trong vùng dao động giữa các lượt. Đo riêng (mục 3m): p95 7,3 ms.
+- **O5 chưa đạt ổn định dưới tải:** ở 10 và 50 người, p95 chấm điểm vượt 50 ms ở cả luồng mã người mới (có hoặc không R18) và nhiều lượt trả trước. Nguyên nhân khả dĩ (chưa đo tách): một tiến trình uvicorn, chấm điểm tranh CPU với băm mật khẩu lúc đăng ký và với các request khác; MariaDB XAMPP mặc định.
+- **Số 03/11 không lặp lại được:** luồng trả trước không đổi code nhưng hôm nay p95 cao hơn, và hai lượt hôm nay cũng lệch nhau (1 người: 16–20 ms rồi 35–36 ms). Môi trường đo trên máy phát triển dao động mạnh, nên kết luận "đạt" ngày 03/11 cần hạ xuống "đạt trong lần đo đó".
+- Ghi cho báo cáo: O5 chỉ khẳng định được ở 1 người dùng (p95 ≤ 26 ms); dưới tải cần đo lại trên cấu hình nhiều worker hoặc đo tách thời gian chấm điểm khỏi thời gian chờ CPU trước khi kết luận.
+
 ## 3m. Cụm tài khoản mới nối chuỗi (2026-11-06, ADR-016)
 Đổi: đặc trưng F18 (cụm liên thông qua thiết bị / điểm nhận hàng, chỉ tài khoản mới) + luật R18; mở rộng chuẩn hóa địa chỉ. Bộ dữ liệu mới dev_v5 / test_v5 (định nghĩa trước khi code): farm nối chuỗi (đã biết), farm nối chuỗi có mắt xích đứt (chưa biết, chỉ test), đại gia đình dùng chung máy và ký túc xá (hard negative).
 

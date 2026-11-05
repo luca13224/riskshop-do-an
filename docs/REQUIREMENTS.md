@@ -69,7 +69,7 @@
 ## 3. Non-functional Requirements
 | Mã | Nhóm | Yêu cầu | Mục tiêu liên quan | Trạng thái |
 |---|---|---|---|---|
-| NFR-01 | Hiệu năng | p95 thời gian chấm điểm ≤ 50 ms trên máy phát triển; đo thêm p95 request đặt hàng ở 1 / 10 / 50 người đồng thời | O5 | p95 chấm điểm ≤ 36,2 ms ở 1/10/50 người (TEST_PLAN 3f) |
+| NFR-01 | Hiệu năng | p95 thời gian chấm điểm ≤ 50 ms trên máy phát triển; đo thêm p95 request đặt hàng ở 1 / 10 / 50 người đồng thời | O5 | 1 người: p95 ≤ 26 ms; 10 / 50 người: chưa đạt ổn định (42–114 ms khi đo lại 06/11, TEST_PLAN 3n) |
 | NFR-02 | Giải thích được | 100% quyết định khác ALLOW có luật đã khớp, giá trị thực tế, phiên bản luật | O6 | `scripts/audit_check.py`: 100% trên dữ liệu demo (TEST_PLAN 3g) |
 | NFR-03 | Truy vết | Mọi thao tác nhân viên làm đổi trạng thái (kết luận case, khiếu nại, sửa luật, khóa / gỡ khóa, xem liên hệ) đều ghi audit | O6 | Có test |
 | NFR-04 | Phân quyền | RBAC 4 vai trò; quyền tối thiểu: Analyst không sửa luật, không gỡ khóa, không kết luận khiếu nại | — | Có test |

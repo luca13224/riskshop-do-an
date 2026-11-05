@@ -8,8 +8,11 @@ Không chạy cùng lúc với simulator.
     2) Mở cửa sổ khác, chạy backend trỏ vào CSDL mô phỏng (cổng 8001), ví dụ trong Git Bash:
        DATABASE_URL="$(grep ^SIM_DATABASE_URL .env | cut -d= -f2-)" .venv/Scripts/python -m uvicorn app.main:app --port 8001
     3) .venv/Scripts/python scripts/load_test.py run --levels 1 10 50 --requests 200 --rounds 3
+       Thêm --mode welcome để đo luồng khách mới dùng mã người mới (có tính cụm liên kết F18, ADR-016).
 
-Mỗi "người dùng ảo" có tài khoản và thiết bị riêng, lặp: thêm 1 sản phẩm vào giỏ → đặt hàng trả trước.
+--mode prepaid (mặc định): mỗi "người dùng ảo" có tài khoản và thiết bị riêng, lặp: thêm 1 sản phẩm vào giỏ → đặt hàng
+trả trước. --mode welcome: mỗi lượt là một khách MỚI (thiết bị, địa chỉ, SĐT riêng) đăng ký → thêm giỏ → áp NGUOIMOI
+→ đặt hàng; đo request đặt hàng và chấm điểm cả hai bước (áp mã, đặt hàng).
 Đo hai thứ: (a) thời gian cả request POST /api/orders/checkout phía client; (b) thời gian chấm điểm Risk Engine
 (cột risk_decisions.latency_ms của các quyết định place_order trong lần đo). Một tiến trình uvicorn, một máy:
 đây là phép đo trên máy phát triển, không phải đo năng lực hệ thống production.
@@ -64,6 +67,29 @@ async def make_user(base: str, i: int, tag: str) -> tuple[httpx.AsyncClient, int
     return c, products["items"][0]["id"]
 
 
+async def welcome_worker(base: str, tag: str, product_id: int, jobs: asyncio.Queue, out: list, statuses: dict) -> None:
+    """Mỗi việc: một khách mới đăng ký, áp mã người mới rồi đặt hàng (luồng có tính cụm F18)."""
+    while True:
+        try:
+            i = jobs.get_nowait()
+        except asyncio.QueueEmpty:
+            return
+        try:
+            c, _ = await make_user(base, i, tag)
+            address = {**ADDRESS, "line": f"{i} Duong Thu {tag}", "phone": f"09{i:08d}"}
+            await c.post("/api/cart/items", json={"product_id": product_id, "quantity": 1})
+            await c.post("/api/cart/voucher", json={"code": "NGUOIMOI"})
+            t0 = time.perf_counter()
+            r = await c.post("/api/orders/checkout", json={"address": address, "payment_method": "PREPAID"},
+                             headers={"Idempotency-Key": str(uuid.uuid4())})
+            out.append((time.perf_counter() - t0) * 1000)
+            statuses[r.status_code] = statuses.get(r.status_code, 0) + 1
+            await c.aclose()
+        except httpx.HTTPError as exc:  # lỗi kết nối: ghi lại, không dừng cả lần đo
+            key = f"error:{type(exc).__name__}"
+            statuses[key] = statuses.get(key, 0) + 1
+
+
 async def worker(c: httpx.AsyncClient, product_id: int, jobs: asyncio.Queue, out: list, statuses: dict) -> None:
     while True:
         try:
@@ -88,41 +114,51 @@ def summarize(xs: list[float]) -> dict:
             "mean": round(statistics.fmean(xs), 1)}
 
 
-async def run_level(base: str, users: int, requests: int, tag: str) -> dict:
-    clients = await asyncio.gather(*(make_user(base, i, tag) for i in range(users)))
+async def run_level(base: str, users: int, requests: int, tag: str, mode: str = "prepaid") -> dict:
+    clients = [] if mode == "welcome" else await asyncio.gather(*(make_user(base, i, tag) for i in range(users)))
     jobs: asyncio.Queue = asyncio.Queue()
-    for _ in range(requests):
-        jobs.put_nowait(1)
+    for i in range(requests):
+        jobs.put_nowait(i)
     out: list[float] = []
     statuses: dict[int, int] = {}
     engine = create_engine(load_url())
     with engine.connect() as conn:  # created_at chỉ lưu đến giây, nên tách lần đo theo id
         first_id = conn.execute(text("SELECT COALESCE(MAX(id), 0) FROM risk_decisions")).scalar_one()
     t0 = time.perf_counter()
-    await asyncio.gather(*(worker(c, pid, jobs, out, statuses) for c, pid in clients))
+    if mode == "welcome":
+        async with httpx.AsyncClient(base_url=base) as probe:
+            pid = (await probe.get("/api/products", params={"page_size": 1})).json()["items"][0]["id"]
+        await asyncio.gather(*(welcome_worker(base, f"{tag}w{k}", pid, jobs, out, statuses) for k in range(users)))
+    else:
+        await asyncio.gather(*(worker(c, pid, jobs, out, statuses) for c, pid in clients))
     wall = time.perf_counter() - t0
     for c, _ in clients:
         await c.aclose()
     with engine.connect() as conn:
-        scoring = [row[0] for row in conn.execute(text(
-            "SELECT latency_ms FROM risk_decisions WHERE context = 'place_order' AND id > :i"), {"i": first_id})]
-    return {"users": users, "checkout_ms": summarize(out), "scoring_ms": summarize(scoring) if scoring else None,
+        rows = conn.execute(text("SELECT context, latency_ms FROM risk_decisions WHERE id > :i AND error IS NULL"),
+                            {"i": first_id}).all()
+    scoring = [ms for ctx, ms in rows if ctx == "place_order"]
+    voucher = [ms for ctx, ms in rows if ctx == "voucher_apply"]
+    return {"users": users, "mode": mode, "checkout_ms": summarize(out),
+            "scoring_ms": summarize(scoring) if scoring else None,
+            "voucher_scoring_ms": summarize(voucher) if voucher else None,
             "throughput_rps": round(len(out) / wall, 1), "statuses": statuses}
 
 
-async def run(base: str, levels: list[int], requests: int, rounds: int, out_path: Path | None) -> None:
+async def run(base: str, levels: list[int], requests: int, rounds: int, out_path: Path | None,
+              mode: str = "prepaid") -> None:
     results = []
     for users in levels:
         for rnd in range(1, rounds + 1):
             tag = f"{users}u{rnd}-{uuid.uuid4().hex[:6]}"
-            res = await run_level(base, users, requests, tag)
+            res = await run_level(base, users, requests, tag, mode)
             res["round"] = rnd
             results.append(res)
             print(json.dumps(res, ensure_ascii=False))
     report = {"created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
               "machine": {"os": platform.platform(), "cpu": platform.processor(), "cores": os.cpu_count(),
                           "python": platform.python_version()},
-              "server": "1 tiến trình uvicorn, MariaDB XAMPP cùng máy", "requests_per_round": requests,
+              "server": "1 tiến trình uvicorn, MariaDB XAMPP cùng máy", "requests_per_round": requests, "mode": mode,
               "results": results}
     if out_path:
         out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -140,11 +176,12 @@ def main() -> int:
     p.add_argument("--requests", type=int, default=200)
     p.add_argument("--rounds", type=int, default=3)
     p.add_argument("--out", type=Path)
+    p.add_argument("--mode", choices=["prepaid", "welcome"], default="prepaid")
     args = parser.parse_args()
     if args.cmd == "setup":
         setup()
     else:
-        asyncio.run(run(args.base, args.levels, args.requests, args.rounds, args.out))
+        asyncio.run(run(args.base, args.levels, args.requests, args.rounds, args.out, args.mode))
     return 0
 
 

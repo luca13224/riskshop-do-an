@@ -1,0 +1,230 @@
+{
+  "created_at": "2026-11-05T21:42:14+00:00",
+  "machine": {
+    "os": "Windows-10-10.0.26200-SP0",
+    "cpu": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+    "cores": 16,
+    "python": "3.11.9"
+  },
+  "server": "1 tiến trình uvicorn, MariaDB XAMPP cùng máy",
+  "requests_per_round": 200,
+  "mode": "prepaid",
+  "results": [
+    {
+      "users": 1,
+      "mode": "prepaid",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 40.0,
+        "p95": 65.2,
+        "p99": 70.2,
+        "mean": 43.3
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 17.9,
+        "p95": 36.5,
+        "p99": 40.7,
+        "mean": 20.6
+      },
+      "voucher_scoring_ms": null,
+      "throughput_rps": 16.7,
+      "statuses": {
+        "201": 200
+      },
+      "round": 1
+    },
+    {
+      "users": 1,
+      "mode": "prepaid",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 40.7,
+        "p95": 63.8,
+        "p99": 68.4,
+        "mean": 43.9
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 18.5,
+        "p95": 35.9,
+        "p99": 39.4,
+        "mean": 20.9
+      },
+      "voucher_scoring_ms": null,
+      "throughput_rps": 16.5,
+      "statuses": {
+        "201": 200
+      },
+      "round": 2
+    },
+    {
+      "users": 1,
+      "mode": "prepaid",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 40.6,
+        "p95": 65.0,
+        "p99": 68.6,
+        "mean": 44.2
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 18.2,
+        "p95": 35.1,
+        "p99": 37.3,
+        "mean": 20.9
+      },
+      "voucher_scoring_ms": null,
+      "throughput_rps": 16.5,
+      "statuses": {
+        "201": 200
+      },
+      "round": 3
+    },
+    {
+      "users": 10,
+      "mode": "prepaid",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 210.7,
+        "p95": 385.1,
+        "p99": 483.0,
+        "mean": 225.8
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 23.4,
+        "p95": 42.2,
+        "p99": 73.0,
+        "mean": 27.1
+      },
+      "voucher_scoring_ms": null,
+      "throughput_rps": 24.0,
+      "statuses": {
+        "201": 200
+      },
+      "round": 1
+    },
+    {
+      "users": 10,
+      "mode": "prepaid",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 227.6,
+        "p95": 386.7,
+        "p99": 474.4,
+        "mean": 236.7
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 22.8,
+        "p95": 81.0,
+        "p99": 147.2,
+        "mean": 30.9
+      },
+      "voucher_scoring_ms": null,
+      "throughput_rps": 23.1,
+      "statuses": {
+        "201": 200
+      },
+      "round": 2
+    },
+    {
+      "users": 10,
+      "mode": "prepaid",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 217.0,
+        "p95": 405.1,
+        "p99": 466.4,
+        "mean": 236.5
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 23.6,
+        "p95": 43.6,
+        "p99": 100.7,
+        "mean": 28.0
+      },
+      "voucher_scoring_ms": null,
+      "throughput_rps": 23.3,
+      "statuses": {
+        "201": 200
+      },
+      "round": 3
+    },
+    {
+      "users": 50,
+      "mode": "prepaid",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 851.4,
+        "p95": 2010.1,
+        "p99": 3056.9,
+        "mean": 980.8
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 23.5,
+        "p95": 47.2,
+        "p99": 58.5,
+        "mean": 28.0
+      },
+      "voucher_scoring_ms": null,
+      "throughput_rps": 24.2,
+      "statuses": {
+        "201": 200
+      },
+      "round": 1
+    },
+    {
+      "users": 50,
+      "mode": "prepaid",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 915.3,
+        "p95": 1946.1,
+        "p99": 2762.9,
+        "mean": 1051.1
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 24.1,
+        "p95": 49.9,
+        "p99": 57.7,
+        "mean": 29.1
+      },
+      "voucher_scoring_ms": null,
+      "throughput_rps": 23.7,
+      "statuses": {
+        "201": 200
+      },
+      "round": 2
+    },
+    {
+      "users": 50,
+      "mode": "prepaid",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 926.3,
+        "p95": 1904.5,
+        "p99": 2550.9,
+        "mean": 1046.1
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 24.8,
+        "p95": 52.4,
+        "p99": 66.7,
+        "mean": 30.1
+      },
+      "voucher_scoring_ms": null,
+      "throughput_rps": 23.1,
+      "statuses": {
+        "201": 200
+      },
+      "round": 3
+    }
+  ]
+}
