@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Link, useNavigate, useSearchParams } from "react-router"
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router"
 import { z } from "zod"
 
 import { FormField } from "@/components/form-field"
@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { isStaff, useLogin } from "@/lib/api/auth"
+import { isStaff, useLogin, useMe } from "@/lib/api/auth"
 
 // Quy tắc kiểm tra form, chạy ngay trên trình duyệt (backend vẫn kiểm tra lại)
 const schema = z.object({
@@ -25,6 +25,7 @@ export function LoginPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const login = useLogin()
+  const { data: me } = useMe()
   const form = useForm<FormValues>({ resolver: zodResolver(schema) })
   const { errors, isSubmitting } = form.formState
 
@@ -42,6 +43,9 @@ export function LoginPage() {
       // Lỗi đã nằm trong login.error, hiển thị bên dưới
     }
   })
+
+  // Đã đăng nhập sẵn (không phải vừa bấm Đăng nhập ở đây) thì không cần form nữa
+  if (me && login.isIdle) return <Navigate to={isStaff(me) ? "/console" : "/"} replace />
 
   return (
     <div className="flex justify-center py-12">

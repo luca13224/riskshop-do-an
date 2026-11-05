@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Link, useNavigate } from "react-router"
+import { Link, Navigate, useNavigate } from "react-router"
 import { z } from "zod"
 
 import { FormField } from "@/components/form-field"
@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { ApiError } from "@/lib/api/client"
-import { useRegister } from "@/lib/api/auth"
+import { isStaff, useMe, useRegister } from "@/lib/api/auth"
 
 // Giữ quy tắc giống backend (app/modules/auth/schemas.py) để báo lỗi sớm cho người dùng
 const schema = z.object({
@@ -36,6 +36,7 @@ type FormValues = z.infer<typeof schema>
 export function RegisterPage() {
   const navigate = useNavigate()
   const register = useRegister()
+  const { data: me } = useMe()
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { phone: "" },
@@ -64,6 +65,9 @@ export function RegisterPage() {
     ["EMAIL_TAKEN", "PHONE_TAKEN"].includes(register.error.code)
       ? null
       : register.error
+
+  // Đã đăng nhập thì không đăng ký thêm tài khoản từ đây
+  if (me && register.isIdle) return <Navigate to={isStaff(me) ? "/console" : "/"} replace />
 
   return (
     <div className="flex justify-center py-12">
