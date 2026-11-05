@@ -33,3 +33,14 @@
 1. P1 (1–3) trước buổi tổng duyệt demo.
 2. P2 (4–8) cùng đợt, mỗi lỗi một commit, có test nếu là backend.
 3. #9 để giai đoạn tinh gọn.
+
+## Cập nhật 2026-11-05: đã sửa việc 1–8
+- 1: menu ẩn Attack Lab (chỉ Admin) và Audit Log (Risk Manager, Admin) theo vai trò; gõ thẳng URL thì hiện trang "không thuộc quyền"; TanStack Query không gọi lại khi lỗi 4xx.
+- 2: câu báo tắt COD viết lại như đề xuất.
+- 3: bảng Audit Log và Đơn hàng (Console) gom cột phụ vào cột đầu trên màn hẹp.
+- 4: đã đăng nhập mở `/login`, `/register` thì chuyển về trang chủ hoặc Console.
+- 5: header hiện khung chờ trong lúc kiểm tra phiên.
+- 6: đơn hàng, khiếu nại của khách chỉ gọi API khi đã là khách đăng nhập.
+- 7: "voucher tân thủ" thành "mã người mới" (R01 có phiên bản luật mới; lý do của quyết định cũ giữ nguyên để truy vết).
+- 8: trang Đơn hàng của khách hiện 10 đơn, nút "Xem thêm".
+- Kiểm chứng: 195 test backend qua; chụp lại bằng Edge chạy ẩn (Analyst, Admin, khách, chưa đăng nhập); chỉ còn 401 `/api/auth/me` (việc 10, P3).
