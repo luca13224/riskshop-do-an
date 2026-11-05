@@ -184,7 +184,7 @@ def test_khang_cod_hidden_and_rejected_but_prepaid_ok(shop, db):
     browse(khang)
     khang.post("/api/cart/items", json={"product_id": 1, "quantity": 1})
     assert khang.get("/api/orders/payment-options").json() == {
-        "cod_allowed": False, "message": "Đơn hàng này hỗ trợ thanh toán trước."}
+        "cod_allowed": False, "message": "Đơn này chưa dùng được thanh toán khi nhận hàng. Bạn chọn trả trước để tiếp tục."}
     r = checkout(khang, COD)  # kể cả gọi thẳng API với COD, server vẫn chặn
     assert r.status_code == 409 and r.json()["error"]["code"] == "COD_NOT_AVAILABLE"
     assert "COD_FAIL_RATE" in hit_codes(db, last_decision(db, "khang@example.com"))
@@ -230,6 +230,16 @@ def test_seed_creates_new_version_instead_of_overwriting(shop, db):
     db.refresh(rule)
     versions = db.scalars(select(RuleVersion).where(RuleVersion.rule_id == rule.id)).all()
     assert len(versions) == 2 and db.get(RuleVersion, rule.active_version_id).version == 2
+
+
+def test_seed_renames_rule_without_new_version(shop, db):
+    from app.modules.risk.models import Rule
+    rule = db.scalar(select(Rule).where(Rule.code == "VCH_NEW_ACCOUNT"))
+    rule.name = "R01 · Tên cũ"
+    db.commit()
+    assert seed_rules(db) == 0  # chỉ đổi tên hiển thị: không cần phiên bản luật mới
+    db.refresh(rule)
+    assert rule.name == "R01 · Tài khoản mới dùng mã người mới"
 
 
 def test_loyal_customer_high_value_cod_allowed(shop, db):

@@ -54,7 +54,7 @@ OPEN_CASE_JOB = "open_case"
 
 MESSAGES = {
     "remove_voucher": "Mã giảm giá không áp dụng được cho đơn hàng này.",
-    "disable_cod": "Đơn hàng này hỗ trợ thanh toán trước.",
+    "disable_cod": "Đơn này chưa dùng được thanh toán khi nhận hàng. Bạn chọn trả trước để tiếp tục.",
     "block": "Hiện chưa thể xử lý đơn hàng. Vui lòng liên hệ bộ phận hỗ trợ.",
     "restrict_account": "Tài khoản của bạn tạm thời chưa thể đặt hàng. "
                         "Nếu bạn cho rằng có nhầm lẫn, vui lòng gửi khiếu nại để được xem xét.",
