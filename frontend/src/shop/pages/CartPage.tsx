@@ -262,6 +262,7 @@ function WalletList({ disabled, onPick }: { disabled: boolean; onPick: (code: st
               type="button"
               disabled={!usable || disabled}
               onClick={() => onPick(v.code)}
+              aria-label={usable ? `Dùng mã ${v.code}: ${v.description}` : `Mã ${v.code}: ${WALLET_STATUS_LABELS[v.status]}`}
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg border border-dashed p-3 text-left transition",
                 usable ? "hover:border-buy hover:bg-buy/5" : "cursor-not-allowed opacity-55"
