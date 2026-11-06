@@ -1,0 +1,290 @@
+{
+  "created_at": "2026-11-06T07:33:56+00:00",
+  "machine": {
+    "os": "Windows-10-10.0.26200-SP0",
+    "cpu": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+    "cores": 16,
+    "python": "3.11.9"
+  },
+  "server": "1 tiến trình uvicorn, MariaDB XAMPP cùng máy",
+  "requests_per_round": 200,
+  "mode": "welcome",
+  "results": [
+    {
+      "users": 1,
+      "mode": "welcome",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 48.8,
+        "p95": 69.2,
+        "p99": 101.3,
+        "mean": 51.9
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 17.8,
+        "p95": 24.4,
+        "p99": 48.7,
+        "mean": 19.3
+      },
+      "voucher_scoring_ms": {
+        "n": 200,
+        "p50": 15.2,
+        "p95": 20.8,
+        "p99": 30.1,
+        "mean": 16.3
+      },
+      "throughput_rps": 1.8,
+      "statuses": {
+        "201": 200
+      },
+      "round": 1
+    },
+    {
+      "users": 1,
+      "mode": "welcome",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 56.0,
+        "p95": 69.4,
+        "p99": 74.1,
+        "mean": 58.2
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 21.2,
+        "p95": 29.3,
+        "p99": 33.2,
+        "mean": 22.3
+      },
+      "voucher_scoring_ms": {
+        "n": 200,
+        "p50": 19.8,
+        "p95": 24.3,
+        "p99": 27.2,
+        "mean": 20.1
+      },
+      "throughput_rps": 1.6,
+      "statuses": {
+        "201": 200
+      },
+      "round": 2
+    },
+    {
+      "users": 1,
+      "mode": "welcome",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 60.6,
+        "p95": 73.0,
+        "p99": 79.8,
+        "mean": 61.5
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 24.9,
+        "p95": 34.8,
+        "p99": 38.5,
+        "mean": 26.6
+      },
+      "voucher_scoring_ms": {
+        "n": 200,
+        "p50": 24.2,
+        "p95": 29.8,
+        "p99": 32.1,
+        "mean": 23.7
+      },
+      "throughput_rps": 1.7,
+      "statuses": {
+        "409": 200
+      },
+      "round": 3
+    },
+    {
+      "users": 10,
+      "mode": "welcome",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 501.3,
+        "p95": 1893.6,
+        "p99": 2256.6,
+        "mean": 690.5
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 36.3,
+        "p95": 81.5,
+        "p99": 116.8,
+        "mean": 43.7
+      },
+      "voucher_scoring_ms": {
+        "n": 200,
+        "p50": 46.6,
+        "p95": 85.9,
+        "p99": 111.5,
+        "mean": 49.4
+      },
+      "throughput_rps": 2.3,
+      "statuses": {
+        "409": 200
+      },
+      "round": 1
+    },
+    {
+      "users": 10,
+      "mode": "welcome",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 489.9,
+        "p95": 1722.6,
+        "p99": 2497.9,
+        "mean": 708.8
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 33.7,
+        "p95": 77.7,
+        "p99": 90.2,
+        "mean": 40.6
+      },
+      "voucher_scoring_ms": {
+        "n": 200,
+        "p50": 47.0,
+        "p95": 83.6,
+        "p99": 105.5,
+        "mean": 48.8
+      },
+      "throughput_rps": 2.4,
+      "statuses": {
+        "409": 200
+      },
+      "round": 2
+    },
+    {
+      "users": 10,
+      "mode": "welcome",
+      "checkout_ms": {
+        "n": 200,
+        "p50": 471.0,
+        "p95": 2016.6,
+        "p99": 2176.3,
+        "mean": 593.7
+      },
+      "scoring_ms": {
+        "n": 200,
+        "p50": 37.7,
+        "p95": 69.3,
+        "p99": 91.3,
+        "mean": 41.4
+      },
+      "voucher_scoring_ms": {
+        "n": 200,
+        "p50": 48.3,
+        "p95": 79.7,
+        "p99": 108.2,
+        "mean": 50.0
+      },
+      "throughput_rps": 2.4,
+      "statuses": {
+        "409": 200
+      },
+      "round": 3
+    },
+    {
+      "users": 50,
+      "mode": "welcome",
+      "checkout_ms": {
+        "n": 137,
+        "p50": 3462.3,
+        "p95": 9911.5,
+        "p99": 14496.6,
+        "mean": 4169.6
+      },
+      "scoring_ms": {
+        "n": 137,
+        "p50": 35.1,
+        "p95": 117.6,
+        "p99": 182.5,
+        "mean": 49.6
+      },
+      "voucher_scoring_ms": {
+        "n": 153,
+        "p50": 60.9,
+        "p95": 159.0,
+        "p99": 213.2,
+        "mean": 76.9
+      },
+      "throughput_rps": 1.7,
+      "statuses": {
+        "409": 137,
+        "error:ReadError": 58,
+        "error:RemoteProtocolError": 5
+      },
+      "round": 1
+    },
+    {
+      "users": 50,
+      "mode": "welcome",
+      "checkout_ms": {
+        "n": 141,
+        "p50": 3836.9,
+        "p95": 7330.6,
+        "p99": 12103.6,
+        "mean": 3474.2
+      },
+      "scoring_ms": {
+        "n": 141,
+        "p50": 37.5,
+        "p95": 130.7,
+        "p99": 299.0,
+        "mean": 53.5
+      },
+      "voucher_scoring_ms": {
+        "n": 160,
+        "p50": 61.4,
+        "p95": 188.9,
+        "p99": 272.4,
+        "mean": 83.5
+      },
+      "throughput_rps": 1.7,
+      "statuses": {
+        "409": 141,
+        "error:ReadError": 45,
+        "error:RemoteProtocolError": 14
+      },
+      "round": 2
+    },
+    {
+      "users": 50,
+      "mode": "welcome",
+      "checkout_ms": {
+        "n": 141,
+        "p50": 2885.6,
+        "p95": 10845.5,
+        "p99": 13124.2,
+        "mean": 3336.3
+      },
+      "scoring_ms": {
+        "n": 141,
+        "p50": 36.6,
+        "p95": 100.5,
+        "p99": 162.6,
+        "mean": 45.6
+      },
+      "voucher_scoring_ms": {
+        "n": 174,
+        "p50": 68.2,
+        "p95": 131.5,
+        "p99": 166.8,
+        "mean": 73.3
+      },
+      "throughput_rps": 1.6,
+      "statuses": {
+        "409": 141,
+        "error:ReadError": 50,
+        "error:RemoteProtocolError": 9
+      },
+      "round": 3
+    }
+  ]
+}

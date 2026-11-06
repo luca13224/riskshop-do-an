@@ -50,6 +50,18 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
 
+## 3o. Vì sao chấm điểm chậm dưới tải (2026-11-06, chẩn đoán cho O5)
+Chi tiết số liệu: [load_diag_20261106.md](experiments/load_diag_20261106.md). Bản tóm tắt:
+- **Số "đạt" ngày 03/11 (mục 3f) bị cách đo làm đẹp:** checkout khóa dòng sản phẩm trước khi chấm điểm và giữ khóa tới lúc commit. Mọi khách ảo mua cùng một sản phẩm nên các đơn xếp hàng trước phần chấm điểm, mỗi lúc chỉ một lượt chấm chạy. Khi mỗi người mua một sản phẩm khác (`--spread`), các lượt chấm chạy song song thật: p50 79–112 ms, p95 145–312 ms.
+- **Nút thắt thật:** mỗi lượt chấm điểm chạy khoảng 22 câu SQL nối tiếp. Dưới tải, mỗi câu mất 3,5–6,7 ms thay vì dưới 1 ms, kể cả câu tra khóa chính. Nhiều worker giảm p95 khi các đơn xếp hàng sẵn (10 người: 48,6 → 18,4 ms) nhưng không đủ khi chạy song song thật.
+- Câu tốn nhất là tải danh sách luật: chạy 2 lần mỗi lượt, khoảng 16% thời gian SQL. Thêm câu tải ngưỡng quyết định, khoảng 5%.
+- **Kết luận cho O5:** chưa đạt dưới tải đồng thời thật trên cấu hình máy phát triển; đạt ở 1 người (p95 ≤ 26 ms). R18 không phải nguyên nhân (mục 3n).
+- **Hướng sửa (đề xuất, chưa làm):**
+  - (1) MVP: lưu tạm danh sách luật và ngưỡng trong bộ nhớ (bỏ 3 trên 22 câu mỗi lượt) + chạy nhiều worker.
+  - (2) Recommended: gộp các câu đếm đặc trưng thành ít vòng hỏi hơn.
+  - (3) Advanced: driver CSDL nhanh hơn (mysqlclient viết bằng C), cấu hình MariaDB, tách khóa tồn kho ra sau bước chấm điểm.
+- Chưa giải thích được: một request treo quá 60 giây trong một lần đo 4 worker × 10 người.
+
 ## 3n. Đo lại độ trễ sau R18 (2026-11-06, kịch bản E2, mục tiêu O5)
 Thêm chế độ `--mode welcome` cho [`load_test.py`](../backend/scripts/load_test.py): mỗi lượt là một khách **mới** (thiết bị, địa chỉ, SĐT riêng) đăng ký → thêm giỏ → áp NGUOIMOI → đặt hàng, để đo đúng luồng có tính cụm F18. Đo **đối chứng**: cùng luồng, cùng CSDL vừa tạo lại, một server thật (B) và một server thay phần tính cụm bằng hàm rỗng (A, script tạm, không sửa code). Lặp lại thêm luồng trả trước (code luồng này không đổi so với 03/11). Cùng máy, 1 tiến trình uvicorn, 3 lượt × 200 đơn mỗi mức.
 

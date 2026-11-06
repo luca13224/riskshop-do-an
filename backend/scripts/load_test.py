@@ -7,6 +7,8 @@ Không chạy cùng lúc với simulator.
        Xóa CSDL mô phỏng, nạp lại sản phẩm / voucher / luật (giống bước chuẩn bị của simulator).
     2) Mở cửa sổ khác, chạy backend trỏ vào CSDL mô phỏng (cổng 8001), ví dụ trong Git Bash:
        DATABASE_URL="$(grep ^SIM_DATABASE_URL .env | cut -d= -f2-)" .venv/Scripts/python -m uvicorn app.main:app --port 8001
+       Thêm --workers 4 để đo cấu hình nhiều tiến trình (TEST_PLAN 3o: một tiến trình bị nghẽn khóa GIL dưới tải),
+       khi đó chạy bước 3 kèm --server "4 worker uvicorn, MariaDB XAMPP cùng máy".
     3) .venv/Scripts/python scripts/load_test.py run --levels 1 10 50 --requests 200 --rounds 3
        Thêm --mode welcome để đo luồng khách mới dùng mã người mới (có tính cụm liên kết F18, ADR-016).
 
@@ -58,11 +60,17 @@ def setup() -> None:
     print("Đã chuẩn bị CSDL mô phỏng. Bước 2: chạy backend trỏ vào nó (xem đầu file).")
 
 
+SPREAD = False  # --spread: mỗi người dùng ảo mua sản phẩm khác nhau, địa chỉ riêng (giảm tranh khóa dòng)
+
+
 async def make_user(base: str, i: int, tag: str) -> tuple[httpx.AsyncClient, int]:
     c = httpx.AsyncClient(base_url=base, timeout=60, headers={"X-Device-Id": f"load-{tag}-{i}"})
     r = await c.post("/api/auth/register", json={"email": f"load-{tag}-{i}@load.test", "password": "taitai123",
                                                  "full_name": f"Tai {i}"})
     r.raise_for_status()
+    if SPREAD:
+        items = (await c.get("/api/products", params={"page_size": 48})).json()["items"]
+        return c, items[i % len(items)]["id"]
     products = (await c.get("/api/products", params={"page_size": 1})).json()
     return c, products["items"][0]["id"]
 
@@ -97,8 +105,9 @@ async def worker(c: httpx.AsyncClient, product_id: int, jobs: asyncio.Queue, out
         except asyncio.QueueEmpty:
             return
         await c.post("/api/cart/items", json={"product_id": product_id, "quantity": 1})
+        address = {**ADDRESS, "line": f"{product_id} Duong {id(c)}"} if SPREAD else ADDRESS
         t0 = time.perf_counter()
-        r = await c.post("/api/orders/checkout", json={"address": ADDRESS, "payment_method": "PREPAID"},
+        r = await c.post("/api/orders/checkout", json={"address": address, "payment_method": "PREPAID"},
                          headers={"Idempotency-Key": str(uuid.uuid4())})
         out.append((time.perf_counter() - t0) * 1000)
         statuses[r.status_code] = statuses.get(r.status_code, 0) + 1
@@ -146,7 +155,7 @@ async def run_level(base: str, users: int, requests: int, tag: str, mode: str = 
 
 
 async def run(base: str, levels: list[int], requests: int, rounds: int, out_path: Path | None,
-              mode: str = "prepaid") -> None:
+              mode: str = "prepaid", server: str = "1 tiến trình uvicorn, MariaDB XAMPP cùng máy") -> None:
     results = []
     for users in levels:
         for rnd in range(1, rounds + 1):
@@ -158,7 +167,7 @@ async def run(base: str, levels: list[int], requests: int, rounds: int, out_path
     report = {"created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
               "machine": {"os": platform.platform(), "cpu": platform.processor(), "cores": os.cpu_count(),
                           "python": platform.python_version()},
-              "server": "1 tiến trình uvicorn, MariaDB XAMPP cùng máy", "requests_per_round": requests, "mode": mode,
+              "server": server, "requests_per_round": requests, "mode": mode,
               "results": results}
     if out_path:
         out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -177,11 +186,17 @@ def main() -> int:
     p.add_argument("--rounds", type=int, default=3)
     p.add_argument("--out", type=Path)
     p.add_argument("--mode", choices=["prepaid", "welcome"], default="prepaid")
+    p.add_argument("--spread", action="store_true",
+                   help="prepaid: mỗi người dùng ảo mua sản phẩm khác nhau, địa chỉ riêng (đo khi không tranh khóa dòng)")
+    p.add_argument("--server", default="1 tiến trình uvicorn, MariaDB XAMPP cùng máy",
+                   help="mô tả cấu hình server để ghi vào báo cáo, ví dụ '4 worker uvicorn, MariaDB XAMPP cùng máy'")
     args = parser.parse_args()
+    global SPREAD
+    SPREAD = getattr(args, "spread", False)
     if args.cmd == "setup":
         setup()
     else:
-        asyncio.run(run(args.base, args.levels, args.requests, args.rounds, args.out, args.mode))
+        asyncio.run(run(args.base, args.levels, args.requests, args.rounds, args.out, args.mode, args.server))
     return 0
 
 
