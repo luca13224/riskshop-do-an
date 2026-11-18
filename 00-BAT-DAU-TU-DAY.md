@@ -32,7 +32,11 @@ Mật khẩu chung: **`11111111`** (đổi được bằng `DEMO_PASSWORD` trong
 
 Mã giảm giá: **NGUOIMOI** (−50.000đ, khách mới, đơn từ 200.000đ, cấp sẵn khi đăng ký) · **GIAM10** (−10%, tối đa 100.000đ, đơn từ 500.000đ).
 
-## 3. Chạy hệ thống (4 cửa sổ)
+## 3. Chạy hệ thống
+
+**Cách nhanh (khuyên dùng):** bấm đúp `scripts\start.bat` (bật), `scripts\check.bat` (kiểm tra), `scripts\stop.bat` (tắt), `scripts\prepare_demo.bat` (chuẩn bị dữ liệu demo). Hướng dẫn đầy đủ và xử lý sự cố: [docs/SO_TAY_VAN_HANH.md](docs/SO_TAY_VAN_HANH.md).
+
+**Chạy bằng tay (4 cửa sổ):**
 
 1. **MariaDB:** mở `D:\xampp\xampp-control.exe` → Start ở dòng MySQL.
 2. **Backend:** `cd backend` → `.venv/Scripts/python -m uvicorn app.main:app --port 8000` (sửa code backend xong thì dừng và chạy lại).
@@ -40,6 +44,8 @@ Mã giảm giá: **NGUOIMOI** (−50.000đ, khách mới, đơn từ 200.000đ, 
 4. **Frontend:** `cd frontend` → `npm run dev`
 
 ## 4. Trước buổi demo
+
+Bấm đúp `scripts\prepare_demo.bat` (gộp 2 lệnh dưới, có kiểm tra lại). Dữ liệu lịch sử tính lùi 14 ngày từ lúc chạy nên cũ dần sau khoảng 1 tuần; `scripts\check.bat` sẽ báo.
 
 - **Demo reset** (XÓA toàn bộ dữ liệu, tạo lại sản phẩm, voucher, luật, nhân viên admin1–3, khách user1–3; chỉ chạy khi `.env` có `DEMO_MODE=true`):
   `cd backend` → `.venv/Scripts/python -m app.modules.lab.reset --yes`

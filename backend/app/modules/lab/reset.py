@@ -3,7 +3,8 @@
     python -m app.modules.lab.reset --yes
 
 XÓA TOÀN BỘ dữ liệu rồi tạo lại: sản phẩm, voucher, bộ luật v1, nhân viên và các nhân vật của kịch bản demo.
-Chỉ chạy khi DEMO_MODE=true. Mật khẩu sinh ngẫu nhiên, ghi vào backend/.env.accounts (không commit).
+Chỉ chạy khi DEMO_MODE=true. Mật khẩu chung lấy từ DEMO_PASSWORD (mặc định 11111111), danh sách ghi vào backend/.env.accounts (không commit).
+Cách dễ nhất: bấm đúp scripts/prepare_demo.bat (reset + lịch sử 14 ngày + kiểm tra).
 
 Nhân vật:
 - Minh: khách mới hợp lệ, đăng ký hôm qua (cảnh 1: dùng NGUOIMOI được).

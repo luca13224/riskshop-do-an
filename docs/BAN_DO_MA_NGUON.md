@@ -9,6 +9,7 @@
 | `frontend/` | Giao diện React + TypeScript: cửa hàng (Shop) và Risk Console |
 | `docs/` | Tài liệu dự án và kết quả thực nghiệm (xem mục 5) |
 | `.claude/skills/` | Hướng dẫn quy trình cho Claude trong dự án (ADR, tổng kết phiên, chuẩn module...) |
+| `scripts/` | Script vận hành bấm đúp: `start` (bật), `stop` (tắt), `check` (kiểm tra), `prepare_demo` (dữ liệu demo); `.bat` gọi `.ps1` cùng tên, hàm dùng chung ở `common.ps1`. Xem [SO_TAY_VAN_HANH.md](SO_TAY_VAN_HANH.md) |
 
 ## 2. Backend: `backend/app/`
 Mỗi module nghiệp vụ trong `app/modules/<tên>/` theo cùng một khuôn:
@@ -73,6 +74,7 @@ Mỗi module nghiệp vụ trong `app/modules/<tên>/` theo cùng một khuôn:
 | `scripts/load_test.py` | Đo độ trễ khi nhiều người đặt hàng cùng lúc (O5) |
 | `scripts/audit_check.py` | Kiểm tra tính giải thích được và audit của quyết định (O6) |
 | `scripts/demo_attack.py` | Gửi tấn công mẫu cho buổi demo (cảnh 5c, 5e) |
+| `scripts/demo_status.py` | Tình trạng dữ liệu demo (còn mới không, đủ tài khoản không), dùng cho `scripts/check.ps1` |
 | `scripts/check_links.py` | Tìm link hỏng trong tài liệu sau khi đổi tên / chuyển chỗ file |
 | `ruff.toml` | Cấu hình ruff: tìm import / biến thừa, tên chưa định nghĩa (`.venv/Scripts/python -m ruff check .`) |
 
@@ -105,6 +107,7 @@ Mỗi module nghiệp vụ trong `app/modules/<tên>/` theo cùng một khuôn:
 | `ERD.md` | Thiết kế CSDL |
 | `KIEM_THU.md` | Kiểm thử và kết quả thực nghiệm (đọc kèm `thuc_nghiem/`) |
 | `KICH_BAN_DEMO.md` | Kịch bản demo bảo vệ |
+| `SO_TAY_VAN_HANH.md` | Bật / tắt / kiểm tra hệ thống, chuẩn bị demo, quyền từng vai trò, xử lý sự cố |
 | `NHAT_KY_TIEN_DO.md` | Nhật ký tiến độ từng phiên |
 | `BAO_CAO_DAN_Y.md` | Dàn ý quyển báo cáo |
 | `BAN_DO_MA_NGUON.md` | File này |

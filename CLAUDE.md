@@ -45,7 +45,7 @@ Cố vấn dài hạn: kiến trúc sư phần mềm, kỹ sư full-stack, BA/SA
 - `git-flow`: quy trình Git cho đồ án.
 
 ## Tài liệu dự án
-`docs/TONG_QUAN.md`, `docs/YEU_CAU.md`, `docs/KIEN_TRUC.md`, `docs/QUYET_DINH.md`, `docs/LO_TRINH.md`, `docs/BO_LUAT_RUI_RO.md`, `docs/ERD.md`, `docs/KIEM_THU.md`, `docs/KICH_BAN_DEMO.md`, `docs/NHAT_KY_TIEN_DO.md`, `docs/BAN_DO_MA_NGUON.md` (vai trò từng file code), `docs/thuc_nghiem/` (kết quả thực nghiệm, có mục lục), `docs/tu_van/`.
+`docs/TONG_QUAN.md`, `docs/YEU_CAU.md`, `docs/KIEN_TRUC.md`, `docs/QUYET_DINH.md`, `docs/LO_TRINH.md`, `docs/BO_LUAT_RUI_RO.md`, `docs/ERD.md`, `docs/KIEM_THU.md`, `docs/KICH_BAN_DEMO.md`, `docs/NHAT_KY_TIEN_DO.md`, `docs/BAN_DO_MA_NGUON.md` (vai trò từng file code), `docs/SO_TAY_VAN_HANH.md` (vận hành, `scripts\*.bat`), `docs/thuc_nghiem/` (kết quả thực nghiệm, có mục lục), `docs/tu_van/`.
 
 ## Quy ước tổ chức file
 - Tài liệu trong `docs/`: tên tiếng Việt không dấu, file viết HOA_GACH_DUOI (`KIEM_THU.md`), thư mục viết thường (`thuc_nghiem/`, `tu_van/`). Thuật ngữ quen thuộc giữ nguyên (`ERD.md`, `README.md`).

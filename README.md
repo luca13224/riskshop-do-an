@@ -71,6 +71,7 @@ Vai trò của từng file code: [docs/BAN_DO_MA_NGUON.md](docs/BAN_DO_MA_NGUON.
 | [docs/KIEM_THU.md](docs/KIEM_THU.md) | Chiến lược và kịch bản kiểm thử |
 | [docs/NHAT_KY_TIEN_DO.md](docs/NHAT_KY_TIEN_DO.md) | Nhật ký tiến độ |
 | [docs/BAN_DO_MA_NGUON.md](docs/BAN_DO_MA_NGUON.md) | Bản đồ mã nguồn: file nào ở đâu, làm gì |
+| [docs/SO_TAY_VAN_HANH.md](docs/SO_TAY_VAN_HANH.md) | Sổ tay vận hành: bật / tắt bằng `scripts\*.bat`, chuẩn bị demo, xử lý sự cố |
 | [docs/thuc_nghiem/](docs/thuc_nghiem/README.md) | Kết quả mô phỏng, đo tải, audit |
 | `docs/tu_van/` | Bản tư vấn, rà soát, thiết kế (chưa phải quyết định) |
 | [docs/tu_van/](docs/tu_van/) | Các bản tư vấn, phản biện (chưa phải quyết định) |
