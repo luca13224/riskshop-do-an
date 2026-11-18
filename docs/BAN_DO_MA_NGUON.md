@@ -61,6 +61,7 @@ Mỗi module nghiệp vụ trong `app/modules/<tên>/` theo cùng một khuôn:
 | `seed.py` | Bộ luật R01–R18 và ngưỡng quyết định; tạo phiên bản mới khi nội dung đổi |
 | `rules_admin.py` | Sửa luật trên Console: chỉ đổi con số, tạo phiên bản mới, ghi audit |
 | `backtest.py` | Chạy thử tham số luật trên quyết định cũ (FR-43) |
+| `restrictions_admin.py` | Danh sách mọi lệnh khóa quyền mua hàng cho trang "Tài khoản bị khóa" (FR-44) |
 | `graph.py` | Đồ thị liên kết tài khoản – thiết bị – IP – địa chỉ cho Console |
 | `models.py` / `schemas.py` / `router.py` | Bảng luật, quyết định, khóa tài khoản; API Console |
 
@@ -87,7 +88,7 @@ Mỗi module nghiệp vụ trong `app/modules/<tên>/` theo cùng một khuôn:
 | `lib/` | Tiện ích: `device.ts` (mã thiết bị gửi kèm request), `format.ts` (tiền, ngày giờ), `seo.tsx`, `utils.ts` |
 | `components/` | Thành phần dùng chung cả hai phía; `components/ui/` là thành phần shadcn/ui |
 | `shop/` | Cửa hàng: `ShopLayout.tsx` (khung trang), `pages/` (trang chủ, danh mục, sản phẩm, giỏ, thanh toán, đơn hàng, khiếu nại, đăng nhập, đăng ký), `components/` (thẻ sản phẩm, header, footer, xem nhanh...) |
-| `console/` | Risk Console: `ConsoleLayout.tsx` (menu theo vai trò), `RequireStaff.tsx` / `RequireRole.tsx` (chặn theo vai trò), `pages/` (Tổng quan, Live Monitor, Báo cáo, Case, Khiếu nại, Đơn hàng, Luật, Attack Lab, Audit Log), `components/` (biểu đồ, đồ thị liên kết, chạy thử luật...) |
+| `console/` | Risk Console: `ConsoleLayout.tsx` (menu theo vai trò), `RequireStaff.tsx` / `RequireRole.tsx` (chặn theo vai trò), `pages/` (Tổng quan, Live Monitor, Báo cáo, Case, Khiếu nại, Tài khoản bị khóa, Đơn hàng, Luật, Attack Lab, Audit Log), `components/` (biểu đồ, đồ thị liên kết, chạy thử luật...) |
 | `../public/` | Ảnh sản phẩm, danh mục (tên file theo mã SKU) |
 
 ## 4. Luồng chính, đi theo file

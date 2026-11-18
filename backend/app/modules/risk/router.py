@@ -5,13 +5,14 @@ from app.core.db import get_db
 from app.modules.auth.deps import require_roles
 from app.modules.auth.models import ADMIN, RISK_MANAGER, STAFF_ROLES, User
 from app.core.errors import AppError
-from app.modules.risk import backtest, graph, rules_admin, service
+from app.modules.risk import backtest, graph, restrictions_admin, rules_admin, service
 from app.modules.risk.schemas import (
     BacktestIn,
     DecisionOut,
     LiftRestrictionIn,
     NewVersionIn,
     RestrictionOut,
+    RestrictionPage,
     RuleOut,
     RuleVersionOut,
 )
@@ -66,6 +67,21 @@ def link_graph(user_id: int, db: Session = Depends(get_db)) -> dict:
 
 
 # ---------- Khóa quyền mua hàng (ADR-010) ----------
+# Danh sách mọi lệnh khóa: nhân viên nào cũng xem được; gỡ khóa vẫn chỉ Risk Manager / Admin (endpoint .../lift)
+@router.get("/restrictions", response_model=RestrictionPage)
+def restrictions(
+    status_filter: str | None = Query(default="active", alias="status", pattern="^(active|expired|lifted|all)$"),
+    kind: str | None = Query(default=None, pattern="^(purchase_cooldown|purchase_ban|purchase_linked)$"),
+    q: str | None = Query(default=None, max_length=100),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    query = q.strip() if q else ""
+    return restrictions_admin.list_restrictions(db, status=status_filter, kind=kind, q=query or None,
+                                                page=page, page_size=page_size)
+
+
 @router.get("/users/{user_id}/restriction", response_model=RestrictionOut | None)
 def user_restriction(user_id: int, db: Session = Depends(get_db)):
     r = service.active_restriction(db, user_id)

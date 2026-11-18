@@ -50,7 +50,7 @@ Bấm đúp `scripts\prepare_demo.bat` (gộp 2 lệnh dưới, có kiểm tra l
 - **Demo reset** (XÓA toàn bộ dữ liệu, tạo lại sản phẩm, voucher, luật, nhân viên admin1–3, khách user1–3; chỉ chạy khi `.env` có `DEMO_MODE=true`):
   `cd backend` → `.venv/Scripts/python -m app.modules.lab.reset --yes`
 - **Lịch sử 14 ngày** cho Dashboard có số liệu: `.venv/Scripts/python -m simulator.history --days 14 --yes`
-- Kiểm tra nhanh: `.venv/Scripts/python -m pytest -q` (hiện 218 test qua).
+- Kiểm tra nhanh: `.venv/Scripts/python -m pytest -q` (hiện 222 test qua).
 
 ## 5. Các cảnh có thao tác đặc biệt
 

@@ -35,6 +35,34 @@ class RestrictionOut(BaseModel):
     reason: str
 
 
+class RestrictionRowOut(BaseModel):
+    """Một lệnh khóa trong danh sách Console. status: active | expired | lifted (tính lúc đọc)."""
+
+    id: int
+    user_id: int
+    user_email: MaskedEmail
+    user_name: str
+    kind: str
+    reason: str
+    source: str  # auto | staff
+    status: str
+    created_at: datetime
+    expires_at: datetime | None
+    lifted_at: datetime | None
+    lifted_by_name: str | None
+    lift_reason: str | None
+    case_code: str | None  # case gần nhất của tài khoản (ưu tiên case còn mở)
+    trust_score: int | None  # điểm tin cậy ở lần chấm gần nhất
+
+
+class RestrictionPage(BaseModel):
+    items: list[RestrictionRowOut]
+    total: int
+    page: int
+    page_size: int
+    status_counts: dict[str, int]  # đã áp bộ lọc loại / từ khóa, chưa áp bộ lọc trạng thái
+
+
 class LiftRestrictionIn(BaseModel):
     reason: str = Field(min_length=10, max_length=255)
 

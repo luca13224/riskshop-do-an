@@ -233,7 +233,7 @@ function SystemStatus({ data }: { data: Dashboard }) {
       label: "Tài khoản đang bị khóa",
       value: String(s.active_restrictions),
       ok: true,
-      to: "/console/cases",
+      to: "/console/restrictions",
     },
   ]
   return (
@@ -241,7 +241,13 @@ function SystemStatus({ data }: { data: Dashboard }) {
       <ul className="grid gap-2">
         {rows.map((r) => (
           <li key={r.label} className="flex items-center justify-between gap-3 rounded-lg border bg-muted/30 px-3 py-2.5 text-sm">
-            <span>{r.label}</span>
+            {r.to ? (
+              <Link to={r.to} className="inline-flex items-center gap-1 hover:text-primary hover:underline">
+                {r.label} <ArrowRight className="size-3.5" aria-hidden />
+              </Link>
+            ) : (
+              <span>{r.label}</span>
+            )}
             <span
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium tabular-nums",

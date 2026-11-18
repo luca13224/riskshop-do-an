@@ -15,6 +15,7 @@ import { RulesPage } from "@/console/pages/RulesPage"
 import { ReportsPage } from "@/console/pages/ReportsPage"
 import { AuditLogPage } from "@/console/pages/AuditLogPage"
 import { CaseDetailPage } from "@/console/pages/CaseDetailPage"
+import { RestrictionsPage } from "@/console/pages/RestrictionsPage"
 import { AUDIT_ROLES, LAB_ROLES } from "@/lib/api/auth"
 import { CatalogPage } from "@/shop/pages/CatalogPage"
 import { ShopLayout } from "@/shop/ShopLayout"
@@ -52,6 +53,7 @@ export function App() {
           <Route element={<ConsoleLayout />}>
             <Route index element={<ConsoleHomePage />} />
             <Route path="orders" element={<ConsoleOrdersPage />} />
+            <Route path="restrictions" element={<RestrictionsPage />} />
             <Route path="monitor" element={<LiveMonitorPage />} />
             <Route path="cases" element={<CasesPage />} />
             <Route path="cases/:code" element={<CaseDetailPage />} />

@@ -44,7 +44,7 @@ Mật khẩu chung **`11111111`** (chỉ là dữ liệu demo trên máy local).
 |---|---|---|---|
 | `admin1@test.com` | Admin | Mọi màn hình Console, **Attack Lab**, khóa / gỡ khóa | — |
 | `admin2@test.com` | Risk Manager | Duyệt khiếu nại, sửa luật (tạo phiên bản mới), khóa / gỡ khóa, xem email / SĐT đầy đủ (phải ghi lý do), Audit Log | Attack Lab |
-| `admin3@test.com` | Analyst | Xem Tổng quan, Live Monitor, Báo cáo; nhận và kết luận case; chạy thử luật | Sửa luật, duyệt khiếu nại, gỡ khóa, Audit Log, Attack Lab |
+| `admin3@test.com` | Analyst | Xem Tổng quan, Live Monitor, Báo cáo, Tài khoản bị khóa; nhận và kết luận case; chạy thử luật | Sửa luật, duyệt khiếu nại, gỡ khóa, Audit Log, Attack Lab |
 | `user1@test.com` | Khách mới (Minh) | Mua hàng bình thường, có sẵn mã NGUOIMOI | — |
 | `user2@test.com` | Khách bùng COD (Khang) | Bị ẩn COD; dùng cho cảnh 5c, 5e | — |
 | `user3@test.com` | Khách uy tín (Lan) | Đơn COD giá trị cao vẫn được | — |
@@ -62,7 +62,8 @@ Mật khẩu chung **`11111111`** (chỉ là dữ liệu demo trên máy local).
 1. **Khiếu nại**: đọc lý do của khách, xem luật đã khớp → **Chấp nhận** (tự miễn trừ / gỡ khóa) hoặc **Từ chối**, viết câu trả lời cho khách.
 2. **Luật rủi ro**: mở luật → sửa con số → **Chạy thử trên dữ liệu cũ** (xem bao nhiêu tài khoản bị ảnh hưởng, có khách quen không) → ghi lý do → lưu thành phiên bản mới.
 3. Trong case: **Khóa vô thời hạn** / **Gỡ khóa** (bắt buộc ghi lý do); **Xem email và SĐT** (bắt buộc lý do, có audit).
-4. **Audit Log**: kiểm tra ai đã làm gì.
+4. **Tài khoản bị khóa**: xem mọi lệnh khóa (đang hiệu lực / hết hạn / đã gỡ), lọc theo loại; bấm **Gỡ khóa** ngay trên dòng → ghi lý do → **Xác nhận gỡ khóa**. Trang Tổng quan, dòng "Tài khoản đang bị khóa" bấm vào cũng tới đây.
+5. **Audit Log**: kiểm tra ai đã làm gì.
 
 **Admin**: như Risk Manager, cộng **Attack Lab** (chạy kịch bản tấn công mẫu để minh họa).
 
@@ -89,7 +90,7 @@ Kịch bản đầy đủ: [KICH_BAN_DEMO.md](KICH_BAN_DEMO.md). Mở cửa sổ
 | Trang web trắng / không mở được | Frontend tắt | `scripts\start.bat`; xem cửa sổ "RiskShop frontend" |
 | Biểu đồ Tổng quan / Báo cáo trống, toàn số 0 | Dữ liệu demo đã cũ | `scripts\prepare_demo.bat` |
 | Đăng nhập báo sai mật khẩu | Gõ sai, hoặc chưa chạy demo reset | Mật khẩu `11111111`; vẫn sai thì `prepare_demo.bat` |
-| "Tài khoản đang bị khóa" khi đăng nhập user2 | Còn khóa từ lần tập cảnh 5c / 5e | Gỡ khóa trong case (admin2, ghi lý do) hoặc `prepare_demo.bat` |
+| "Tài khoản đang bị khóa" khi đăng nhập user2 | Còn khóa từ lần tập cảnh 5c / 5e | Console → **Tài khoản bị khóa** → Gỡ khóa (admin2, ghi lý do), hoặc `prepare_demo.bat` |
 | Case không tự mở, Attack Lab đứng ở "đang chạy" | Worker tắt | `scripts\check.bat` → `scripts\start.bat` |
 | "port already in use" / cổng 8000, 5173 bận | Lần trước chưa tắt hết | `scripts\stop.bat` rồi `scripts\start.bat` |
 | `npm` không nhận lệnh | Node.js chưa cài / chưa có trong PATH | Cài Node.js 24 (LTS), mở lại cửa sổ |
@@ -100,7 +101,7 @@ Mở PowerShell, `cd D:\do_an\backend`:
 
 | Lệnh | Kiểm tra gì | Kết quả gần nhất |
 |---|---|---|
-| `.venv\Scripts\python -m pytest -q` | 218 test tự động (chạy trên CSDL test riêng, không đụng dữ liệu demo), ~4 phút | 218 qua (19/11) |
+| `.venv\Scripts\python -m pytest -q` | 222 test tự động (chạy trên CSDL test riêng, không đụng dữ liệu demo), ~4 phút | 222 qua (19/11) |
 | `.venv\Scripts\python -m ruff check .` | Import / biến thừa | Sạch |
 | `.venv\Scripts\python scripts\check_links.py` | Link hỏng trong tài liệu | 0 link hỏng |
 | `cd ..\frontend` rồi `npx tsc -b` | Lỗi kiểu TypeScript | Sạch |

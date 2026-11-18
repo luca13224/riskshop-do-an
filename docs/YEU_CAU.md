@@ -64,6 +64,7 @@
 | FR-40 | Simulator sinh persona hợp lệ, hard negative, lạm dụng đã biết và biến thể chưa biết; gọi đúng API của shop; nhãn thật lưu riêng, Risk Engine không đọc | MVP | `test_simulator.py` |
 | FR-41 | Tách tập dev / test, tái lập theo seed, ghi dấu vân tay bộ luật; báo cáo precision, recall, FPR kèm khoảng tin cậy Wilson | MVP | `docs/thuc_nghiem/` |
 | FR-42 | Tắt từng luật (`--disable-rule`), tắt lớp Trust (`--no-trust`) hoặc chạy cách tính điểm v3 (`--trust-all-rules`) để so sánh trên cùng dân số | Recommended | KIEM_THU 3c, 3d, 3e |
+| FR-44 | Trang "Tài khoản bị khóa": mọi lệnh khóa quyền mua hàng (tự động / nhân viên), lọc theo trạng thái (đang hiệu lực, hết hạn, đã gỡ), loại khóa, tìm theo email / tên; email được che; mọi nhân viên xem, Risk Manager / Admin gỡ khóa ngay trên trang (bắt buộc lý do, có audit) | Recommended | `test_restriction_list.py` |
 | FR-43 | Chạy thử tham số mới của một luật trên quyết định 7–90 ngày qua trước khi lưu (chỉ đọc, mọi nhân viên): số lượt / tài khoản chặt hơn, nới hơn, trong đó bao nhiêu từng bị kết luận lạm dụng / không vi phạm, khách quen; kèm độ khớp phát lại | Recommended | `test_backtest.py` |
 
 ## 3. Non-functional Requirements

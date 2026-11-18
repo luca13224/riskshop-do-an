@@ -14,9 +14,10 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 - Điểm tin cậy và túi voucher (`test_trust.py`); khóa quyền mua hàng tự động, gỡ khóa, khiếu nại gỡ khóa (`test_restrictions.py`).
 - Né lệnh khóa bằng tài khoản mới, gia đình chung máy, chung IP, khóa thủ công (`test_linked_ban.py`, `test_restrictions.py`).
 - Cụm tài khoản mới nối chuỗi (R18); gia đình và cụm chỉ một loại điểm chung không bị bắt; chuẩn hóa địa chỉ ngõ / ngách / tỉnh, không gộp "12/5" (`test_cluster_chain.py`, `test_order.py`).
+- Danh sách tài khoản bị khóa: trạng thái đang hiệu lực / hết hạn / đã gỡ, lọc, che email, gỡ khóa hiện người gỡ, khách bị chặn (`test_restriction_list.py`).
 - Bộ nhớ đệm luật và ngưỡng: dùng bản cũ trong thời hạn, làm mới khi hết hạn hoặc khi bị xóa (`test_rule_cache.py`).
 - Chạy thử luật trên quyết định cũ: không đổi tham số thì không đổi gì và phát lại khớp 100%; giảm điểm thì đúng lượt bị nới; chỉ đọc; khách bị chặn (`test_backtest.py`).
-- Lần chạy gần nhất: **218 test qua** (2026-11-19).
+- Lần chạy gần nhất: **222 test qua** (2026-11-19).
 
 ## 2. Thực nghiệm mô phỏng (`backend/simulator`)
 ```

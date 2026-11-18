@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Store,
+  UserX,
   type LucideIcon,
 } from "lucide-react"
 import { useState, type FormEvent } from "react"
@@ -53,6 +54,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
         icon: MessageSquareWarning,
         badge: "appeals",
       },
+      { to: "/console/restrictions", label: "Tài khoản bị khóa", icon: UserX },
       { to: "/console/orders", label: "Đơn hàng", icon: Package },
     ],
   },

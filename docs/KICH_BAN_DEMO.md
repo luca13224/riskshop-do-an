@@ -90,6 +90,7 @@
 ## Cảnh 5c — Cố tình đặt lặp sau khi bị từ chối (0:45)
 - Khang bị ẩn COD. Người thuyết trình nói: "kẻ gian bỏ qua giao diện, gọi thẳng API đặt COD nhiều lần".
 - Gửi 4 lần (công cụ API hoặc script): 3 lần đầu bị từ chối "Đơn này chưa dùng được thanh toán khi nhận hàng…"; lần thứ 4 bị **chặn** và tài khoản **tạm khóa mua hàng 24 giờ**; tái phạm trong 30 ngày thì khóa vô thời hạn.
+- Console → **Tài khoản bị khóa**: thấy Khang với "Khóa 24 giờ · Hệ thống tự khóa", lý do, thời hạn, nút "Xem case". Đăng nhập Analyst thì xem được nhưng không có nút gỡ khóa (phân quyền).
 - Console: case tự mở, dải đỏ "Tạm khóa mua hàng", khung "Quyền mua hàng" có nút Gỡ khóa (chỉ Risk Manager, bắt buộc lý do, ghi audit).
 - Điểm nhấn: hoàn toàn tự động nhưng không có quyết định nào "không thể đảo ngược"; khách vẫn đăng nhập và khiếu nại được (chuyển sang cảnh 5d).
 

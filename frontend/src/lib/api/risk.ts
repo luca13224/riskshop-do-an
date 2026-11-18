@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { apiFetch } from "./client"
 
@@ -256,8 +256,10 @@ export function useLiftRestriction(userId: number) {
         method: "POST",
         body: JSON.stringify({ reason }),
       }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["console", "risk", "restriction", userId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["console", "risk", "restriction", userId] })
+      queryClient.invalidateQueries({ queryKey: ["console", "risk", "restrictions"] })
+    },
   })
 }
 
@@ -269,7 +271,55 @@ export function useBanUser(userId: number) {
         method: "POST",
         body: JSON.stringify({ reason }),
       }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["console", "risk", "restriction", userId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["console", "risk", "restriction", userId] })
+      queryClient.invalidateQueries({ queryKey: ["console", "risk", "restrictions"] })
+    },
+  })
+}
+
+// ---------- Danh sách mọi tài khoản bị hạn chế (Console) ----------
+export type RestrictionStatus = "active" | "expired" | "lifted"
+
+export const RESTRICTION_STATUS_LABELS: Record<RestrictionStatus, string> = {
+  active: "Đang hiệu lực",
+  expired: "Đã hết hạn",
+  lifted: "Đã gỡ",
+}
+
+export interface RestrictionRow {
+  id: number
+  user_id: number
+  user_email: string // đã che
+  user_name: string
+  kind: RestrictionKind
+  reason: string
+  source: "auto" | "staff"
+  status: RestrictionStatus
+  created_at: string
+  expires_at: string | null
+  lifted_at: string | null
+  lifted_by_name: string | null
+  lift_reason: string | null
+  case_code: string | null
+  trust_score: number | null
+}
+
+export interface RestrictionPage {
+  items: RestrictionRow[]
+  total: number
+  page: number
+  page_size: number
+  status_counts: Record<RestrictionStatus, number>
+}
+
+export function useRestrictionList(f: { status: RestrictionStatus | "all"; kind?: RestrictionKind; q: string; page: number }) {
+  const params = new URLSearchParams({ status: f.status, page: String(f.page), page_size: "20" })
+  if (f.kind) params.set("kind", f.kind)
+  if (f.q) params.set("q", f.q)
+  return useQuery({
+    queryKey: ["console", "risk", "restrictions", f],
+    queryFn: () => apiFetch<RestrictionPage>(`/api/console/risk/restrictions?${params}`),
+    placeholderData: keepPreviousData,
   })
 }
