@@ -138,13 +138,13 @@ NỘI DUNG TỪNG HÀNG:
 2 PAIN POINT
 - Định nghĩa: Bất cập cụ thể gây tốn kém, rủi ro, có hậu quả rõ.
 - Trả lời câu hỏi: Điều gì gây khó? Hậu quả ra sao?
-- Ví dụ áp dụng: • Farm tài khoản gom mã • Bùng hàng COD • Bị khóa thì lập tài khoản mới • Xử lý thủ công, khó truy vết • Chặn nhầm khách thật
+- Ví dụ áp dụng: • Farm tài khoản gom mã • Bùng hàng COD • Bị khóa thì lập tài khoản mới • Xử lý thủ công, khó truy vết • Chặn nhầm khách
 - Khác biệt nổi bật: ✔ Chặn nhầm khách cũng là một nỗi đau ✔ Xét cả né lệnh khóa
 
 3 OBJECTIVE
 - Định nghĩa: Trạng thái mong muốn, đo được, có phạm vi và thời hạn.
 - Trả lời câu hỏi: Cải thiện gì? Đến mức nào? Đo bằng gì?
-- Ví dụ áp dụng: • Bắt ≥80% lạm dụng đã biết • Chặn nhầm khách thường ≤2% • ≥90% kẻ né khóa bị khóa • Chấm điểm ≤50 ms • Quyết định có lý do
+- Ví dụ áp dụng: • Bắt ≥80% lạm dụng đã biết • Chặn nhầm khách thường ≤2% • ≥90% né khóa bị khóa • Chấm điểm ≤50 ms • Quyết định có lý do
 - Khác biệt nổi bật: ✔ Có mục tiêu cho phía khách thật ✔ Giữ nguyên chỉ tiêu đề cương
 
 4 CONSTRAINT
@@ -156,7 +156,7 @@ NỘI DUNG TỪNG HÀNG:
 5 METHOD
 - Định nghĩa: Cách thức, kiến trúc, quy trình để đạt mục tiêu.
 - Trả lời câu hỏi: Giải quyết bằng cách nào? Cơ chế hoạt động ra sao?
-- Ví dụ áp dụng: • Chấm điểm ở 3 điểm kiểm soát • 18 luật có phiên bản • Điểm tin cậy • Khóa theo bậc, truy vết liên kết • Case, khiếu nại, nhật ký
+- Ví dụ áp dụng: • Chấm điểm ở 3 bước mua • 18 luật có phiên bản • Điểm tin cậy • Khóa theo bậc, truy vết liên kết • Case, khiếu nại
 - Khác biệt nổi bật: ✔ Sửa luật không cần triển khai lại ✔ Chạy thử luật trước khi bật
 
 6 EVALUATION
