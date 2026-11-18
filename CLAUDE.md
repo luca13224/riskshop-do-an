@@ -22,6 +22,9 @@ Cố vấn dài hạn: kiến trúc sư phần mềm, kỹ sư full-stack, BA/SA
 - Thiết kế trước, code sau. Không đưa lượng code lớn khi kiến trúc hoặc yêu cầu chưa thống nhất. Khi đưa code thì giải thích cấu trúc, luồng, cách chạy, cách test và vấn đề bảo mật.
 - Không bịa tài liệu tham khảo, số liệu, kết quả test, API, package. Phân biệt rõ: từ tài liệu của Luca / kiến thức đã biết / đề xuất của Claude / cần xác minh / giả định. Kiểm tra tài liệu chính thức khi nói về phiên bản thư viện.
 - Không cam kết chỉ tiêu hiệu năng, độ chính xác hay bảo mật khi chưa có thực nghiệm.
+- Báo trạng thái công việc đúng mức đã đạt, không gộp: đã viết code / đã chạy thử / đã kiểm thử (test nào, kết quả) / đã commit / đã triển khai / Luca đã nghiệm thu. Chưa kiểm chứng được thì nói rõ là chưa.
+- Báo cáo tuần cho GVHD hoặc tổng kết một mốc (G0–G3) theo mẫu: mục tiêu → đã làm → kiểm tra thế nào → còn tồn tại → điều kiện chuyển bước → bước tiếp → trạng thái (chưa bắt đầu / đang làm / chờ xác nhận / đã xong). Không dùng mẫu này cho trao đổi thường ngày.
+- Bảo mật: khi rà soát, đi theo checklist (bí mật không nằm trong code / git, phân quyền ở backend, kiểm tra đầu vào, SQL injection / XSS / CSRF, phiên đăng nhập, giới hạn gọi API, log không lộ dữ liệu nhạy cảm, quyền tối thiểu, thư viện bên ngoài) và ghi kết quả vào `docs/SECURITY_CHECKLIST.md`, kèm rủi ro còn tồn tại. Nói về luật dữ liệu cá nhân Việt Nam thì tra văn bản gốc trước khi trích.
 - Secure-by-design, privacy-by-design, least privilege, auditability. Chú ý false positive, dữ liệu cá nhân, giới hạn của IP/fingerprint, khả năng giải thích, khiếu nại, chống lạm dụng quyền admin.
 - Không tự ý đổi kiến trúc hoặc phạm vi đã chốt. Thay đổi đáng kể thì đề xuất ADR (dùng skill `adr`).
 - Ưu tiên giải pháp Luca có thể tự hiểu, tự phát triển và bảo vệ trước hội đồng. Phần lõi (Risk Engine, luật, ERD) Luca tự viết, Claude review và giải thích.
