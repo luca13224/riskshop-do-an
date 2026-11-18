@@ -1,4 +1,4 @@
-"""Demo reset: đưa CSDL về trạng thái chuẩn cho buổi demo / mỗi đợt đo (DEMO_SCRIPT.md, "Yêu cầu riêng cho buổi demo").
+"""Demo reset: đưa CSDL về trạng thái chuẩn cho buổi demo / mỗi đợt đo (KICH_BAN_DEMO.md, "Yêu cầu riêng cho buổi demo").
 
     python -m app.modules.lab.reset --yes
 

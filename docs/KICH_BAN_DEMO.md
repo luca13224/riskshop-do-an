@@ -53,7 +53,7 @@
 - **Thao tác:** mở trang **Attack Lab** trong Console (chỉ bật ở chế độ demo, chỉ vai quản trị), chọn kịch bản **"Farm voucher: 20 tài khoản mới, 3 thiết bị, 1 địa chỉ nhận hàng"**, bấm **Chạy**.
 - **Bên phải:** Live Monitor đổ dồn sự kiện theo thời gian thực (SSE):
   - 4 tài khoản đầu: `ALLOW`, vì chưa đủ tín hiệu (hệ thống thật cũng vậy).
-  - Từ tài khoản thứ 5 (5 tài khoản trên cùng địa chỉ): `ALLOW_WITH_RESTRICTION` (voucher bị gỡ). Từ tài khoản thứ 7 (3 tài khoản mới trên cùng thiết bị): điểm vượt 80. Phép tính xem `RULES_V0.md` mục 5.
+  - Từ tài khoản thứ 5 (5 tài khoản trên cùng địa chỉ): `ALLOW_WITH_RESTRICTION` (voucher bị gỡ). Từ tài khoản thứ 7 (3 tài khoản mới trên cùng thiết bị): điểm vượt 80. Phép tính xem `BO_LUAT_RUI_RO.md` mục 5.
   - Một **cảnh báo cụm** hiện lên: *"Cụm 20 tài khoản liên kết qua 3 thiết bị và 1 địa chỉ"* → mở **case** mới.
 - **Bên trái:** Luca đăng nhập thủ công một tài khoản của farm trên trình duyệt, áp `NGUOIMOI` → shop báo *"Mã giảm giá không áp dụng được cho đơn hàng này"*. **Không nói lý do**, để kẻ gian không học được luật.
 - **Chứng minh:** phát hiện theo thời gian thực; hành động **mềm** (gỡ voucher, vẫn cho mua giá gốc) thay vì chặn; thông điệp không lộ luật.

@@ -19,7 +19,7 @@ description: Chuẩn thiết kế cơ sở dữ liệu MariaDB của đồ án, 
 - Bảng **chỉ ghi thêm** (`risk_decisions`, `audit_logs`, `events`): ứng dụng không có code `UPDATE` hay `DELETE` lên chúng.
 
 ## Index theo truy vấn thật
-- Mỗi đặc trưng trong `docs/RULES_V0.md` tương ứng một truy vấn đếm theo cửa sổ thời gian; tạo index ghép theo **cột lọc + thời gian**, ví dụ `(device_id, created_at)`, `(address_hash, created_at)`, `(ip, created_at)`.
+- Mỗi đặc trưng trong `docs/BO_LUAT_RUI_RO.md` tương ứng một truy vấn đếm theo cửa sổ thời gian; tạo index ghép theo **cột lọc + thời gian**, ví dụ `(device_id, created_at)`, `(address_hash, created_at)`, `(ip, created_at)`.
 - Trước khi kết luận "cần Redis", đo truy vấn bằng `EXPLAIN` và thời gian thực tế.
 
 ## Migration (Alembic)

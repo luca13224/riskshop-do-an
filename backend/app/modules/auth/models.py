@@ -34,7 +34,7 @@ class Device(Base):
     """Một trình duyệt/thiết bị, nhận diện bằng ID ngẫu nhiên lưu trong trình duyệt.
 
     Đây KHÔNG phải fingerprint thật: người dùng xóa dữ liệu trình duyệt là có ID mới.
-    Luật rủi ro coi đây là tín hiệu mạnh nhưng không tuyệt đối (RULES_V0, F02).
+    Luật rủi ro coi đây là tín hiệu mạnh nhưng không tuyệt đối (BO_LUAT_RUI_RO, F02).
     """
 
     __tablename__ = "devices"

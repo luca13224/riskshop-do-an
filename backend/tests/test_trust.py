@@ -1,6 +1,6 @@
 """Test lớp 1 — điểm tin cậy tài khoản (Trust Score, bộ luật v3) và túi voucher.
 
-Thiết kế: docs/reviews/2026-10-31_TRUST_SCORE_DESIGN.md.
+Thiết kế: docs/tu_van/2026-10-31_TRUST_SCORE_DESIGN.md.
 """
 
 import uuid

@@ -139,7 +139,7 @@ def _active_policies(req: EvaluationRequest) -> list[str]:
     return policies
 
 
-# ---------- Bộ nhớ đệm luật và ngưỡng (O5, TEST_PLAN 3o) ----------
+# ---------- Bộ nhớ đệm luật và ngưỡng (O5, KIEM_THU 3o) ----------
 # Mỗi lần chấm điểm trước đây tải danh sách luật 2 lần và ngưỡng 1 lần: khoảng 20% thời gian SQL khi đông người.
 # Luật hiếm khi đổi, nên giữ một BẢN SAO gọn trong bộ nhớ của tiến trình, hết hạn sau RULE_CACHE_SECONDS.
 # Trong cùng tiến trình, sửa luật / seed / demo reset xóa cache ngay. Chạy nhiều worker thì worker khác thấy luật mới
@@ -216,7 +216,7 @@ def _load_rules(db: Session, context: str | None) -> list[tuple[CachedRule, Cach
 
 # ---------- Điểm tin cậy tài khoản (Trust Score, lớp 1, bộ luật v3) ----------
 # Trust = min(100, 100 - tổng điểm của MỌI luật khớp), không lọc theo context, mỗi luật tính một lần ở bậc cao nhất.
-# Luật tích cực (điểm âm) cộng lại điểm. Có thể âm. Xem docs/reviews/2026-10-31_TRUST_SCORE_DESIGN.md.
+# Luật tích cực (điểm âm) cộng lại điểm. Có thể âm. Xem docs/tu_van/2026-10-31_TRUST_SCORE_DESIGN.md.
 TRUST_MAX = 100
 TRUST_TIERS = [(70, "normal"), (50, "watch"), (30, "restricted"), (1, "review")]  # dưới 1 (<= 0): "critical"
 
@@ -260,7 +260,7 @@ def decide(
     trust: int | None = None,
     voucher_min_trust: int | None = None,
 ) -> tuple[str, dict]:
-    """Ma trận quyết định (RULES_V0 mục 4). Hàm thuần, test riêng được.
+    """Ma trận quyết định (BO_LUAT_RUI_RO mục 4). Hàm thuần, test riêng được.
 
     Mỗi chính sách có điểm riêng; hành động tương ứng theo chính sách đó.
     `exempt`: các chính sách khách đang được miễn trừ (khiếu nại được chấp nhận, ADR-006): bỏ qua hành động

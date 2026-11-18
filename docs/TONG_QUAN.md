@@ -29,17 +29,17 @@ Phạm vi: 2 nhóm chính sách (voucher tân thủ, COD), dữ liệu mô phỏ
 
 | Mã | Mục tiêu | Chỉ số | Ngưỡng | Vấn đề | Số đã có |
 |---|---|---|---|---|---|
-| O1 | Bắt lạm dụng kiểu đã biết | Recall kiểu đã biết, tập test | ≥ 80% | P1, P2 | test_v2 seed 5: **53,8%, chưa đạt** (85,5% ở bộ v1 là dữ liệu dễ hơn thực tế, TEST_PLAN 3e) |
+| O1 | Bắt lạm dụng kiểu đã biết | Recall kiểu đã biết, tập test | ≥ 80% | P1, P2 | test_v2 seed 5: **53,8%, chưa đạt** (85,5% ở bộ v1 là dữ liệu dễ hơn thực tế, KIEM_THU 3e) |
 | O2 | Không làm phiền khách bình thường | FPR khách thông thường | ≤ 2% | P5 | 0% ở mọi lần đo |
 | O3 | Hạn chế chặn nhầm ca khó | FPR hard negative | ≤ 20% | P5 | test_v2 seed 5: 17,6% đạt; các lần trước 18,2% – 31,2%, **có lần chưa đạt** |
 | O4 | Chỉ tiêu FPR tổng của đề cương | FPR trên toàn bộ tài khoản hợp lệ | ≤ 5% | P5 | test_v2 seed 5: 6,2%; v1 test: 7,9% · **chưa đạt** |
-| O5 | Không làm chậm checkout | p95 chấm điểm; p95 request đặt hàng ở 1 / 10 / 50 người đồng thời | ≤ 50 ms (chấm điểm) | mọi P | Sau ADR-017 (cache luật, 4 worker, các lượt chấm chạy song song thật): 1 người p95 ≤ 11,3 ms, 10 người ≤ 31,5 ms: **đạt**; 50 người 87–117 ms: **chưa đạt**. Số 03/11 bị khóa dòng sản phẩm làm đẹp (TEST_PLAN 3o, 3p) |
-| O6 | Quyết định giải thích được, truy vết được | % quyết định khác ALLOW có luật đã khớp, giá trị đặc trưng, audit | 100% | P4 | 8/8 mục kiểm tra đạt 100% trên dữ liệu demo: **đạt** (TEST_PLAN 3g) |
-| O7 | Lệnh khóa không bị né bằng tài khoản mới | % tài khoản né khóa (chung ≥ 2 điểm) bị khóa thanh toán | ≥ 90% | P3 | test_v4 seed 10 (sau ADR-015): **14/14 = 100% bị khóa, đạt** (KTC 95%: 78,5%–100%, mẫu nhỏ); người nhà 0/8 bị hạn chế (TEST_PLAN 3l). Trước đó 66,7% (3i) |
+| O5 | Không làm chậm checkout | p95 chấm điểm; p95 request đặt hàng ở 1 / 10 / 50 người đồng thời | ≤ 50 ms (chấm điểm) | mọi P | Sau ADR-017 (cache luật, 4 worker, các lượt chấm chạy song song thật): 1 người p95 ≤ 11,3 ms, 10 người ≤ 31,5 ms: **đạt**; 50 người 87–117 ms: **chưa đạt**. Số 03/11 bị khóa dòng sản phẩm làm đẹp (KIEM_THU 3o, 3p) |
+| O6 | Quyết định giải thích được, truy vết được | % quyết định khác ALLOW có luật đã khớp, giá trị đặc trưng, audit | 100% | P4 | 8/8 mục kiểm tra đạt 100% trên dữ liệu demo: **đạt** (KIEM_THU 3g) |
+| O7 | Lệnh khóa không bị né bằng tài khoản mới | % tài khoản né khóa (chung ≥ 2 điểm) bị khóa thanh toán | ≥ 90% | P3 | test_v4 seed 10 (sau ADR-015): **14/14 = 100% bị khóa, đạt** (KTC 95%: 78,5%–100%, mẫu nhỏ); người nhà 0/8 bị hạn chế (KIEM_THU 3l). Trước đó 66,7% (3i) |
 | O8 | Khách bị chặn nhầm có đường sửa sai | % quyết định hạn chế khiếu nại được; chấp nhận thì tự miễn trừ / gỡ khóa | 100% | P5 | có test |
 | O9 | Analyst xử lý case nhanh, nhất quán | Thời gian trung vị xử lý 1 case; tỉ lệ hai người cùng kết luận | đặt ngưỡng **trước** buổi đo (gợi ý ≤ 2 phút, ≥ 80%) | P4 | **[CẦN ĐO]** |
 
-Yêu cầu chi tiết (FR / NFR / BR / UC) ở `docs/REQUIREMENTS.md`. Kịch bản đo cho các ô **[CẦN ĐO]** ở `docs/reviews/2026-11-03_7_KHAI_NIEM_REVIEW.md` mục 4.
+Yêu cầu chi tiết (FR / NFR / BR / UC) ở `docs/YEU_CAU.md`. Kịch bản đo cho các ô **[CẦN ĐO]** ở `docs/tu_van/2026-11-03_7_KHAI_NIEM_REVIEW.md` mục 4.
 
 ## 4. Phạm vi
 | Mức | Nội dung | Trạng thái |
@@ -53,12 +53,12 @@ Yêu cầu chi tiết (FR / NFR / BR / UC) ở `docs/REQUIREMENTS.md`. Kịch b�
 ## 5. Hiện trạng
 - [x] Kiến trúc modular monolith (ADR-003), 11 ADR đã chốt
 - [x] Shop, Risk Engine v3, Risk Console, khiếu nại, khóa tự động, truy vết né khóa
-- [x] Thực nghiệm v1, v2, v3 trên tập dev / test (TEST_PLAN mục 3, 3c, 3d)
+- [x] Thực nghiệm v1, v2, v3 trên tập dev / test (KIEM_THU mục 3, 3c, 3d)
 - [x] Report tháng 10 (bản Word, chưa gửi)
-- [x] REQUIREMENTS.md bản 1 (2026-11-03)
+- [x] YEU_CAU.md bản 1 (2026-11-03)
 - [ ] Chốt bảng mục tiêu O1–O9 với GVHD
 - [x] Đo bổ sung 2026-11-03: v3.1 trên seed 5 (ADR-012), tải đồng thời, script đối chiếu giải thích / audit
-- [x] Đo O7 (TEST_PLAN 3h), sửa theo ADR-013 và đo lại trên seed 7 (3i): 46,7% → 66,7%, vẫn chưa đạt
+- [x] Đo O7 (KIEM_THU 3h), sửa theo ADR-013 và đo lại trên seed 7 (3i): 46,7% → 66,7%, vẫn chưa đạt
 - [x] ADR-015: khóa kẻ né khóa thao tác như bot ngay ở bước áp mã; test_v4 seed 10: 100% bị khóa (3l)
 - [ ] Còn đo: buổi đo thời gian xử lý case (O9)
 - [ ] Tra nguồn số liệu cho phần bối cảnh

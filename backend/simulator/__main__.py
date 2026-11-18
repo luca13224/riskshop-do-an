@@ -23,7 +23,13 @@ from simulator.personas import DATASETS
 from simulator.report import render_markdown
 from simulator.runner import run
 
-REPORT_DIR = BACKEND_DIR.parent / "docs" / "experiments"
+# Kết quả ghi vào docs/thuc_nghiem/mo_phong/v<phiên bản bộ dữ liệu>/ ("dev", "test" là v1; "dev_v3" là v3...)
+REPORT_DIR = BACKEND_DIR.parent / "docs" / "thuc_nghiem" / "mo_phong"
+
+
+def report_dir(dataset: str) -> Path:
+    version = dataset.split("_v", 1)[1] if "_v" in dataset else "1"
+    return REPORT_DIR / f"v{version}"
 
 
 def main() -> int:
@@ -63,7 +69,8 @@ def main() -> int:
                  no_trust=args.no_trust, trust_all_rules=args.trust_all_rules,
                  no_control=args.no_control)
 
-    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    out_dir = report_dir(args.dataset)
+    out_dir.mkdir(parents=True, exist_ok=True)
     stem = f"{args.dataset}_seed{args.seed}_scale{args.scale:g}"
     if args.no_control:
         stem += "_no-control"
@@ -73,13 +80,13 @@ def main() -> int:
         stem += "_no-trust"
     if args.trust_all_rules:
         stem += "_trust-all-rules"
-    (REPORT_DIR / f"{stem}.json").write_text(json.dumps(result, ensure_ascii=False, indent=2, default=str),
+    (out_dir / f"{stem}.json").write_text(json.dumps(result, ensure_ascii=False, indent=2, default=str),
                                              encoding="utf-8")
-    (REPORT_DIR / f"{stem}.md").write_text(render_markdown(result), encoding="utf-8")
+    (out_dir / f"{stem}.md").write_text(render_markdown(result), encoding="utf-8")
     m = result
     print(f"Precision {m['precision']['value']} · Recall {m['recall']['value']} · F1 {m['f1']} · "
           f"FPR {m['fpr']['value']} · Accuracy {m['accuracy']}")
-    print(f"Báo cáo: docs/experiments/{stem}.md")
+    print(f"Báo cáo: {out_dir.relative_to(BACKEND_DIR.parent).as_posix()}/{stem}.md")
     return 0
 
 

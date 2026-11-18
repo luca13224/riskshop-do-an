@@ -46,27 +46,31 @@ cd backend
 .venv/Scripts/python -m alembic -x target=sim upgrade head
 .venv/Scripts/python -m simulator --dataset dev --seed 1
 ```
-Báo cáo ghi vào `docs/experiments/`. Tập `test` chỉ chạy sau khi đã khóa luật (`--confirm-test`).
+Báo cáo ghi vào `docs/thuc_nghiem/mo_phong/v<phiên bản bộ dữ liệu>/` (mục lục: [docs/thuc_nghiem/README.md](docs/thuc_nghiem/README.md)). Tập `test` chỉ chạy sau khi đã khóa luật (`--confirm-test`).
 
 ## Cấu trúc thư mục
 | Thư mục | Nội dung |
 |---|---|
-| `backend/` | FastAPI: `app/core` (cấu hình, CSDL, lỗi), `app/modules` (các module nghiệp vụ), `migrations` (Alembic), `tests` |
-| `frontend/` | React + Vite + TypeScript + Tailwind + shadcn/ui |
-| `spike/risk-mock/` | Risk API giả từ spike, giữ làm mẫu hợp đồng tích hợp |
-| `docs/` | Tài liệu dự án |
+| `backend/` | FastAPI: `app/core` (cấu hình, CSDL, lỗi), `app/modules` (các module nghiệp vụ, Risk Engine), `migrations` (Alembic), `tests`, `worker`, `simulator` (bộ mô phỏng), `scripts` (đo tải, kiểm tra audit, demo, kiểm tra link) |
+| `frontend/` | React + Vite + TypeScript + Tailwind + shadcn/ui: `shop/` (cửa hàng), `console/` (Risk Console) |
+| `docs/` | Tài liệu dự án, kết quả thực nghiệm (`thuc_nghiem/`), bản tư vấn (`tu_van/`), sơ đồ (`so_do/`) |
+
+Vai trò của từng file code: [docs/BAN_DO_MA_NGUON.md](docs/BAN_DO_MA_NGUON.md).
 
 ## Tài liệu dự án
 | File | Nội dung |
 |---|---|
-| [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) | Mục tiêu, phạm vi, hiện trạng |
-| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | Yêu cầu nghiệp vụ và chức năng |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Kiến trúc và các thành phần |
-| [docs/DECISIONS.md](docs/DECISIONS.md) | Các quyết định kỹ thuật (ADR) |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | Kế hoạch, milestone |
-| [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | Kịch bản demo bảo vệ; phạm vi MVP suy ra từ đây |
-| [docs/RULES_V0.md](docs/RULES_V0.md) | Bộ luật rủi ro v0: đặc trưng, luật, ma trận quyết định |
+| [docs/TONG_QUAN.md](docs/TONG_QUAN.md) | Mục tiêu, phạm vi, hiện trạng |
+| [docs/YEU_CAU.md](docs/YEU_CAU.md) | Yêu cầu nghiệp vụ và chức năng |
+| [docs/KIEN_TRUC.md](docs/KIEN_TRUC.md) | Kiến trúc và các thành phần |
+| [docs/QUYET_DINH.md](docs/QUYET_DINH.md) | Các quyết định kỹ thuật (ADR) |
+| [docs/LO_TRINH.md](docs/LO_TRINH.md) | Kế hoạch, milestone |
+| [docs/KICH_BAN_DEMO.md](docs/KICH_BAN_DEMO.md) | Kịch bản demo bảo vệ; phạm vi MVP suy ra từ đây |
+| [docs/BO_LUAT_RUI_RO.md](docs/BO_LUAT_RUI_RO.md) | Bộ luật rủi ro R01–R18: đặc trưng, luật, ma trận quyết định |
 | [docs/ERD.md](docs/ERD.md) | Thiết kế CSDL: sơ đồ, index theo đặc trưng, ràng buộc, dữ liệu cá nhân |
-| [docs/TEST_PLAN.md](docs/TEST_PLAN.md) | Chiến lược và kịch bản kiểm thử |
-| [docs/PROGRESS_LOG.md](docs/PROGRESS_LOG.md) | Nhật ký tiến độ |
-| [docs/reviews/](docs/reviews/) | Các bản tư vấn, phản biện (chưa phải quyết định) |
+| [docs/KIEM_THU.md](docs/KIEM_THU.md) | Chiến lược và kịch bản kiểm thử |
+| [docs/NHAT_KY_TIEN_DO.md](docs/NHAT_KY_TIEN_DO.md) | Nhật ký tiến độ |
+| [docs/BAN_DO_MA_NGUON.md](docs/BAN_DO_MA_NGUON.md) | Bản đồ mã nguồn: file nào ở đâu, làm gì |
+| [docs/thuc_nghiem/](docs/thuc_nghiem/README.md) | Kết quả mô phỏng, đo tải, audit |
+| `docs/tu_van/` | Bản tư vấn, rà soát, thiết kế (chưa phải quyết định) |
+| [docs/tu_van/](docs/tu_van/) | Các bản tư vấn, phản biện (chưa phải quyết định) |

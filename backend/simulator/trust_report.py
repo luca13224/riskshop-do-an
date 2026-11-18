@@ -1,7 +1,7 @@
 """Phân bố điểm tin cậy theo nhóm persona của lần mô phỏng gần nhất (đọc CSDL mô phỏng, chỉ đọc).
 
 Chạy ngay sau `python -m simulator ...` (lần chạy sau sẽ xóa dữ liệu):
-    .venv/Scripts/python -m simulator.trust_report --out ../docs/experiments/<tên>.json
+    .venv/Scripts/python -m simulator.trust_report --out ../docs/thuc_nghiem/mo_phong/v<phiên bản>/<tên>.json
 
 Mỗi tài khoản lấy điểm tin cậy THẤP NHẤT qua mọi quyết định. "Bị hạn chế" = có ít nhất một quyết định khác ALLOW
 (cùng định nghĩa "bị gắn cờ" của bộ đánh giá).

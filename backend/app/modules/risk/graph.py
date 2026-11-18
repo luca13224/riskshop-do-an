@@ -2,7 +2,7 @@
 
 Ý tưởng: từng tín hiệu riêng lẻ (cùng thiết bị, cùng IP, cùng địa chỉ giao hàng) có thể yếu, nhưng
 nhìn cả MẠNG LƯỚI thì thấy được một cụm tài khoản cùng hội tụ về vài điểm chung. Ví dụ farm "phân tán"
-đổi thiết bị và IP cho từng tài khoản nhưng vẫn giao về một địa chỉ (docs/TEST_PLAN.md mục 3).
+đổi thiết bị và IP cho từng tài khoản nhưng vẫn giao về một địa chỉ (docs/KIEM_THU.md mục 3).
 
 Đồ thị hai loại nút: TÀI KHOẢN và ĐIỂM CHUNG (thiết bị, IP, địa chỉ). Cạnh = tài khoản đã dùng điểm chung đó.
 Từ một tài khoản gốc, đi tối đa 2 bước "tài khoản -> điểm chung -> tài khoản khác".

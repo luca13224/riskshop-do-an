@@ -1,4 +1,4 @@
-"""Tính đặc trưng F01–F18 (docs/RULES_V0.md, mục 2; F12–F13 thêm ở bộ luật v2, F14–F16 ở v3, F17–F18 sau v3).
+"""Tính đặc trưng F01–F18 (docs/BO_LUAT_RUI_RO.md, mục 2; F12–F13 thêm ở bộ luật v2, F14–F16 ở v3, F17–F18 sau v3).
 
 Đây là lớp "feature store" của Risk Engine: ĐỌC (chỉ đọc) các bảng của module khác bằng SQL thuần,
 không import code của cart/order, nên không tạo vòng phụ thuộc. Lý do: ADR-004.
@@ -140,7 +140,7 @@ def compute(db: Session, f: FeatureInput) -> dict:
 
     # F12, F13 (v2): nhìn "cụm" quanh địa chỉ trên đồ thị liên kết: nút địa chỉ -> các tài khoản MỚI -> các IP
     # họ đã dùng. Farm phân tán: nhiều tài khoản mới cùng nhà nhưng mỗi người một mạng (đa dạng IP cao);
-    # hộ gia đình thật thường chung Wi-Fi (đa dạng IP thấp). Xem docs/reviews/2026-10-31_RISK_V2_DESIGN.md.
+    # hộ gia đình thật thường chung Wi-Fi (đa dạng IP thấp). Xem docs/tu_van/2026-10-31_RISK_V2_DESIGN.md.
     if f.address_hash:
         t7 = now - timedelta(days=7)
         cluster = db.execute(

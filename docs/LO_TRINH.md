@@ -1,4 +1,4 @@
-# ROADMAP
+# LO_TRINH
 
 > Hạn nộp: khoảng cuối tháng 12/2026 (còn ~2 tháng tính từ 30/10/2026). **Mục tiêu nội bộ: hoàn thiện sản phẩm trước 30/11/2026**, tháng 12 để dự phòng và chỉnh báo cáo theo góp ý của GVHD.
 
@@ -12,20 +12,20 @@
 
 | Giai đoạn | Nội dung chính | Đầu ra | Thời gian |
 |---|---|---|---|
-| 0. Khởi động | Thu thập đề cương, yêu cầu GVHD, chốt phạm vi | PROJECT_OVERVIEW hoàn chỉnh | _?_ |
-| 1. Phân tích | Stakeholder, quy trình nghiệp vụ, yêu cầu, use case | REQUIREMENTS | _?_ |
-| 2. Thiết kế | Kiến trúc, ERD, API, rule, UI | ARCHITECTURE, ADR | _?_ |
+| 0. Khởi động | Thu thập đề cương, yêu cầu GVHD, chốt phạm vi | TONG_QUAN hoàn chỉnh | _?_ |
+| 1. Phân tích | Stakeholder, quy trình nghiệp vụ, yêu cầu, use case | YEU_CAU | _?_ |
+| 2. Thiết kế | Kiến trúc, ERD, API, rule, UI | KIEN_TRUC, ADR | _?_ |
 | 3. Dữ liệu mô phỏng | Kịch bản hành vi hợp lệ & lạm dụng | Bộ sinh dữ liệu | _?_ |
 | 4. Xây dựng MVP | Risk Engine, Admin Console, sàn mô phỏng | Mã nguồn chạy được | _?_ |
-| 5. Kiểm thử & đánh giá | Test case, đo precision/recall trên dữ liệu mô phỏng | TEST_PLAN, kết quả | _?_ |
+| 5. Kiểm thử & đánh giá | Test case, đo precision/recall trên dữ liệu mô phỏng | KIEM_THU, kết quả | _?_ |
 | 6. Báo cáo & bảo vệ | Viết báo cáo, slide, demo | Báo cáo, slide | _?_ |
 
 ## Việc tiếp theo
 - [x] Luca gửi đề cương
 - [x] Chốt hướng kiến trúc (ADR-003)
-- [x] Viết kịch bản demo v1 (`docs/DEMO_SCRIPT.md`)
+- [x] Viết kịch bản demo v1 (`docs/KICH_BAN_DEMO.md`)
 - [x] Luca duyệt kịch bản demo
-- [x] Danh sách luật v0 (`docs/RULES_V0.md`), chờ Luca duyệt
+- [x] Danh sách luật v0 (`docs/BO_LUAT_RUI_RO.md`), chờ Luca duyệt
 - [x] ERD v1 (`docs/ERD.md`), chờ Luca duyệt
 - [x] Tạo khung dự án `backend/`, `frontend/` và migration đầu tiên (baseline trống)
 - [x] Module auth: đăng ký, đăng nhập, đăng xuất, phiên trong CSDL, RBAC, ghi nhận thiết bị và IP

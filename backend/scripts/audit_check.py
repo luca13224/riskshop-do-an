@@ -2,7 +2,7 @@
 
     .venv/Scripts/python scripts/audit_check.py            # CSDL chính (dữ liệu demo)
     .venv/Scripts/python scripts/audit_check.py --sim      # CSDL mô phỏng (lần chạy simulator gần nhất)
-    ... --out ../docs/experiments/audit_check_<tên>.json
+    ... --out ../docs/thuc_nghiem/audit/audit_check_<tên>.json
 
 Mỗi mục kiểm tra trả về: tổng số bản ghi, số bản ghi vi phạm, và tối đa 5 id vi phạm để tra lại.
 Quyết định khác ALLOW không có luật khớp vẫn được coi là có lý do nếu lý do nằm ở chỗ khác đã lưu cùng quyết định:

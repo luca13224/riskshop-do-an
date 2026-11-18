@@ -1,8 +1,8 @@
-# REQUIREMENTS
+# YEU_CAU
 
-> Cập nhật: 2026-11-03 · Trạng thái: **Bản 1, viết lại từ sản phẩm đã xây** (DEMO_SCRIPT "Phạm vi MVP", ADR-003 → ADR-011, mã nguồn `backend/app/modules`).
-> Cột **Mức**: MVP / Recommended / Advanced. Cột **Kiểm chứng**: test tự động (`backend/tests`), thực nghiệm (`docs/TEST_PLAN.md`) hoặc demo (`docs/DEMO_SCRIPT.md`).
-> Mã mục tiêu O1–O9 ở `docs/PROJECT_OVERVIEW.md` mục 3. Mã vấn đề P1–P5 ở cùng file, mục 2.
+> Cập nhật: 2026-11-03 · Trạng thái: **Bản 1, viết lại từ sản phẩm đã xây** (KICH_BAN_DEMO "Phạm vi MVP", ADR-003 → ADR-011, mã nguồn `backend/app/modules`).
+> Cột **Mức**: MVP / Recommended / Advanced. Cột **Kiểm chứng**: test tự động (`backend/tests`), thực nghiệm (`docs/KIEM_THU.md`) hoặc demo (`docs/KICH_BAN_DEMO.md`).
+> Mã mục tiêu O1–O9 ở `docs/TONG_QUAN.md` mục 3. Mã vấn đề P1–P5 ở cùng file, mục 2.
 
 ## 1. Stakeholders và tác nhân
 | Stakeholder | Tác nhân trong hệ thống | Quan tâm chính |
@@ -62,15 +62,15 @@
 | Mã | Yêu cầu | Mức | Kiểm chứng |
 |---|---|---|---|
 | FR-40 | Simulator sinh persona hợp lệ, hard negative, lạm dụng đã biết và biến thể chưa biết; gọi đúng API của shop; nhãn thật lưu riêng, Risk Engine không đọc | MVP | `test_simulator.py` |
-| FR-41 | Tách tập dev / test, tái lập theo seed, ghi dấu vân tay bộ luật; báo cáo precision, recall, FPR kèm khoảng tin cậy Wilson | MVP | `docs/experiments/` |
-| FR-42 | Tắt từng luật (`--disable-rule`), tắt lớp Trust (`--no-trust`) hoặc chạy cách tính điểm v3 (`--trust-all-rules`) để so sánh trên cùng dân số | Recommended | TEST_PLAN 3c, 3d, 3e |
+| FR-41 | Tách tập dev / test, tái lập theo seed, ghi dấu vân tay bộ luật; báo cáo precision, recall, FPR kèm khoảng tin cậy Wilson | MVP | `docs/thuc_nghiem/` |
+| FR-42 | Tắt từng luật (`--disable-rule`), tắt lớp Trust (`--no-trust`) hoặc chạy cách tính điểm v3 (`--trust-all-rules`) để so sánh trên cùng dân số | Recommended | KIEM_THU 3c, 3d, 3e |
 | FR-43 | Chạy thử tham số mới của một luật trên quyết định 7–90 ngày qua trước khi lưu (chỉ đọc, mọi nhân viên): số lượt / tài khoản chặt hơn, nới hơn, trong đó bao nhiêu từng bị kết luận lạm dụng / không vi phạm, khách quen; kèm độ khớp phát lại | Recommended | `test_backtest.py` |
 
 ## 3. Non-functional Requirements
 | Mã | Nhóm | Yêu cầu | Mục tiêu liên quan | Trạng thái |
 |---|---|---|---|---|
-| NFR-01 | Hiệu năng | p95 thời gian chấm điểm ≤ 50 ms trên máy phát triển; đo thêm p95 request đặt hàng ở 1 / 10 / 50 người đồng thời | O5 | Sau ADR-017, 4 worker: 1 / 10 người p95 ≤ 11,3 / 31,5 ms (đạt); 50 người 87–117 ms (chưa đạt) (TEST_PLAN 3p) |
-| NFR-02 | Giải thích được | 100% quyết định khác ALLOW có luật đã khớp, giá trị thực tế, phiên bản luật | O6 | `scripts/audit_check.py`: 100% trên dữ liệu demo (TEST_PLAN 3g) |
+| NFR-01 | Hiệu năng | p95 thời gian chấm điểm ≤ 50 ms trên máy phát triển; đo thêm p95 request đặt hàng ở 1 / 10 / 50 người đồng thời | O5 | Sau ADR-017, 4 worker: 1 / 10 người p95 ≤ 11,3 / 31,5 ms (đạt); 50 người 87–117 ms (chưa đạt) (KIEM_THU 3p) |
+| NFR-02 | Giải thích được | 100% quyết định khác ALLOW có luật đã khớp, giá trị thực tế, phiên bản luật | O6 | `scripts/audit_check.py`: 100% trên dữ liệu demo (KIEM_THU 3g) |
 | NFR-03 | Truy vết | Mọi thao tác nhân viên làm đổi trạng thái (kết luận case, khiếu nại, sửa luật, khóa / gỡ khóa, xem liên hệ) đều ghi audit | O6 | Có test |
 | NFR-04 | Phân quyền | RBAC 4 vai trò; quyền tối thiểu: Analyst không sửa luật, không gỡ khóa, không kết luận khiếu nại | — | Có test |
 | NFR-05 | Bảo mật đăng nhập | Mật khẩu băm; phiên trong CSDL, cookie HttpOnly; giới hạn sai 5 lần / tài khoản, 20 lần / IP trong 15 phút | — | Có test |
@@ -79,7 +79,7 @@
 | NFR-08 | Khả năng phục hồi | Lỗi Risk Engine không làm hỏng checkout (FR-16) | — | Có test |
 | NFR-09 | Toàn vẹn dữ liệu | Giao dịch ACID cho đơn, tồn kho, lượt dùng voucher; ràng buộc UNIQUE chống trùng | — | Có test |
 | NFR-10 | Cấu hình được | Luật và ngưỡng quyết định là dữ liệu, sửa qua Console, không cần sửa code | — | Có test |
-| NFR-11 | Khả dụng | Shop dùng được ở 375 px và 1440 px, dùng được bằng bàn phím, có chế độ giảm chuyển động | — | Kiểm thủ công (TEST_PLAN 3b); 768 px chưa kiểm |
+| NFR-11 | Khả dụng | Shop dùng được ở 375 px và 1440 px, dùng được bằng bàn phím, có chế độ giảm chuyển động | — | Kiểm thủ công (KIEM_THU 3b); 768 px chưa kiểm |
 | NFR-12 | Khả năng kiểm thử | Toàn bộ test tự động chạy trên CSDL riêng, qua migration thật | — | 215 test qua (2026-11-06) |
 
 ## 4. Business Rules
@@ -88,13 +88,13 @@
 | BR-01 | NGUOIMOI: −50.000đ, đơn từ 200.000đ, chỉ tài khoản tạo trong 30 ngày gần nhất, cần điểm tin cậy ≥ 50 | `promotion/seed.py`, `promotion/service.py`, ADR-009 |
 | BR-02 | GIAM10: −10%, tối đa 100.000đ, đơn từ 500.000đ, cần điểm tin cậy ≥ 70 | `promotion/seed.py`, ADR-009 |
 | BR-03 | Bậc tin cậy: ≥ 70 bình thường · 50–69 theo dõi · 30–49 hạn chế · < 30 mở case khi đặt hàng · ≤ 0 tắt COD | ADR-009 |
-| BR-04 | REVIEW / BLOCK chỉ được ra khi có ít nhất một luật mạnh | RULES_V0 |
-| BR-05 | Risk Engine lỗi: voucher fail-open; COD từ 3.000.000đ fail-closed | RULES_V0 |
+| BR-04 | REVIEW / BLOCK chỉ được ra khi có ít nhất một luật mạnh | BO_LUAT_RUI_RO |
+| BR-05 | Risk Engine lỗi: voucher fail-open; COD từ 3.000.000đ fail-closed | BO_LUAT_RUI_RO |
 | BR-06 | Lần đặt hàng bị từ chối thứ 4 trong 24 giờ → khóa mua 24 giờ; tái phạm trong 30 ngày (lệnh trước chưa được gỡ) → khóa vô thời hạn | ADR-010 |
 | BR-07 | Tài khoản mới chung ≥ 2 điểm (thiết bị, SĐT nhận, địa chỉ) với tài khoản đang bị khóa vô thời hạn, hoặc chung 1 điểm và spam mã người mới → khóa thanh toán 30 ngày, tái phạm 60 ngày; chung 1 điểm không spam → chỉ trừ điểm và mở case | ADR-011 |
 | BR-08 | Khiếu nại trong 30 ngày; mỗi chính sách chỉ một khiếu nại đang mở; chấp nhận → miễn trừ chính sách đó 30 ngày, duyệt đơn đang giữ, gỡ khóa nếu quyết định có khóa | ADR-006, ADR-010 |
 | BR-09 | Kết luận case, khiếu nại, gỡ khóa, xem liên hệ đầy đủ: bắt buộc ghi lý do | ADR-006, ADR-010 |
-| BR-10 | Sửa luật tạo phiên bản mới; quyết định cũ giữ nguyên phiên bản đã dùng | RULES_V0 |
+| BR-10 | Sửa luật tạo phiên bản mới; quyết định cũ giữ nguyên phiên bản đã dùng | BO_LUAT_RUI_RO |
 
 ## 5. Use Cases
 | Mã | Tác nhân | Use case | FR |

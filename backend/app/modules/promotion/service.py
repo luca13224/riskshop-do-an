@@ -1,7 +1,7 @@
 """Kiểm tra điều kiện voucher và tính tiền giảm.
 
 Đây là luật NGHIỆP VỤ (voucher có tồn tại, còn hạn, đủ giá trị tối thiểu, đúng đối tượng...).
-Voucher sai nghiệp vụ bị từ chối ngay, không cần chấm điểm rủi ro (RULES_V0, mục 1).
+Voucher sai nghiệp vụ bị từ chối ngay, không cần chấm điểm rủi ro (BO_LUAT_RUI_RO, mục 1).
 """
 
 from dataclasses import dataclass

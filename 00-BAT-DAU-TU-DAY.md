@@ -11,10 +11,10 @@
 | Shop (khách hàng) | http://localhost:5173 |
 | Risk Console (nhân viên) | http://localhost:5173/console |
 | Tài liệu API (tự sinh) | http://localhost:8000/docs |
-| Kịch bản demo | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
-| Quyết định kỹ thuật (ADR) | [docs/DECISIONS.md](docs/DECISIONS.md) |
-| Bộ luật | [docs/RULES_V0.md](docs/RULES_V0.md) |
-| Kết quả thực nghiệm | [docs/TEST_PLAN.md](docs/TEST_PLAN.md) |
+| Kịch bản demo | [docs/KICH_BAN_DEMO.md](docs/KICH_BAN_DEMO.md) |
+| Quyết định kỹ thuật (ADR) | [docs/QUYET_DINH.md](docs/QUYET_DINH.md) |
+| Bộ luật | [docs/BO_LUAT_RUI_RO.md](docs/BO_LUAT_RUI_RO.md) |
+| Kết quả thực nghiệm | [docs/KIEM_THU.md](docs/KIEM_THU.md) |
 | Dàn ý báo cáo | [docs/BAO_CAO_DAN_Y.md](docs/BAO_CAO_DAN_Y.md) |
 
 ## 2. Tài khoản demo

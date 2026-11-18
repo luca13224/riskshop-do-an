@@ -1,6 +1,6 @@
 """Quản lý case: mở/gom case từ quyết định rủi ro (worker gọi), nhận xử lý, kết luận.
 
-Vòng đời (docs/REQUIREMENTS, ERD mục 5.6 bản tư vấn):
+Vòng đời (docs/YEU_CAU, ERD mục 5.6 bản tư vấn):
     OPEN --nhận xử lý--> IN_REVIEW --kết luận--> CONFIRMED_ABUSE | CLEARED
 Case COD gắn với một đơn đang chờ xác minh: kết luận "không vi phạm" thì duyệt đơn,
 "xác nhận lạm dụng" thì từ chối đơn và hoàn hàng về kho.

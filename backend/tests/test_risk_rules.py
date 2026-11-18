@@ -1,4 +1,4 @@
-"""Test các LOẠI luật và ma trận quyết định: hàm thuần, không cần CSDL (RULES_V0 mục 7)."""
+"""Test các LOẠI luật và ma trận quyết định: hàm thuần, không cần CSDL (BO_LUAT_RUI_RO mục 7)."""
 
 from app.modules.risk import rules
 from app.modules.risk.models import ALLOW, ALLOW_WITH_RESTRICTION, BLOCK, PAYMENT_OPTIONS, PLACE_ORDER, REVIEW
@@ -87,7 +87,7 @@ def test_most_severe_decision_wins():
     assert decision == REVIEW and actions["remove_voucher"] and actions["hold_order"]
 
 
-# R11 (bộ luật v2): đúng tham số trong seed, kiểm 5 trường hợp của RULES_V0 mục 7
+# R11 (bộ luật v2): đúng tham số trong seed, kiểm 5 trường hợp của BO_LUAT_RUI_RO mục 7
 def _r11():
     from app.modules.risk.seed import RULES
     return next(r for r in RULES if r["code"] == "ADDR_VOUCHER_RING")

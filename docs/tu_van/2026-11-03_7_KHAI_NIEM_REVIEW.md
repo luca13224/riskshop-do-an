@@ -1,7 +1,7 @@
 # Rà soát đồ án theo khung 7 khái niệm (Nhánh A — đang làm)
 
-> Ngày: 2026-11-03 · Tư vấn, **chưa phải quyết định** (quyết định chỉ ở `docs/DECISIONS.md`).
-> Nguồn: PROJECT_OVERVIEW, REQUIREMENTS, ROADMAP, TEST_PLAN, BAO_CAO_DAN_Y, DECISIONS (ADR-003 → ADR-011), INITIAL_REVIEW.
+> Ngày: 2026-11-03 · Tư vấn, **chưa phải quyết định** (quyết định chỉ ở `docs/QUYET_DINH.md`).
+> Nguồn: TONG_QUAN, YEU_CAU, LO_TRINH, KIEM_THU, BAO_CAO_DAN_Y, QUYET_DINH (ADR-003 → ADR-011), INITIAL_REVIEW.
 > Nhãn: **[ĐỀ XUẤT – cần xác nhận]** = Claude đề xuất, Luca chốt. **[CẦN ĐO]** = chưa có số.
 
 ## 0. Thông tin đầu vào (đã có trong repo, không cần dán lại)
@@ -16,13 +16,13 @@
 |---|---|---|---|
 | 1 | Context | ⚠️ | Đúng hướng (voucher tân thủ, COD phổ biến ở TMĐT VN) nhưng **chưa có số liệu thị trường nào có nguồn**. Hội đồng sẽ hỏi "bao nhiêu % đơn là COD?". |
 | 2 | Pain point | ⚠️ | Nêu được 3 nỗi đau (farm voucher, bùng COD, xử lý thủ công khó truy vết) nhưng chỉ định tính. Thiếu "hậu quả tính bằng tiền/thời gian" và thiếu nỗi đau thứ 4 mà sản phẩm thực ra đang giải: **chặn nhầm khách thật** và **né lệnh khóa bằng tài khoản mới**. |
-| 3 | Objective | ❌ | 4 mục tiêu trong PROJECT_OVERVIEW **không có con số**. Chỉ tiêu cũ trong đề cương (p95 ≤ 45 ms, FPR ≤ 5%) bị chính review 30/10 chỉ ra là định nghĩa chưa đúng, nhưng chưa có bản thay thế. Đây là chỗ hở lớn nhất. |
+| 3 | Objective | ❌ | 4 mục tiêu trong TONG_QUAN **không có con số**. Chỉ tiêu cũ trong đề cương (p95 ≤ 45 ms, FPR ≤ 5%) bị chính review 30/10 chỉ ra là định nghĩa chưa đúng, nhưng chưa có bản thay thế. Đây là chỗ hở lớn nhất. |
 | 4 | Constraint | ⚠️ | Ràng buộc có nhưng rải rác (không dữ liệu thật, 1 người, ~2 tháng, máy local, không thanh toán thật, Nghị định 13/2023 [XM]). Chưa gom thành mục và **chưa nối "vì ràng buộc này nên chọn rule-based / modular monolith"**. |
 | 5 | Method | ✅ | Điểm mạnh nhất: 3 điểm kiểm soát, đặc trưng F01–F17, luật R01–R16 có phiên bản, điểm theo chính sách + Trust Score, ma trận quyết định, case/khiếu nại/audit, 11 ADR giải thích lựa chọn. |
 | 6 | Evaluation | ⚠️ | Có số thật, tách dev/test, Wilson CI, có hard negative và biến thể chưa biết (tốt hơn mặt bằng chung). Thiếu: **so sánh với mục tiêu** (vì mục tiêu chưa có số), **đo tải đồng thời**, **đánh giá phía người dùng Console**, v3.1 chưa đo, R12/R14 chưa có số trong mô phỏng. |
 | 7 | Impact | ⚠️ | Có trang "tác động nghiệp vụ ước tính" trong Console nhưng chưa có đoạn văn Impact quay lại từng pain point; khả năng mở rộng (tách Risk Engine thành dịch vụ độc lập/plugin) mới chỉ là ý tưởng đã thảo luận. |
 
-Ngoài khung 7 bước: **`docs/REQUIREMENTS.md` vẫn trống** (FR/NFR/BR chưa đánh mã). Chương 2.2 báo cáo cần nó; ma trận truy vết cũng cần mã FR để trỏ về.
+Ngoài khung 7 bước: **`docs/YEU_CAU.md` vẫn trống** (FR/NFR/BR chưa đánh mã). Chương 2.2 báo cáo cần nó; ma trận truy vết cũng cần mã FR để trỏ về.
 
 ## 2. Kiểm tra chuỗi logic
 
@@ -95,17 +95,17 @@ Phạm vi: 2 nhóm chính sách (voucher tân thủ, COD), dữ liệu mô phỏ
 
 | Việc | Đầu ra | Ưu tiên | Ước tính |
 |---|---|---|---|
-| Viết lại Objective có số, chốt với GVHD | Bảng O1–O9 trong PROJECT_OVERVIEW + Mở đầu báo cáo | Cao | 2 giờ |
-| Điền REQUIREMENTS.md (FR/NFR/BR có mã) | Bảng yêu cầu cho Chương 2.2 | Cao | 4 giờ |
+| Viết lại Objective có số, chốt với GVHD | Bảng O1–O9 trong TONG_QUAN + Mở đầu báo cáo | Cao | 2 giờ |
+| Điền YEU_CAU.md (FR/NFR/BR có mã) | Bảng yêu cầu cho Chương 2.2 | Cao | 4 giờ |
 | Tra 2–3 nguồn số liệu thật cho Context | Đoạn văn "Lý do chọn đề tài" có trích dẫn | Cao | 3 giờ |
 | Bảng "Mục tiêu → Kết quả → Đạt/Chưa đạt" | Bảng trong Chương 4 | Cao | 1 giờ (sau E1, E2) |
-| Chạy E1 (v3.1) + E5 | Số mới trong TEST_PLAN | TB | 1 ngày |
+| Chạy E1 (v3.1) + E5 | Số mới trong KIEM_THU | TB | 1 ngày |
 | Chạy E2 (đo tải) | Bảng p50/p95/p99 theo mức tải | TB | 0,5 ngày |
 | Script E3 | Con số 100% (hoặc lỗi cần sửa) | TB | 2 giờ |
 | Buổi đo E4 | Thời gian trung vị, độ đồng thuận | Thấp | 0,5 ngày |
 | Gom Constraint thành mục riêng, nối với ADR | Mục 1.x hoặc Mở đầu | TB | 1 giờ |
 | Viết đoạn Impact theo P1–P5 | Kết luận báo cáo | TB | 1 giờ |
-| Cập nhật PROJECT_OVERVIEW (đang ghi trạng thái 30/10) | File cập nhật | Thấp | 15 phút |
+| Cập nhật TONG_QUAN (đang ghi trạng thái 30/10) | File cập nhật | Thấp | 15 phút |
 
 ## 6. Đầu ra cuối
 
@@ -132,7 +132,7 @@ Phạm vi: 2 nhóm chính sách (voucher tân thủ, COD), dữ liệu mô phỏ
 
 ### 6.3 Checklist tiếp theo
 - [ ] Chốt bảng O1–O9 (sửa ngưỡng nếu muốn) → hỏi GVHD
-- [ ] Điền REQUIREMENTS.md
+- [ ] Điền YEU_CAU.md
 - [ ] Tra nguồn số liệu Context
 - [ ] Chạy E1 + E5 trên seed mới
 - [ ] Chạy E2 đo tải

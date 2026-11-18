@@ -1,4 +1,4 @@
-"""Bộ luật v1 (theo docs/RULES_V0.md) và ngưỡng của ma trận quyết định.
+"""Bộ luật v1 (theo docs/BO_LUAT_RUI_RO.md) và ngưỡng của ma trận quyết định.
 
     python -m app.modules.risk.seed
 
@@ -69,7 +69,7 @@ RULES = [
          strength="medium", policies=[C], contexts=[PAYMENT_OPTIONS, PLACE_ORDER],
          params={"feature": "open_cod_orders", "tiers": [{"gte": 3, "points": 25}]},
          reason_template="{value} đơn COD đang chờ giao (ngưỡng {threshold})"),
-    # ---- Bộ luật v2 (2026-10-31, docs/reviews/2026-10-31_RISK_V2_DESIGN.md) ----
+    # ---- Bộ luật v2 (2026-10-31, docs/tu_van/2026-10-31_RISK_V2_DESIGN.md) ----
     # Farm phân tán: mỗi tài khoản một máy, một mạng, nhưng cùng giao về một nhà. Một mình mỗi tín hiệu thì yếu;
     # nhìn cả cụm quanh địa chỉ mới thấy: nhiều tài khoản mới, mỗi người vào mạng từ một nơi khác nhau.
     # Gia đình thật thường chung Wi-Fi nên độ phân tán mạng thấp. Độ mạnh "vừa": chỉ gỡ voucher, không giữ đơn.
@@ -82,7 +82,7 @@ RULES = [
          reason_template="{new_accounts_on_address_7d} tài khoản mới cùng địa chỉ giao hàng trong 7 ngày, "
                          "độ phân tán mạng {address_ip_diversity_7d}",
          note="Bộ luật v2: cụm tài khoản mới quanh một địa chỉ"),
-    # ---- Bộ luật v3 (2026-10-31): dấu hiệu mới cho điểm tin cậy tài khoản (docs/reviews/2026-10-31_TRUST_SCORE_DESIGN.md) ----
+    # ---- Bộ luật v3 (2026-10-31): dấu hiệu mới cho điểm tin cậy tài khoản (docs/tu_van/2026-10-31_TRUST_SCORE_DESIGN.md) ----
     # Chỉ khi một SĐT nhận hàng ở >= 2 địa chỉ: cả nhà chung SĐT ở một địa chỉ thì không trừ (tránh trừ trùng với R03)
     dict(code="PHONE_MULTI_ACCOUNTS", name="R12 · Một SĐT nhận hàng cho nhiều tài khoản ở nhiều địa chỉ", rule_type="compound",
          strength="medium", policies=[V], contexts=[PLACE_ORDER],
@@ -184,7 +184,7 @@ def seed_rules(db: Session) -> int:
         db.flush()
         version = RuleVersion(rule_id=rule.id, version=1, contexts=spec["contexts"], params=spec["params"],
                               reason_template=spec["reason_template"],
-                              change_note=spec.get("note", "Phiên bản đầu (RULES_V0)"))
+                              change_note=spec.get("note", "Phiên bản đầu (BO_LUAT_RUI_RO)"))
         db.add(version)
         db.flush()
         rule.active_version_id = version.id

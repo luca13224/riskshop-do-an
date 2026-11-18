@@ -1,4 +1,4 @@
-# ARCHITECTURE
+# KIEN_TRUC
 
 > Trạng thái: **Hướng kiến trúc đã chốt (ADR-003)**. Chi tiết module, ERD và API sẽ bổ sung trong giai đoạn thiết kế.
 
@@ -87,7 +87,7 @@ backend/simulator/                 persona, chạy mô phỏng qua API, đo kế
 
 ### 6.5 Giới hạn và lộ trình
 - Nhiều bên bán dùng chung: tách dữ liệu theo từng bên, khóa API.
-- Gọi qua mạng: độ trễ và lúc engine sập; đã có dự phòng fail-open/fail-closed (RULES_V0 mục 4).
+- Gọi qua mạng: độ trễ và lúc engine sập; đã có dự phòng fail-open/fail-closed (BO_LUAT_RUI_RO mục 4).
 - Quyền riêng tư: SĐT, IP phải băm trước khi gửi (IP đã băm sẵn).
 - Lộ trình: API có phiên bản + khóa (`/api/risk/v1/evaluate`) → API nhận sự kiện (`/api/risk/v1/events`) → plugin WooCommerce.
 

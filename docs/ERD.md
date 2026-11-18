@@ -2,7 +2,7 @@
 
 > Ngày: 2026-10-30 · Trạng thái: **Bản nháp v1, chờ Luca duyệt**
 > CSDL: MariaDB 10.11 (InnoDB, `utf8mb4_unicode_ci`). Quy ước theo skill `db-design`: tiền là `BIGINT` theo đồng, thời gian lưu UTC, mọi bảng có `created_at`.
-> Đầu vào: `DEMO_SCRIPT.md` (màn hình, vai trò), `RULES_V0.md` (đặc trưng F01–F11, luật, ma trận quyết định).
+> Đầu vào: `KICH_BAN_DEMO.md` (màn hình, vai trò), `BO_LUAT_RUI_RO.md` (đặc trưng F01–F11, luật, ma trận quyết định).
 > Mức: bảng không đánh dấu là **MVP**; bảng đánh dấu (R) là Recommended.
 
 ## 1. Tổng quan theo nhóm

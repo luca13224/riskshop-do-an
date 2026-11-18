@@ -2,7 +2,7 @@
 
 > Ngày: 2026-10-30 · Trạng thái: **v0.1: đã cài đặt (Luca đã duyệt v0)**
 > Nguồn gốc các con số: **lập luận chuyên gia ban đầu [ĐX]**, chưa hiệu chỉnh trên dữ liệu. Mọi ngưỡng, điểm và cửa sổ thời gian là **tham số cấu hình**, sẽ hiệu chỉnh trên tập dev rồi khóa trước khi chạy tập test (xem bản tư vấn, mục 6.3 và 7.3).
-> Phạm vi: 2 nhóm chính sách là voucher tân thủ và COD (theo `DEMO_SCRIPT.md`).
+> Phạm vi: 2 nhóm chính sách là voucher tân thủ và COD (theo `KICH_BAN_DEMO.md`).
 
 
 ## 0. Thay đổi khi cài đặt (v0.1, 2026-10-30)
@@ -15,12 +15,12 @@ Những điểm dưới đây được điều chỉnh khi lập trình Risk Eng
 
 ## 0b. Bộ luật v2 (2026-10-31, ADR-008)
 - Thêm **F12** `new_accounts_on_address_7d`, **F13** `address_ip_diversity_7d` và luật **R11** `ADDR_VOUCHER_RING` (mục 2, 3).
-- Thiết kế, hiệu chỉnh và lý do chọn ngưỡng: `docs/reviews/2026-10-31_RISK_V2_DESIGN.md`. Kết quả: `TEST_PLAN.md` mục 3c.
+- Thiết kế, hiệu chỉnh và lý do chọn ngưỡng: `docs/tu_van/2026-10-31_RISK_V2_DESIGN.md`. Kết quả: `KIEM_THU.md` mục 3c.
 
 ## 0c. Bộ luật v3 — Trust Score (2026-10-31, ADR-009)
 - Lớp 1: điểm tin cậy tài khoản = min(100, 100 − tổng điểm mọi luật khớp), bậc Bình thường / Theo dõi / Hạn chế / Xem xét / Rất thấp.
 - Thêm F14–F16 và R12–R15 (mục 2, 3). Mã TANTHU đổi thành **NGUOIMOI**, cấp sẵn vào túi voucher khi đăng ký.
-- Thiết kế: `docs/reviews/2026-10-31_TRUST_SCORE_DESIGN.md`. Kết quả: `TEST_PLAN.md` mục 3d.
+- Thiết kế: `docs/tu_van/2026-10-31_TRUST_SCORE_DESIGN.md`. Kết quả: `KIEM_THU.md` mục 3d.
 
 ## 0d. Khóa quyền mua hàng tự động (2026-10-31, ADR-010)
 - Đếm số lần **đặt hàng bị từ chối** (đơn không được tạo) trong 24 giờ, tính từ lần khóa gần nhất. Lần thứ 4 → tạm khóa mua 24 giờ; đã từng bị khóa tự động trong 30 ngày → khóa vô thời hạn. Lần kích hoạt là quyết định **BLOCK**, tự mở case, ghi audit.

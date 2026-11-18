@@ -14,19 +14,19 @@
 | Đề cương | Thực tế | Lý do (nguồn) |
 |---|---|---|
 | React + FastAPI + **MongoDB**, Redis, Celery | React + FastAPI + **MariaDB**, hàng đợi việc nền tự viết (`SKIP LOCKED`) | Dữ liệu đơn hàng, voucher cần giao dịch ACID và ràng buộc; giảm số hạ tầng phải vận hành (ADR-003, review mục 1.2) |
-| **Trust Score** một công thức T(u,t), trọng số 35/25/25/15, bán rã 14 ngày | Điểm **riêng theo từng chính sách** (voucher, COD), luật có phiên bản, ma trận quyết định; REVIEW/BLOCK bắt buộc có luật mạnh | Trọng số trong đề cương chưa có cơ sở; tách theo chính sách thì hành động hợp lý hơn (RULES_V0) |
+| **Trust Score** một công thức T(u,t), trọng số 35/25/25/15, bán rã 14 ngày | Điểm **riêng theo từng chính sách** (voucher, COD), luật có phiên bản, ma trận quyết định; REVIEW/BLOCK bắt buộc có luật mạnh | Trọng số trong đề cương chưa có cơ sở; tách theo chính sách thì hành động hợp lý hơn (BO_LUAT_RUI_RO) |
 | Luồng bất đồng bộ đẩy vùng 40–70 sang **AI/LLM** tóm tắt | Không dùng LLM; giải thích bằng luật đã khớp + giá trị thực tế | Quyết định phải đồng bộ tại checkout; giải thích bằng luật kiểm chứng được (review mục 1.2, tiêu chí 8) |
 | 4 loại lạm dụng (gồm cước vận chuyển) | 2 nhóm chính sách: **voucher tân thủ** và **COD** | Đủ sâu trong 2 tháng; demo và thực nghiệm làm được trọn vẹn |
-| p95 ≤ 45 ms | p95 chấm điểm ~8–12 ms **[đo]** (một tiến trình, tuần tự, không phải đo tải) | `docs/experiments/` |
+| p95 ≤ 45 ms | p95 chấm điểm ~8–12 ms **[đo]** (một tiến trình, tuần tự, không phải đo tải) | `docs/thuc_nghiem/` |
 | FPR ≤ 5% | Tổng: dev 4,7%, **test 7,9%**; khách thường 0%; hard negative 19,5% / 31,2% **[đo]** | Nói thẳng là chưa đạt ở tập test; khiếu nại (ADR-006) là biện pháp giảm thiệt hại |
-| Bộ 16 biến thể | Simulator 7–9 persona, có hard negative và 2 biến thể chưa biết, tách dev/test | TEST_PLAN mục 2 |
+| Bộ 16 biến thể | Simulator 7–9 persona, có hard negative và 2 biến thể chưa biết, tách dev/test | KIEM_THU mục 2 |
 
 ---
 
 ## Phần mở đầu (~4–5 trang)
 - Lời cam đoan, lời cảm ơn, mục lục, danh mục hình, bảng, từ viết tắt (theo mẫu Khoa).
 - **Lý do chọn đề tài:** voucher tân thủ và COD là công cụ hút khách phổ biến của TMĐT Việt Nam; lạm dụng (farm tài khoản, bùng hàng COD) gây thiệt hại; kiểm tra thủ công không theo kịp. **[XM]** số liệu thị trường TMĐT, tỷ lệ COD, tình trạng bùng hàng (chỉ dùng nguồn kiểm chứng được, ví dụ báo cáo của Bộ Công Thương / VECOM).
-- **Mục tiêu:** 4 mục tiêu trong PROJECT_OVERVIEW mục 3, viết lại khớp với sản phẩm cuối.
+- **Mục tiêu:** 4 mục tiêu trong TONG_QUAN mục 3, viết lại khớp với sản phẩm cuối.
 - **Đối tượng, phạm vi:** 2 nhóm chính sách; dữ liệu mô phỏng; không có thanh toán thật, không triển khai production.
 - **Phương pháp:** phân tích nghiệp vụ → thiết kế (kịch bản demo trước, ADR) → xây dựng theo module → kiểm thử tự động → thực nghiệm mô phỏng tách dev/test.
 - **Điều chỉnh so với đề cương:** bảng ở mục 0.
@@ -35,7 +35,7 @@
 ## Chương 1. Tổng quan và cơ sở lý thuyết (~12–15 trang)
 1.1. **Lạm dụng chính sách trong TMĐT:** định nghĩa; phân biệt với gian lận thanh toán; các dạng: farm tài khoản gom voucher, bùng hàng COD, gian lận hoàn tiền. **[XM]** tài liệu về promotion abuse / fraud trong TMĐT.
 1.2. **Các hướng tiếp cận phát hiện:** luật (rule-based), chấm điểm thống kê, học máy (có giám sát, phát hiện bất thường), phân tích đồ thị liên kết. So sánh ưu nhược: khả năng giải thích, cần nhãn, chi phí vận hành. **[XM]**
-1.3. **Hệ thống ra quyết định rủi ro thời gian thực:** điểm kiểm soát trong luồng mua hàng; fail-open / fail-closed; human-in-the-loop; case management; khiếu nại. **[XM]** + **[docs]** RULES_V0.
+1.3. **Hệ thống ra quyết định rủi ro thời gian thực:** điểm kiểm soát trong luồng mua hàng; fail-open / fail-closed; human-in-the-loop; case management; khiếu nại. **[XM]** + **[docs]** BO_LUAT_RUI_RO.
 1.4. **Nhận diện thiết bị và mạng:** ID thiết bị trong trình duyệt, IP, giới hạn và sai số (dùng chung Wi-Fi, NAT). **[XM]**
 1.5. **Đánh giá hệ thống phát hiện:** confusion matrix, precision, recall, FPR; khoảng tin cậy Wilson; vì sao phải tách tập tinh chỉnh và tập kiểm thử; hard negative. **[XM]** tài liệu thống kê cho Wilson interval.
 1.6. **Quyền riêng tư và an toàn:** privacy-by-design, tối thiểu hóa dữ liệu, che PII, băm IP bằng HMAC, audit log, phân quyền tối thiểu. **[XM]** Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân (kiểm tra số hiệu, nội dung trước khi trích).
@@ -43,18 +43,18 @@
 1.8. Tiểu kết.
 
 ## Chương 2. Phân tích và thiết kế hệ thống (~20–25 trang)
-2.1. **Bài toán nghiệp vụ và tác nhân:** khách hàng, Analyst, Risk Manager, Admin; quy trình mua hàng có kiểm soát rủi ro. **[docs]** DEMO_SCRIPT. Hình: quy trình nghiệp vụ tổng thể **[A] workflow**.
-2.2. **Yêu cầu chức năng và phi chức năng:** bảng yêu cầu. **[viết mới]** từ DEMO_SCRIPT "Phạm vi MVP" (REQUIREMENTS.md đang trống, cần bổ sung). Biểu đồ use case **[viết mới]** (Archify không vẽ use case UML: dùng PlantUML hoặc draw.io).
-2.3. **Kiến trúc tổng thể:** modular monolith; các module và ranh giới; worker; Risk đọc chỉ đọc qua feature store. **[docs]** ARCHITECTURE, ADR-003, ADR-004. Hình: kiến trúc **[A] architecture** (vẽ từ mã nguồn).
+2.1. **Bài toán nghiệp vụ và tác nhân:** khách hàng, Analyst, Risk Manager, Admin; quy trình mua hàng có kiểm soát rủi ro. **[docs]** KICH_BAN_DEMO. Hình: quy trình nghiệp vụ tổng thể **[A] workflow**.
+2.2. **Yêu cầu chức năng và phi chức năng:** bảng yêu cầu. **[viết mới]** từ KICH_BAN_DEMO "Phạm vi MVP" (YEU_CAU.md đang trống, cần bổ sung). Biểu đồ use case **[viết mới]** (Archify không vẽ use case UML: dùng PlantUML hoặc draw.io).
+2.3. **Kiến trúc tổng thể:** modular monolith; các module và ranh giới; worker; Risk đọc chỉ đọc qua feature store. **[docs]** KIEN_TRUC, ADR-003, ADR-004. Hình: kiến trúc **[A] architecture** (vẽ từ mã nguồn).
 2.4. **Thiết kế Risk Engine:**
   - 3 điểm kiểm soát: áp voucher, chọn thanh toán, đặt hàng. Hình: tuần tự đặt hàng có chấm điểm **[A] sequence**.
-  - Đặc trưng F01–F11, 10 luật R01–R10, 3 kiểu luật, điểm theo chính sách, ma trận quyết định, fail-open/closed. **[docs]** RULES_V0. Bảng luật + bảng ma trận.
+  - Đặc trưng F01–F11, 10 luật R01–R10, 3 kiểu luật, điểm theo chính sách, ma trận quyết định, fail-open/closed. **[docs]** BO_LUAT_RUI_RO. Bảng luật + bảng ma trận.
   - Phiên bản luật, quyết định và rule hit bất biến.
   - Danh sách miễn trừ sau khiếu nại (ADR-006).
 2.5. **Thiết kế xử lý case và khiếu nại:** vòng đời case **[A] lifecycle**; quy trình khiếu nại, bốn mắt **[A] workflow**.
 2.6. **Đồ thị liên kết tài khoản:** mô hình hai loại nút, duyệt 2 bước, cửa sổ 30 ngày, che PII. **[docs]** `risk/graph.py`.
 2.7. **Thiết kế cơ sở dữ liệu:** ERD theo nhóm, ràng buộc quan trọng (UNIQUE chống trùng, `open_key`), index theo đặc trưng, dữ liệu cá nhân. **[docs]** ERD.md. Hình: ERD **[A] erd**.
-2.8. **Thiết kế bảo mật và quyền riêng tư:** phiên đăng nhập, RBAC, che email, xem liên hệ có lý do + audit, giới hạn đăng nhập sai, băm IP. **[docs]** PROGRESS_LOG, ERD mục 6.
+2.8. **Thiết kế bảo mật và quyền riêng tư:** phiên đăng nhập, RBAC, che email, xem liên hệ có lý do + audit, giới hạn đăng nhập sai, băm IP. **[docs]** NHAT_KY_TIEN_DO, ERD mục 6.
 2.9. **Thiết kế giao diện:** nguyên tắc (ADR-005), Shop tông sáng, Console dark navy; bố cục dashboard và lý do. **[UI]**
 2.10. Tiểu kết.
 
@@ -68,15 +68,15 @@
 3.7. Tiểu kết.
 
 ## Chương 4. Thực nghiệm và đánh giá (~10–12 trang)
-4.1. **Thiết kế thực nghiệm:** persona, hard negative, biến thể chưa biết; tách dev/test; quy tắc chống học thuộc; đơn vị đo. **[docs]** TEST_PLAN mục 2.
-4.2. **Kết quả:** confusion matrix, precision/recall/FPR kèm KTC 95%, theo persona, theo nhóm. **[đo]** `docs/experiments/*.md`.
+4.1. **Thiết kế thực nghiệm:** persona, hard negative, biến thể chưa biết; tách dev/test; quy tắc chống học thuộc; đơn vị đo. **[docs]** KIEM_THU mục 2.
+4.2. **Kết quả:** confusion matrix, precision/recall/FPR kèm KTC 95%, theo persona, theo nhóm. **[đo]** `docs/thuc_nghiem/*.md`.
 4.3. **Độ trễ:** p50/p95/p99 chấm điểm và request; nói rõ là đo tuần tự một tiến trình. **[đo]**
 4.4. **Phân tích lỗi:**
   - Biến thể chưa biết lọt 0/33. Farm phân tán chỉ có 1 tín hiệu chung (địa chỉ), tổng 40 < 50; đồ thị liên kết nhìn ra được cụm.
   - Gia đình đông người bị gỡ voucher (FPR hard negative 31,2%); khách mới COD giá trị cao luôn bị giữ (đánh đổi có chủ đích).
   - Bùng hàng lịch sử ngắn lọt.
 4.5. **Đánh giá theo mục tiêu đề cương:** đạt / chưa đạt từng chỉ tiêu (bảng mục 0).
-4.6. **Kịch bản demo:** 10 cảnh (DEMO_SCRIPT) như minh chứng chức năng. **[UI]**
+4.6. **Kịch bản demo:** 10 cảnh (KICH_BAN_DEMO) như minh chứng chức năng. **[UI]**
 4.7. Tiểu kết.
 
 ## Kết luận và hướng phát triển (~2–3 trang)
@@ -88,7 +88,7 @@
   - **Đổi chính sách thay vì bắt người:** mã người mới giới hạn theo SĐT nhận hàng.
   - **Lan truyền rủi ro trên đồ thị:** khoảng cách tới tài khoản đã xác nhận lạm dụng; thêm nút SĐT nhận hàng.
   - **Học máy khi có nhãn thật:** hồi quy logistic (giải thích được) học điểm từ kết quả case; Isolation Forest chỉ để gợi ý cho analyst.
-  - **Tách Risk Engine thành dịch vụ dùng lại được:** API có phiên bản + khóa, API nhận sự kiện, plugin WooCommerce (ARCHITECTURE.md mục 6).
+  - **Tách Risk Engine thành dịch vụ dùng lại được:** API có phiên bản + khóa, API nhận sự kiện, plugin WooCommerce (KIEN_TRUC.md mục 6).
   - **Luồng tranh chấp có bằng chứng video** (ý tưởng của Luca): shop quay lúc đóng gói, shipper chụp lúc bàn giao, khách quay lúc mở hàng; bằng chứng gắn vào khiếu nại "hàng sai/thiếu". Băm SHA-256 và ghi dấu thời gian ở server lúc tải lên để phát hiện chỉnh sửa; chính sách ai được xem, lưu bao lâu, sự đồng ý của người bị quay. Web làm được (ô tải file `capture` hoặc `getUserMedia` + `MediaRecorder`, cần HTTPS) nhưng khó bắt buộc quay trực tiếp và chống chỉnh sửa như app. Cần module đổi trả/hoàn tiền trước; sau đó thêm luật "khiếu nại hàng sai nhiều lần" vào Trust Score. Không dùng thị giác máy tính để tự kiểm hàng.
   - Thẻ / tài khoản ngân hàng dùng chung (cần thanh toán thật); SSE cho Live Monitor; trợ lý tóm tắt case cho analyst (có người duyệt).
 
@@ -99,7 +99,7 @@
 - A. Danh sách luật R01–R10 đầy đủ (tham số, điểm, lý do).
 - B. Từ điển dữ liệu (ERD.md).
 - C. Danh sách API.
-- D. Kết quả thực nghiệm chi tiết (`docs/experiments/`).
+- D. Kết quả thực nghiệm chi tiết (`docs/thuc_nghiem/`).
 - E. Danh sách ADR-001 đến ADR-006.
 - F. Hướng dẫn cài đặt và chạy (README).
 
@@ -116,7 +116,7 @@
 | H2.6 | Quy trình khiếu nại | [A] workflow | Chưa |
 | H2.7 | ERD | [A] erd | Chưa |
 | H3.x | Ảnh chụp các màn hình Shop và Console | [UI] | Chưa |
-| H4.x | Biểu đồ kết quả thực nghiệm | Từ `docs/experiments/*.json` | Chưa |
+| H4.x | Biểu đồ kết quả thực nghiệm | Từ `docs/thuc_nghiem/*.json` | Chưa |
 
 ## Ước lượng
 Khoảng 60–75 trang chính văn. Thứ tự viết đề xuất: Chương 2 → 3 → 4 (đã có sẵn tư liệu) → Chương 1 (cần tìm tài liệu) → Mở đầu, Kết luận (viết sau cùng).

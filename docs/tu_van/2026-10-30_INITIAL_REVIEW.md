@@ -1,7 +1,7 @@
 # INITIAL PROJECT REVIEW — Đánh giá và tư vấn đồ án tốt nghiệp
 
 > Ngày: 2026-10-30 · Đầu vào: `DeCuong_DATN_HaTienLuc_2251162067_64HTTT4.docx` (bản tóm tắt đề cương, GVHD ThS. Tạ Chí Hiếu)
-> Tính chất: **tư vấn và phản biện — chưa phải quyết định đã chốt.** Mọi quyết định sẽ chỉ ghi vào `DECISIONS.md` sau khi Luca đồng ý.
+> Tính chất: **tư vấn và phản biện — chưa phải quyết định đã chốt.** Mọi quyết định sẽ chỉ ghi vào `QUYET_DINH.md` sau khi Luca đồng ý.
 
 **Quy ước nguồn trong tài liệu này**
 
@@ -845,14 +845,14 @@ Chọn ngưỡng vận hành theo **lợi ích ròng**, không theo F1, là mộ
 
 | Tuần | Giai đoạn và mục tiêu | Công việc chính | Kiến thức cần học | Deliverables | Điều kiện nghiệm thu | Rủi ro → phương án giảm phạm vi |
 |---|---|---|---|---|---|---|
-| **1–2** | **Chốt phạm vi và phân tích** | Chốt 2 nhóm chính sách; stakeholder; BPMN 3 quy trình; use case; FR/NFR; danh sách luật v0 kèm lý do | BPMN, use case, viết yêu cầu | REQUIREMENTS.md, BPMN, danh sách luật v0 | **Mốc GVHD #1:** GVHD đồng ý phạm vi | GVHD muốn giữ 4 loại → giữ 2 loại làm sâu, 2 loại làm mức luật cơ bản |
-| **3** | **Thiết kế** | ERD, kiến trúc module, sequence checkout, API chính, wireframe, thiết kế bộ mô phỏng (persona, tham số); dựng khung repo + Docker Compose chạy "hello world" | SQL nâng cao, SQLAlchemy, Docker Compose, Git | ARCHITECTURE.md, ERD, ADR 001–005 | `docker compose up` chạy được API + DB + web trống | Docker gặp khó → chạy trực tiếp local, Docker sau |
+| **1–2** | **Chốt phạm vi và phân tích** | Chốt 2 nhóm chính sách; stakeholder; BPMN 3 quy trình; use case; FR/NFR; danh sách luật v0 kèm lý do | BPMN, use case, viết yêu cầu | YEU_CAU.md, BPMN, danh sách luật v0 | **Mốc GVHD #1:** GVHD đồng ý phạm vi | GVHD muốn giữ 4 loại → giữ 2 loại làm sâu, 2 loại làm mức luật cơ bản |
+| **3** | **Thiết kế** | ERD, kiến trúc module, sequence checkout, API chính, wireframe, thiết kế bộ mô phỏng (persona, tham số); dựng khung repo + Docker Compose chạy "hello world" | SQL nâng cao, SQLAlchemy, Docker Compose, Git | KIEN_TRUC.md, ERD, ADR 001–005 | `docker compose up` chạy được API + DB + web trống | Docker gặp khó → chạy trực tiếp local, Docker sau |
 | **4–5** | **Luồng nghiệp vụ lõi** | Auth + RBAC; voucher + giới hạn lượt (có test race condition); giỏ hàng, checkout, idempotency; giả lập giao hàng; ghi event | FastAPI, transaction, pytest | API checkout đầu-cuối (chưa có risk) | Test integration checkout + voucher đều qua | Chậm → bỏ UI shop, dùng Swagger + script |
 | **6–7** | **Risk Engine v1** | Tính đặc trưng (SQL); 6–10 luật có tham số; scorecard; ma trận quyết định; lưu `risk_decision` + `rule_hit`; unit test từng luật | Thiết kế luật, pure function | Risk Engine tích hợp checkout và voucher | Mỗi luật có unit test; quyết định có lý do | Chậm → giảm còn 5–6 luật |
 | **8** | **Console v1 — MỐC MVP** | Hàng đợi case, chi tiết bằng chứng, resolve/override có lý do, audit log; UI shop tối giản | React, Ant Design, TanStack Query | **MVP chạy đầu-cuối** | **Mốc GVHD #2:** demo MVP: mua hàng → bị hạn chế → case → analyst xử lý | **Bắt buộc đạt.** Chậm → Console chỉ còn 2 màn hình |
 | **9** | **Simulator v1** | Sinh persona, dòng thời gian, gọi API; tập dev | Phân phối xác suất cơ bản, Python | Bộ sinh dữ liệu + tập dev | Chạy lặp lại được với seed | |
 | **10** | **Hiệu chỉnh trên dev, khóa luật** | Quét ngưỡng, phân tích độ nhạy; **khóa phiên bản luật**; đo latency | Locust/k6, thống kê mô tả | Luật vX đã khóa, đường đánh đổi | Ghi ADR khóa luật | **Đóng băng tính năng (feature freeze) cuối tuần 10** |
-| **11** | **Thực nghiệm trên tập test** | Chạy test một lần; confusion matrix, FPR có khoảng tin cậy, chỉ số nghiệp vụ; script đối chiếu audit | Khoảng tin cậy, cách trình bày kết quả | TEST_PLAN.md có kết quả thật | **Mốc GVHD #3:** trình bày kết quả | Kết quả xấu → **báo cáo trung thực** + phân tích nguyên nhân; không chỉnh luật trên test |
+| **11** | **Thực nghiệm trên tập test** | Chạy test một lần; confusion matrix, FPR có khoảng tin cậy, chỉ số nghiệp vụ; script đối chiếu audit | Khoảng tin cậy, cách trình bày kết quả | KIEM_THU.md có kết quả thật | **Mốc GVHD #3:** trình bày kết quả | Kết quả xấu → **báo cáo trung thực** + phân tích nguyên nhân; không chỉnh luật trên test |
 | **12** | **Recommended / Optional** (chỉ nếu MVP ổn) | Một trong: hiệu quả luật trên Console; khiếu nại; so sánh Redis; LLM tóm tắt case có đánh giá | Tùy lựa chọn | Một tính năng nâng cao có đánh giá | | Không kịp → bỏ, ghi vào hướng phát triển |
 | **13** | **Ổn định và tài liệu** | Sửa lỗi, README chạy một lệnh, seed demo, quay video demo | | Bản demo ổn định, video | Người khác chạy được theo README | **Đóng băng code (code freeze) cuối tuần 13** |
 | **14–15** | **Báo cáo và bảo vệ** | Hoàn thiện báo cáo (đã viết dần từ tuần 3), slide, tập dượt hỏi đáp | | Báo cáo, slide | **Mốc GVHD #4:** duyệt báo cáo | |
@@ -877,7 +877,7 @@ Chọn ngưỡng vận hành theo **lợi ích ròng**, không theo F1, là mộ
 | Công cụ | Dùng cho |
 |---|---|
 | **Claude Code (ứng dụng desktop này, gắn với thư mục `D:\do_an`)** | Đọc và sửa file trong repo, chạy test, Git, cập nhật tài liệu `docs/`. **Đây nên là nơi làm việc chính**, vì repo là nguồn sự thật |
-| **Claude.ai Chat + Projects** | Hỏi đáp khái niệm, học lý thuyết, luyện trả lời hội đồng khi không cần đụng vào code. Tải lên Project Knowledge: đề cương, `PROJECT_OVERVIEW.md`, `DECISIONS.md` (cập nhật lại khi chúng thay đổi) |
+| **Claude.ai Chat + Projects** | Hỏi đáp khái niệm, học lý thuyết, luyện trả lời hội đồng khi không cần đụng vào code. Tải lên Project Knowledge: đề cương, `TONG_QUAN.md`, `QUYET_DINH.md` (cập nhật lại khi chúng thay đổi) |
 | **VS Code** (máy đã cài) | Tự đọc, tự viết code, debug |
 | **GitHub** | Lưu trữ từ xa, CI, chia sẻ với GVHD |
 
@@ -885,9 +885,9 @@ Chọn ngưỡng vận hành theo **lợi ích ròng**, không theo F1, là mộ
 
 - **Mình không nhớ được các cuộc trò chuyện khác.** Thứ duy nhất bền vững là **file trong repo** và **bộ nhớ ngắn** mình đã lưu.
 - `CLAUDE.md` ở gốc repo được Claude Code **tự đọc mỗi phiên**. Mình đã tạo file này với các nguyên tắc cố vấn của Luca.
-- Cuối mỗi phiên quan trọng: cập nhật `PROGRESS_LOG.md` rồi commit. Mình đã tạo skill dự án `session-wrap` cho việc này.
-- Quyết định lớn ghi vào `DECISIONS.md` bằng skill dự án `adr`.
-- Khi mở cuộc trò chuyện mới: "Đọc CLAUDE.md, PROJECT_OVERVIEW.md, PROGRESS_LOG.md rồi tiếp tục từ bước tiếp theo".
+- Cuối mỗi phiên quan trọng: cập nhật `NHAT_KY_TIEN_DO.md` rồi commit. Mình đã tạo skill dự án `session-wrap` cho việc này.
+- Quyết định lớn ghi vào `QUYET_DINH.md` bằng skill dự án `adr`.
+- Khi mở cuộc trò chuyện mới: "Đọc CLAUDE.md, TONG_QUAN.md, NHAT_KY_TIEN_DO.md rồi tiếp tục từ bước tiếp theo".
 
 ## 10.3. Skills và plugin thực sự hữu ích
 

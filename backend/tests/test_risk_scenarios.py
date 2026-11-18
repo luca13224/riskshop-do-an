@@ -1,4 +1,4 @@
-"""Tái hiện các nhân vật trong kịch bản demo (DEMO_SCRIPT.md, RULES_V0.md mục 5) qua API thật."""
+"""Tái hiện các nhân vật trong kịch bản demo (KICH_BAN_DEMO.md, BO_LUAT_RUI_RO.md mục 5) qua API thật."""
 
 import uuid
 from datetime import timedelta

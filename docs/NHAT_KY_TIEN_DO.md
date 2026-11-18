@@ -19,7 +19,7 @@ Ghi mới nhất ở trên cùng.
 ## 2026-10-31 — Dữ liệu demo nhiều ngày, kịch bản demo, CI
 **Đã hoàn thành**
 - `python -m simulator.history --days 14 --yes`: sinh lịch sử demo CỘNG DỒN sau demo reset. Mỗi ngày là một đợt khách theo persona của tập dev, thao tác qua API thật; sau đó dời thời gian theo từng khách về đúng ngày và giờ trong quá khứ (trọng số giờ: trưa và tối đông hơn). Đơn ngày cũ được giả lập giao hàng (kẻ bùng hàng thì giao thất bại). Chỉ chạy khi DEMO_MODE=true. Test `test_demo_history.py` chạy trên CSDL test.
-- DEMO_SCRIPT thêm cảnh 0b (Dashboard) và 5d (Khiếu nại), tổng khoảng 11:45.
+- KICH_BAN_DEMO thêm cảnh 0b (Dashboard) và 5d (Khiếu nại), tổng khoảng 11:45.
 - CI GitHub Actions (`.github/workflows/ci.yml`): backend chạy toàn bộ pytest trên MariaDB 10.11; frontend chạy lint và build.
 - Tổng 152 test qua.
 
@@ -46,7 +46,7 @@ Ghi mới nhất ở trên cùng.
 - Tìm ảnh trên Unsplash (loại ảnh Unsplash+ trả phí), làm trang xem trước để Luca duyệt; Luca chọn theo đề xuất.
 - Tải 30 ảnh (3,6 MB), cắt và nén WebP: sản phẩm 800×800, màn ảnh danh mục 600×900; mỗi ảnh 6–118 KB, tổng khoảng 1,1 MB trong `frontend/public`.
 - Seed gán `image_url` cho 24 sản phẩm. Ảnh hiển thị phủ kín ô (`object-cover`). Màn ảnh rạp phim dùng ảnh nền phủ lớp tối dần để chữ dễ đọc.
-- Sổ nguồn ảnh (tác giả, URL, giấy phép) ở `docs/assets/IMAGE_BRIEF.md` mục 4.
+- Sổ nguồn ảnh (tác giả, URL, giấy phép) ở `docs/hinh_anh/MO_TA_HINH_ANH.md` mục 4.
 
 **Lưu ý**
 - Vài ảnh có logo thương hiệu thật (điện thoại, webcam). Sản phẩm trong shop là tên tự đặt; ảnh chỉ để minh họa và đã ghi rõ trong sổ nguồn.
@@ -70,7 +70,7 @@ Ghi mới nhất ở trên cùng.
 
 **Còn mở**
 - Trên điện thoại, header của shop chưa có mục "Khiếu nại" (vẫn vào được từ giỏ hàng, thanh toán, chi tiết đơn).
-- Đưa khiếu nại vào DEMO_SCRIPT (gợi ý: thêm vào cảnh 5c hoặc một cảnh riêng).
+- Đưa khiếu nại vào KICH_BAN_DEMO (gợi ý: thêm vào cảnh 5c hoặc một cảnh riêng).
 
 ## 2026-10-31 — Tuần 3 (phần 1): Dashboard tổng quan của Risk Console
 **Đã hoàn thành**
@@ -133,7 +133,7 @@ Ghi mới nhất ở trên cùng.
 - Lưới CSS có một cột `auto` sẽ bị phần tử cuộn ngang kéo giãn. Phải dùng `minmax(0, 1fr)`.
 
 **Còn thiếu**
-- Ảnh sản phẩm thật (chờ chọn nguồn, xem `docs/assets/IMAGE_BRIEF.md`). Hiện đang dùng icon theo danh mục trên nền xám.
+- Ảnh sản phẩm thật (chờ chọn nguồn, xem `docs/hinh_anh/MO_TA_HINH_ANH.md`). Hiện đang dùng icon theo danh mục trên nền xám.
 - Mô tả dài cho từng sản phẩm (phần "Mô tả" đang lặp lại mô tả ngắn).
 
 ## 2026-10-30 — Giới hạn đăng nhập sai và che dữ liệu cá nhân
@@ -152,9 +152,9 @@ Ghi mới nhất ở trên cùng.
 ## 2026-10-30 — Simulator và thực nghiệm
 **Đã hoàn thành**
 - `backend/simulator`: persona hợp lệ / hard negative / lạm dụng, gọi đúng API qua `TestClient`, nhãn thật trong `sim_labels` (Risk không đọc). CSDL riêng `riskshop_sim`.
-- Báo cáo Markdown + JSON trong `docs/experiments/`: confusion, precision/recall/FPR kèm KTC Wilson 95%, theo persona, theo nhóm, tác động nghiệp vụ, độ trễ.
+- Báo cáo Markdown + JSON trong `docs/thuc_nghiem/`: confusion, precision/recall/FPR kèm KTC Wilson 95%, theo persona, theo nhóm, tác động nghiệp vụ, độ trễ.
 - Sửa lỗi trong chính bộ mô phỏng: lambda trong vòng lặp đọc nhầm địa chỉ của nhóm cuối (late binding) làm gia đình bị gắn cờ oan 9/25 → sau sửa 0/25.
-- Chạy tập test một lần với bộ luật v1 đã khóa. Kết quả và cách đọc: xem TEST_PLAN mục 3.
+- Chạy tập test một lần với bộ luật v1 đã khóa. Kết quả và cách đọc: xem KIEM_THU mục 3.
 - `test_simulator.py`; tổng 126 test qua.
 
 **Phát hiện quan trọng**
@@ -186,7 +186,7 @@ Ghi mới nhất ở trên cùng.
 - Backend `risk/rules_admin.py`: danh sách luật kèm phiên bản đang dùng và số lần khớp 7 ngày; lịch sử phiên bản; tạo phiên bản mới khi sửa (chỉ Risk Manager/Admin, Analyst bị 403). Chỉ cho sửa con số và bật/tắt: đổi đặc trưng, phép so sánh, độ mạnh hay số bậc đều bị từ chối; điểm trong khoảng -100..100, ngưỡng không âm; bắt buộc lý do; ghi audit log. Phiên bản mới có hiệu lực ngay ở lần chấm điểm kế tiếp.
 - Giao diện: luật hiển thị thành câu ("Khi số tài khoản mới trên cùng thiết bị ≥ 3 thì cộng 35 điểm"), ô số chỉ hiện khi sửa, lịch sử phiên bản.
 - 118 test qua. Đã diễn lại cảnh 6 trên trình duyệt: R02 v2 (≥2: +40), rồi khôi phục bằng v3 (≥3: +35) để các kịch bản Attack Lab giữ kỳ vọng ban đầu.
-- Sửa DEMO_SCRIPT cảnh 6: phải đổi cả điểm (≥2 tài khoản: +40) thì tài khoản thứ 2 mới bị gỡ voucher (10 + 40 = 50); chỉ hạ ngưỡng thì mới được 45 điểm, chưa đủ.
+- Sửa KICH_BAN_DEMO cảnh 6: phải đổi cả điểm (≥2 tài khoản: +40) thì tài khoản thứ 2 mới bị gỡ voucher (10 + 40 = 50); chỉ hạ ngưỡng thì mới được 45 điểm, chưa đủ.
 
 **Còn mở**
 - Ngưỡng của ma trận quyết định (decision_policies) chưa có giao diện sửa (hiện chỉ sửa qua seed, có phiên bản).
@@ -217,7 +217,7 @@ Ghi mới nhất ở trên cùng.
 - Sửa lỗi logic: payment_options dùng cùng luật/ngưỡng với place_order (R06, R08 lên v2; policy payment_options v2).
 
 - Đã kiểm tra trên trình duyệt: tài khoản mới, giỏ 3,78 triệu → COD bị khóa, tự chọn chuyển khoản; đơn 2,84 triệu của khách đã xem sản phẩm → cho qua (0 điểm, đúng luật).
-- ADR-004 (feature store chỉ đọc), RULES_V0 lên v0.1.
+- ADR-004 (feature store chỉ đọc), BO_LUAT_RUI_RO lên v0.1.
 
 **Việc tiếp theo**
 - Case Queue / Case Detail (worker mở case khi `open_case`), Rules UI, Attack Lab, Audit Log.
@@ -307,7 +307,7 @@ Ghi mới nhất ở trên cùng.
 
 ## 2026-10-30 — Phản biện đề cương ban đầu
 **Đã hoàn thành**
-- Đọc đề cương `DeCuong_DATN_HaTienLuc_2251162067_64HTTT4.docx`; viết bản tư vấn 11 phần tại `docs/reviews/2026-10-30_INITIAL_REVIEW.md`.
+- Đọc đề cương `DeCuong_DATN_HaTienLuc_2251162067_64HTTT4.docx`; viết bản tư vấn 11 phần tại `docs/tu_van/2026-10-30_INITIAL_REVIEW.md`.
 - Tạo `CLAUDE.md` (nguyên tắc cố vấn, Claude Code tự đọc mỗi phiên) và 2 skill dự án: `adr`, `session-wrap` trong `.claude/skills/`.
 
 **Quyết định đã chốt**

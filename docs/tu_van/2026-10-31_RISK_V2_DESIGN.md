@@ -5,7 +5,7 @@
 
 ## 1. Bài toán
 
-Kết quả v1 trên tập test (TEST_PLAN mục 3): biến thể **farm phân tán** lọt 100%.
+Kết quả v1 trên tập test (KIEM_THU mục 3): biến thể **farm phân tán** lọt 100%.
 Farm này: mỗi tài khoản một thiết bị riêng, một IP riêng, địa chỉ viết khác nhau nhưng chuẩn hóa về **cùng một địa chỉ**.
 Tài khoản thứ n chỉ khớp R01 (+10) và R03 (+30 khi ≥ 5 tài khoản/địa chỉ) = 40 < 50, nên voucher không bị gỡ.
 
@@ -68,9 +68,9 @@ Một hộ gia đình thật thì ngược lại: chung địa chỉ **và** th�
 |---|---|
 | Duyệt thiết kế, chốt con số R11 | Luca |
 | Viết khai báo R11 trong `risk/seed.py` (dữ liệu luật, ~8 dòng) | **Luca**, Claude review |
-| Tính F12, F13 trong `features.py` + unit test 5 trường hợp (mục 7 RULES_V0) | Claude, Luca đọc và giải thích lại |
+| Tính F12, F13 trong `features.py` + unit test 5 trường hợp (mục 7 BO_LUAT_RUI_RO) | Claude, Luca đọc và giải thích lại |
 | Persona mới cho dev/test, chạy dev, khóa luật, chạy test seed 3, viết kết quả | Claude, Luca duyệt số liệu |
-| Cập nhật RULES_V0 → v2, ADR-008, TEST_PLAN | Claude |
+| Cập nhật BO_LUAT_RUI_RO → v2, ADR-008, KIEM_THU | Claude |
 
 ## 8. Không làm (và lý do)
 

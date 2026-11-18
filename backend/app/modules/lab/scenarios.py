@@ -1,4 +1,4 @@
-"""Các kịch bản của Attack Lab (DEMO_SCRIPT.md, cảnh 2, 4, 5).
+"""Các kịch bản của Attack Lab (KICH_BAN_DEMO.md, cảnh 2, 4, 5).
 
 Mỗi kịch bản là một hàm nhận Runner, gọi API thật qua HTTP như một khách hàng (hoặc bot),
 ghi từng bước kèm KỲ VỌNG và KẾT QUẢ THỰC TẾ, cuối cùng trả về câu tóm tắt.

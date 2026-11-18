@@ -7,7 +7,7 @@ Không chạy cùng lúc với simulator.
        Xóa CSDL mô phỏng, nạp lại sản phẩm / voucher / luật (giống bước chuẩn bị của simulator).
     2) Mở cửa sổ khác, chạy backend trỏ vào CSDL mô phỏng (cổng 8001), ví dụ trong Git Bash:
        DATABASE_URL="$(grep ^SIM_DATABASE_URL .env | cut -d= -f2-)" .venv/Scripts/python -m uvicorn app.main:app --port 8001
-       Thêm --workers 4 để đo cấu hình nhiều tiến trình (TEST_PLAN 3o: một tiến trình bị nghẽn khóa GIL dưới tải),
+       Thêm --workers 4 để đo cấu hình nhiều tiến trình (KIEM_THU 3o: một tiến trình bị nghẽn khóa GIL dưới tải),
        khi đó chạy bước 3 kèm --server "4 worker uvicorn, MariaDB XAMPP cùng máy".
     3) .venv/Scripts/python scripts/load_test.py run --levels 1 10 50 --requests 200 --rounds 3
        Thêm --mode welcome để đo luồng khách mới dùng mã người mới (có tính cụm liên kết F18, ADR-016).

@@ -1,4 +1,4 @@
-# DECISIONS (Architecture Decision Records)
+# QUYET_DINH (Architecture Decision Records)
 
 Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quyết định cũ; nếu thay đổi thì tạo ADR mới và đánh dấu ADR cũ là "Superseded".
 
@@ -76,7 +76,7 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 ## ADR-005: Hướng giao diện "rạp chiếu phim" và gian hàng chỉ bán đồ công nghệ
 - Ngày: 2026-10-30
 - Trạng thái: Accepted
-- Bối cảnh: Shop hiện dùng nền tối, ảnh sản phẩm chỉ là ô gradient kèm icon, danh mục lẫn lộn (thời trang, gia dụng, thể thao...). Luca muốn demo ấn tượng. Có ba nguồn tham khảo (xem `docs/reviews/2026-10-30_UI_DIRECTION.md`): prompt landing "Vertex", video "10K websites" (trang kể chuyện theo nhịp cuộn), mẫu WooCommerce "Neotek".
+- Bối cảnh: Shop hiện dùng nền tối, ảnh sản phẩm chỉ là ô gradient kèm icon, danh mục lẫn lộn (thời trang, gia dụng, thể thao...). Luca muốn demo ấn tượng. Có ba nguồn tham khảo (xem `docs/tu_van/2026-10-30_UI_DIRECTION.md`): prompt landing "Vertex", video "10K websites" (trang kể chuyện theo nhịp cuộn), mẫu WooCommerce "Neotek".
 - Các phương án:
   - (1) Giữ nguyên, chỉ làm đẹp từng chi tiết.
   - (2) Dùng nguyên theme hoặc mẫu có sẵn (Neotek / WordPress): trái với ADR-003.
@@ -86,7 +86,7 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
   - Thẻ sản phẩm kiểu Neotek: ảnh tách nền đặt trên nền xám nhạt, rê chuột thì hiện nút thao tác, nút giá nằm trong vết khuyết bo góc ngược.
   - Màu nhấn: cyan điện cho vùng tối (banner, Risk Console), vàng cho nút mua trên vùng sáng. Không thêm màu nhấn nào khác.
   - Gian hàng chỉ bán đồ công nghệ, 6 danh mục, 24 sản phẩm.
-  - Ảnh và video được phép tạo bằng AI hoặc lấy từ nền tảng ảnh có giấy phép. Phải đạt chuẩn chất lượng trong `docs/assets/IMAGE_BRIEF.md` và ghi nguồn vào sổ nguồn ảnh.
+  - Ảnh và video được phép tạo bằng AI hoặc lấy từ nền tảng ảnh có giấy phép. Phải đạt chuẩn chất lượng trong `docs/hinh_anh/MO_TA_HINH_ANH.md` và ghi nguồn vào sổ nguồn ảnh.
 - Lý do: banner tạo dấu ấn khi demo; phần cửa hàng sáng giúp khách dễ đọc giá và tạo cảm giác tin cậy; đồ công nghệ giá cao làm kịch bản "COD giá trị cao" (cảnh 5b) tự nhiên hơn.
 - Hệ quả / rủi ro:
   - Không làm biến thể sản phẩm (màu, dung lượng) có tồn kho riêng ở MVP, vì phải sửa giỏ hàng, đơn hàng và khóa tồn kho.
@@ -99,7 +99,7 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 ## ADR-006: Khiếu nại và danh sách miễn trừ
 - Ngày: 2026-10-31
 - Trạng thái: Accepted
-- Bối cảnh: thực nghiệm (TEST_PLAN mục 3) cho thấy 20–31% khách "hợp lệ nhưng dễ nhầm" bị hạn chế, ví dụ gia đình dùng chung máy hoặc khách mới đặt COD giá trị cao. Hệ thống cần một đường để khách bị chặn nhầm lên tiếng, và để quyết định của nhân viên được ghi nhận lại.
+- Bối cảnh: thực nghiệm (KIEM_THU mục 3) cho thấy 20–31% khách "hợp lệ nhưng dễ nhầm" bị hạn chế, ví dụ gia đình dùng chung máy hoặc khách mới đặt COD giá trị cao. Hệ thống cần một đường để khách bị chặn nhầm lên tiếng, và để quyết định của nhân viên được ghi nhận lại.
 - Các phương án:
   - (1) Không có khiếu nại, khách tự liên hệ CSKH bên ngoài: không lưu vết, không đo được.
   - (2) Khiếu nại xong thì tắt luật cho khách đó: mất khả năng giải thích, khó kiểm tra lại.
@@ -163,7 +163,7 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
   - Đổi mã TANTHU → NGUOIMOI, túi voucher (`user_vouchers`), cấp NGUOIMOI khi đăng ký.
 - Lý do: một con số dễ hiểu cho Console, phản ứng theo bậc thay vì cho/chặn, bám đề cương, thêm góc nhìn tiền bạc (tỷ lệ trợ giá).
 - Hệ quả / rủi ro:
-  - Trên bộ mô phỏng, v3 cho kết quả **trùng hoàn toàn** với v2 (TEST_PLAN mục 3d): không bắt thêm, không nhầm thêm. Bộ mô phỏng không có hành vi chung SĐT hay "săn sale" nên R12, R14 chưa được đo.
+  - Trên bộ mô phỏng, v3 cho kết quả **trùng hoàn toàn** với v2 (KIEM_THU mục 3d): không bắt thêm, không nhầm thêm. Bộ mô phỏng không có hành vi chung SĐT hay "săn sale" nên R12, R14 chưa được đo.
   - Phát hiện trên tập test: luật theo đơn (R08 COD giá trị cao) kéo điểm tin cậy của khách mới hợp lệ xuống ~30. Đề xuất v3.1: chỉ tính các luật "về tài khoản" vào lớp 1; muốn đổi phải đo lại trên tập test mới.
 
 ## ADR-010: Tự động khóa quyền mua hàng khi cố đặt lặp sau nhiều lần bị từ chối
@@ -200,7 +200,7 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 ## ADR-012: Bộ luật v3.1 — luật chỉ mô tả đơn đang đặt không trừ vào điểm tin cậy tài khoản
 - Ngày: 2026-11-03
 - Trạng thái: Accepted (Luca duyệt 2026-11-03; muốn quay về v3 chỉ cần bỏ khóa `exclude_rules` trong `TRUST`)
-- Bối cảnh: đo bộ luật v3 (TEST_PLAN 3d) cho thấy khách mới hợp lệ mua COD giá trị cao có điểm tin cậy thấp hơn cả farm (trung vị 30), vì R08 "COD giá trị cao, ít lịch sử" bị cộng vào điểm TÀI KHOẢN. R08 không nói gì về con người, chỉ nói về đơn đang đặt (giá trị, phương thức). Điểm tin cậy bị kéo xuống thì khách đó bị khóa mã GIAM10 / NGUOIMOI, bị mở case ở các lần sau.
+- Bối cảnh: đo bộ luật v3 (KIEM_THU 3d) cho thấy khách mới hợp lệ mua COD giá trị cao có điểm tin cậy thấp hơn cả farm (trung vị 30), vì R08 "COD giá trị cao, ít lịch sử" bị cộng vào điểm TÀI KHOẢN. R08 không nói gì về con người, chỉ nói về đơn đang đặt (giá trị, phương thức). Điểm tin cậy bị kéo xuống thì khách đó bị khóa mã GIAM10 / NGUOIMOI, bị mở case ở các lần sau.
 - Các phương án:
   - (1) Giữ v3: đơn giản, nhưng điểm tin cậy lẫn "đơn này rủi ro" với "người này đáng ngờ"; giải thích với khách khó.
   - (2) Hạ điểm R08: giảm cả khả năng giữ đơn COD rủi ro ở lớp giao dịch, tức là sửa sai chỗ.
@@ -219,13 +219,13 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 ## ADR-013: R16 chỉ trừ điểm tin cậy; khóa kẻ né lệnh khóa ở bước đặt hàng
 - Ngày: 2026-11-03
 - Trạng thái: Accepted (Luca chọn 2026-11-03; sửa phần cài đặt của ADR-011, phần quy tắc khóa của ADR-011 giữ nguyên)
-- Bối cảnh: đo O7 (TEST_PLAN 3h) cho thấy cài đặt khác thiết kế ADR-011. ADR-011 định "chung 1 điểm → chỉ trừ điểm tin cậy + mở case", nhưng R16 (+45) cộng thẳng vào điểm voucher / COD, nên 7/8 người nhà dùng chung máy bị gỡ mã và tắt COD. Cùng lúc, kẻ né khóa bị gỡ mã ngay ở bước áp mã (lúc đó mới thấy 1 điểm là thiết bị), bỏ đơn, không tới bước đặt hàng nơi có đủ ≥ 2 điểm để bị khóa: chỉ 46,7% bị khóa.
+- Bối cảnh: đo O7 (KIEM_THU 3h) cho thấy cài đặt khác thiết kế ADR-011. ADR-011 định "chung 1 điểm → chỉ trừ điểm tin cậy + mở case", nhưng R16 (+45) cộng thẳng vào điểm voucher / COD, nên 7/8 người nhà dùng chung máy bị gỡ mã và tắt COD. Cùng lúc, kẻ né khóa bị gỡ mã ngay ở bước áp mã (lúc đó mới thấy 1 điểm là thiết bị), bỏ đơn, không tới bước đặt hàng nơi có đủ ≥ 2 điểm để bị khóa: chỉ 46,7% bị khóa.
 - Các phương án:
   - (1) Khóa ngay ở bước áp mã khi chung máy với tài khoản bị khóa và đang dùng mã người mới: khóa được nhiều hơn, nhưng ở bước này người nhà và kẻ né khóa giống hệt nhau, người nhà bị khóa thanh toán 30 ngày.
   - (2) R16 chỉ trừ điểm tin cậy (contexts rỗng, không cộng vào điểm giao dịch), hạ bậc 1 điểm chung từ 45 xuống 35 để tài khoản mới (R01 −10) vẫn còn ≥ 50 = `min_trust` của NGUOIMOI. Kẻ né khóa đi tiếp tới bước đặt hàng và bị khóa khi chung ≥ 2 điểm.
 - Quyết định: (2). Điều kiện khóa của ADR-011 không đổi (≥ 2 điểm, hoặc 1 điểm + spam mã người mới).
 - Lý do: đúng ý thiết kế ADR-011; ưu tiên không phạt nhầm người nhà; bằng chứng đầy đủ nhất có ở bước đặt hàng. Con số 35 chọn bằng lập luận trên dev_v3, không chỉnh theo tập test.
-- Kết quả đo (test_v3 seed 7, seed mới, chạy một lần; so với seed 6 ở TEST_PLAN 3h là so khác dân số, chỉ mang tính tham khảo):
+- Kết quả đo (test_v3 seed 7, seed mới, chạy một lần; so với seed 6 ở KIEM_THU 3h là so khác dân số, chỉ mang tính tham khảo):
   - Né khóa chung ≥ 2 điểm: bị khóa 10/15 = 66,7% (seed 6: 46,7%); vẫn 100% bị gắn cờ, 0 mã bị lấy.
   - Người nhà dùng chung máy: 0/8 bị hạn chế (seed 6: 7/8).
   - Đánh đổi đã biết trước: biến thể "chỉ giữ SĐT cũ" (1 điểm, không spam) giờ lấy được mã 6/6 (seed 6: 0/6). Theo ADR-011 trường hợp này chỉ mở case; analyst là lớp xử lý.
@@ -237,7 +237,7 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 ## ADR-014: Bùng hàng COD lịch sử ngắn và tài khoản mới treo nhiều đơn COD
 - Ngày: 2026-11-05
 - Trạng thái: Accepted (Luca chọn ngưỡng R17 = 2 đơn treo ngày 2026-11-05, duyệt toàn bộ ADR ngày 2026-11-06)
-- Bối cảnh: thí nghiệm baseline (TEST_PLAN 3j) cho thấy Risk Engine chỉ bắt 6/15 kẻ bùng hàng COD, trong khi luật thủ công bắt 15/15. Nguyên nhân: R07 dùng tỷ lệ thất bại làm mượt (cộng thêm 10 đơn giả định, 10% thất bại), kẻ có 2/3 hoặc 3/5 đơn thất bại chỉ còn 0,23–0,29, rơi vào bậc 0,20 (+25), chưa đủ ngưỡng ẩn COD (40). Ngoài ra "tài khoản mới treo nhiều đơn COD" (cod_hoarder) chưa bao giờ bị bắt: R10 cần ≥ 3 đơn treo và chỉ +25.
+- Bối cảnh: thí nghiệm baseline (KIEM_THU 3j) cho thấy Risk Engine chỉ bắt 6/15 kẻ bùng hàng COD, trong khi luật thủ công bắt 15/15. Nguyên nhân: R07 dùng tỷ lệ thất bại làm mượt (cộng thêm 10 đơn giả định, 10% thất bại), kẻ có 2/3 hoặc 3/5 đơn thất bại chỉ còn 0,23–0,29, rơi vào bậc 0,20 (+25), chưa đủ ngưỡng ẩn COD (40). Ngoài ra "tài khoản mới treo nhiều đơn COD" (cod_hoarder) chưa bao giờ bị bắt: R10 cần ≥ 3 đơn treo và chỉ +25.
 - Các phương án:
   - (1) Bỏ làm mượt, dùng tỷ lệ thô như luật thủ công: bắt hết kẻ ít đơn, nhưng phạt khách quen vì một lần giao thất bại (luật thủ công bắt nhầm 30/40 khách quen).
   - (2) Giữ làm mượt, nâng bậc 0,20 của R07 từ +25 lên +40 để bậc này tự đủ ẩn COD. Bậc 0,20 = gấp đôi mức nền 10%; muốn chạm cần ≥ 2 lần thất bại trên ≤ 5 đơn, hoặc ≥ 3 trên ≤ 10 đơn. Khách quen có 1 lần thất bại không chạm.
@@ -251,7 +251,7 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 - Hệ quả / rủi ro:
   - Khách mới mua nhiều đợt liền nhau phải trả trước từ đơn thứ 3 cho tới khi nhận được đơn đầu tiên: đánh đổi có chủ đích, cần ghi trong thông điệp và chính sách.
   - Kẻ treo đơn vẫn treo được 2 đơn COD trước khi bị chặn.
-  - Bộ luật có 17 luật; RULES_V0 cập nhật R07 và R17.
+  - Bộ luật có 17 luật; BO_LUAT_RUI_RO cập nhật R07 và R17.
 
 ## ADR-015: Khóa ngay ở bước áp mã khi tài khoản mới chung máy với tài khoản bị khóa và thao tác như bot
 - Ngày: 2026-11-06
@@ -272,7 +272,7 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 
 ## ADR-016: Phát hiện cụm tài khoản mới nối chuỗi (R18) và mở rộng chuẩn hóa địa chỉ
 - Ngày: 2026-11-06
-- Trạng thái: Accepted (Luca duyệt thiết kế `docs/reviews/2026-11-06_CUM_LIEN_KET_DESIGN.md` ngày 2026-11-06; ngưỡng chọn trên dev theo thiết kế)
+- Trạng thái: Accepted (Luca duyệt thiết kế `docs/tu_van/2026-11-06_CUM_LIEN_KET_DESIGN.md` ngày 2026-11-06; ngưỡng chọn trên dev theo thiết kế)
 - Bối cảnh: các luật đếm (R02 thiết bị, R03 / R11 địa chỉ, R12 SĐT) mỗi luật chỉ nhìn một loại điểm chung. Farm "nối chuỗi" (A chung máy với B, B chung SĐT với C, C chung địa chỉ với D…) không cặp nào chạm ngưỡng nên lọt hoàn toàn (dev_v5: 0/27 tài khoản, 0/4 farm). Rà lại cũng cho thấy farm gom hàng nhiều điểm (`farm_multi_drop`) không có mối nối nào giữa các điểm nhận, nên gom cụm không giải được và không nhắm tới.
 - Các phương án: (A) cụm liên thông theo chuỗi + luật R18; (B) chỉ mở rộng chuẩn hóa địa chỉ; (C) dừng. Chi tiết ở bản thiết kế.
 - Quyết định: (A) + (B).
@@ -294,7 +294,7 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
 ## ADR-017: Lưu tạm luật và ngưỡng quyết định trong bộ nhớ, đo hiệu năng với nhiều worker
 - Ngày: 2026-11-19
 - Trạng thái: Accepted (Luca chọn bản sửa MVP ngày 2026-11-06, gồm cả đánh đổi "worker khác thấy luật mới chậm vài giây")
-- Bối cảnh: chẩn đoán O5 (TEST_PLAN 3o) cho thấy mỗi lượt chấm điểm chạy khoảng 22 câu SQL nối tiếp. Khi đông người, mỗi câu chậm 5–10 lần. Câu tốn nhất là tải danh sách luật (chạy 2 lần mỗi lượt) và tải ngưỡng quyết định, cộng lại khoảng 20% thời gian SQL. Luật và ngưỡng hiếm khi đổi.
+- Bối cảnh: chẩn đoán O5 (KIEM_THU 3o) cho thấy mỗi lượt chấm điểm chạy khoảng 22 câu SQL nối tiếp. Khi đông người, mỗi câu chậm 5–10 lần. Câu tốn nhất là tải danh sách luật (chạy 2 lần mỗi lượt) và tải ngưỡng quyết định, cộng lại khoảng 20% thời gian SQL. Luật và ngưỡng hiếm khi đổi.
 - Các phương án:
   - (1) Lưu tạm trong bộ nhớ của từng tiến trình, hết hạn sau vài giây, xóa ngay khi luật đổi trong cùng tiến trình. Đơn giản; cái giá là worker khác thấy luật mới chậm tối đa thời hạn đó.
   - (2) Lưu tạm và kiểm tra "phiên bản luật" bằng một câu SQL nhẹ mỗi lượt. Luôn mới ngay, nhưng vẫn tốn một vòng hỏi CSDL (mỗi vòng khi đông người tốn 3–4 ms).

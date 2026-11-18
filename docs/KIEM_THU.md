@@ -1,6 +1,6 @@
 # TEST PLAN
 
-> Trạng thái: **Đang dùng**. Kết quả dưới đây là số thật từ các lần chạy đã ghi lại trong `docs/experiments/`.
+> Trạng thái: **Đang dùng**. Kết quả dưới đây là số thật từ các lần chạy đã ghi lại trong `docs/thuc_nghiem/`.
 
 ## 1. Kiểm thử tự động (pytest, `backend/tests`)
 Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua đúng các migration thật.
@@ -41,7 +41,7 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 | FPR hard negative | 19,5% (8/41) | 31,2% (20/64) |
 | Độ trễ chấm điểm p95 | 7,78 ms | 11,5 ms |
 
-Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experiments/test_seed2_scale1.md).
+Chi tiết và KTC 95%: [dev](thuc_nghiem/mo_phong/v1/dev_seed1_scale1.md), [test](thuc_nghiem/mo_phong/v1/test_seed2_scale1.md).
 
 ### Đọc kết quả (trung thực)
 - Kiểu lạm dụng đã biết được bắt ổn định giữa dev và test (~85%), khách bình thường không bị ảnh hưởng.
@@ -60,7 +60,7 @@ Cùng máy, 4 worker uvicorn, `--spread` (mỗi người một sản phẩm, đ�
 | 10 | 15,1–18,8 / 24,8–44,9 | **11,1–11,6 / 16,7–31,5** | 92–143 → 76–127 |
 | 50 | 47,1–53,1 / 132–175 | **32,9–36,2 / 87–117** | 633–692 → 518–668 |
 
-Mọi request đều thành công (3.600 / 3.600 mã 201). Dữ liệu: [trước](experiments/load_test_20261119_spread_w4_before.json), [sau](experiments/load_test_20261119_spread_w4_after.json).
+Mọi request đều thành công (3.600 / 3.600 mã 201). Dữ liệu: [trước](thuc_nghiem/do_tai/load_test_20261119_spread_w4_before.json), [sau](thuc_nghiem/do_tai/load_test_20261119_spread_w4_after.json).
 
 ### Đọc kết quả (trung thực)
 - Cache giảm thời gian chấm điểm khoảng 30% ở mọi mức. **O5 đạt ở 1 và 10 người đồng thời thật (p95 ≤ 31,5 ms ở cả 3 lượt), chưa đạt ở 50 người (p95 87–117 ms).**
@@ -68,7 +68,7 @@ Mọi request đều thành công (3.600 / 3.600 mã 201). Dữ liệu: [trướ
 - Số đo chỉ áp dụng cho máy phát triển này, MariaDB cùng máy; không phải năng lực production.
 
 ## 3o. Vì sao chấm điểm chậm dưới tải (2026-11-06, chẩn đoán cho O5)
-Chi tiết số liệu: [load_diag_20261106.md](experiments/load_diag_20261106.md). Bản tóm tắt:
+Chi tiết số liệu: [load_diag_20261106.md](thuc_nghiem/do_tai/load_diag_20261106.md). Bản tóm tắt:
 - **Số "đạt" ngày 03/11 (mục 3f) bị cách đo làm đẹp:** checkout khóa dòng sản phẩm trước khi chấm điểm và giữ khóa tới lúc commit. Mọi khách ảo mua cùng một sản phẩm nên các đơn xếp hàng trước phần chấm điểm, mỗi lúc chỉ một lượt chấm chạy. Khi mỗi người mua một sản phẩm khác (`--spread`), các lượt chấm chạy song song thật: p50 79–112 ms, p95 145–312 ms.
 - **Nút thắt thật:** mỗi lượt chấm điểm chạy khoảng 22 câu SQL nối tiếp. Dưới tải, mỗi câu mất 3,5–6,7 ms thay vì dưới 1 ms, kể cả câu tra khóa chính. Nhiều worker giảm p95 khi các đơn xếp hàng sẵn (10 người: 48,6 → 18,4 ms) nhưng không đủ khi chạy song song thật.
 - Câu tốn nhất là tải danh sách luật: chạy 2 lần mỗi lượt, khoảng 16% thời gian SQL. Thêm câu tải ngưỡng quyết định, khoảng 5%.
@@ -91,7 +91,7 @@ Thêm chế độ `--mode welcome` cho [`load_test.py`](../backend/scripts/load_
 | Trả trước, lượt 2 hôm nay | 35,1–36,5 | 42,2–81,0 | 47,2–52,4 |
 | Trả trước, 03/11 (mục 3f) | 15,1–16,1 | 32,6–35,5 | 34,0–36,2 |
 
-Ở 50 người, luồng mã người mới có 10–26 / 200 request lỗi kết nối (server quá tải) ở cả A và B. Mọi đơn khách mới từ lượt thứ 3 bị gỡ mã (409) vì mọi khách ảo cùng một IP 127.0.0.1 nên luật "nhiều tài khoản mới cùng IP" khớp; như nhau ở A và B. Dữ liệu: [welcome A](experiments/load_test_20261106_welcome_nocluster.json), [welcome B](experiments/load_test_20261106_welcome.json), [trả trước lượt 1](experiments/load_test_20261106_prepaid.json), [lượt 2](experiments/load_test_20261106_prepaid_r2.json).
+Ở 50 người, luồng mã người mới có 10–26 / 200 request lỗi kết nối (server quá tải) ở cả A và B. Mọi đơn khách mới từ lượt thứ 3 bị gỡ mã (409) vì mọi khách ảo cùng một IP 127.0.0.1 nên luật "nhiều tài khoản mới cùng IP" khớp; như nhau ở A và B. Dữ liệu: [welcome A](thuc_nghiem/do_tai/load_test_20261106_welcome_nocluster.json), [welcome B](thuc_nghiem/do_tai/load_test_20261106_welcome.json), [trả trước lượt 1](thuc_nghiem/do_tai/load_test_20261106_prepaid.json), [lượt 2](thuc_nghiem/do_tai/load_test_20261106_prepaid_r2.json).
 
 ### Đọc kết quả (trung thực)
 - **R18 không phải nút thắt:** ở 1 người, có hay không tính cụm như nhau (≤ 26 ms); dưới tải, tính cụm làm p95 bước đặt hàng tăng khoảng 10–30 ms, nằm trong vùng dao động giữa các lượt. Đo riêng (mục 3m): p95 7,3 ms.
@@ -113,7 +113,7 @@ Thêm chế độ `--mode welcome` cho [`load_test.py`](../backend/scripts/load_
 | Luật thủ công (B1), cùng lần chạy: F1 | — | — | 43,5% |
 | Chấm điểm p95 (mô phỏng, tuần tự) | 20,2 ms | 20,0 ms | 51,0 ms |
 
-Ngưỡng R18 thử trên dev: 4 / 5 / 6 tài khoản ([n4](experiments/dev_v5_seed1_scale1_r18n4.md), [n5](experiments/dev_v5_seed1_scale1_r18n5.md), [n6](experiments/dev_v5_seed1_scale1_r18n6.md)); chọn 5. Chi tiết: [test v5 seed 12](experiments/test_v5_seed12_scale1.md), [test v5 seed 11, bản trước khi sửa](experiments/test_v5_seed11_scale1.md), [dev v5 trước](experiments/dev_v5_seed1_scale1_before.md), [dev v5 R18](experiments/dev_v5_seed1_scale1_r18.md).
+Ngưỡng R18 thử trên dev: 4 / 5 / 6 tài khoản ([n4](thuc_nghiem/mo_phong/v5/dev_v5_seed1_scale1_r18n4.md), [n5](thuc_nghiem/mo_phong/v5/dev_v5_seed1_scale1_r18n5.md), [n6](thuc_nghiem/mo_phong/v5/dev_v5_seed1_scale1_r18n6.md)); chọn 5. Chi tiết: [test v5 seed 12](thuc_nghiem/mo_phong/v5/test_v5_seed12_scale1.md), [test v5 seed 11, bản trước khi sửa](thuc_nghiem/mo_phong/v5/test_v5_seed11_scale1.md), [dev v5 trước](thuc_nghiem/mo_phong/v5/dev_v5_seed1_scale1_before.md), [dev v5 R18](thuc_nghiem/mo_phong/v5/dev_v5_seed1_scale1_r18.md).
 
 ### Đọc kết quả (trung thực)
 - **Phát hiện farm theo nhóm đạt 5/5, theo tài khoản chỉ 6/41.** Chuỗi lộ dần nên các tài khoản đầu đã lấy mã trước khi cụm đủ lớn; khi một mắt xích bị gỡ mã và bỏ đơn thì chuỗi đứt. Muốn thu hồi thiệt hại cần mở case cho cả cụm (hướng tiếp, chưa làm).
@@ -136,7 +136,7 @@ Ngưỡng R18 thử trên dev: 4 / 5 / 6 tài khoản ([n4](experiments/dev_v5_s
 | Người nhà dùng chung máy: bị hạn chế | 0/5 | 0/5 | **0/8** (KTC 95%: 0%–32,4%) |
 | Precision / Recall / F1 toàn tập | 79,0% / 68,2% / 73,2% | 79,0% / 68,2% / 73,2% | 78,4% / 55,1% / 64,7% |
 
-Precision/recall không đổi trên dev vì kẻ né khóa vốn đã bị gắn cờ 100%; ADR-015 chỉ đổi gắn cờ thành **khóa**. Chi tiết: [test v4 seed 10](experiments/test_v4_seed10_scale1.md), [dev v4 sau ADR-015](experiments/dev_v4_seed1_scale1_adr015.md).
+Precision/recall không đổi trên dev vì kẻ né khóa vốn đã bị gắn cờ 100%; ADR-015 chỉ đổi gắn cờ thành **khóa**. Chi tiết: [test v4 seed 10](thuc_nghiem/mo_phong/v4/test_v4_seed10_scale1.md), [dev v4 sau ADR-015](thuc_nghiem/mo_phong/v4/dev_v4_seed1_scale1_adr015.md).
 
 ### Đọc kết quả (trung thực)
 - **O7 đạt theo ước lượng điểm (100% ≥ 90%)**, nhưng mẫu chỉ 14 tài khoản: cận dưới KTC 95% là 78,5%, nên nói "đạt trong lần đo này", chưa khẳng định chắc chắn ≥ 90%.
@@ -159,7 +159,7 @@ Precision/recall không đổi trên dev vì kẻ né khóa vốn đã bị gắ
 | Precision / Recall / F1 | 82,0% / 56,8% / 67,1% | 79,0% / 68,2% / 73,2% | 78,5% / 54,0% / **64,0%** |
 | Luật thủ công (B1), cùng lần chạy: F1 / FPR | 63,0% / 12,1% | 63,0% / 12,1% | 49,5% / 12,0% |
 
-Hai cột dev cùng dân số (B1 ra cùng con số ở cả hai lần chạy). Ngưỡng R17 = 3 đơn treo (đo trên dev, không chọn): treo đơn 3/5, khách mới 0/8, F1 73,9%. Dấu vân tay `e0240c5bbcce8604…`. Chi tiết: [test v4 seed 9](experiments/test_v4_seed9_scale1.md), [dev v4 trước](experiments/dev_v4_seed1_scale1_before.md), [dev v4 sau](experiments/dev_v4_seed1_scale1.md), [dev v4 ngưỡng 3](experiments/dev_v4_seed1_scale1_open3.md).
+Hai cột dev cùng dân số (B1 ra cùng con số ở cả hai lần chạy). Ngưỡng R17 = 3 đơn treo (đo trên dev, không chọn): treo đơn 3/5, khách mới 0/8, F1 73,9%. Dấu vân tay `e0240c5bbcce8604…`. Chi tiết: [test v4 seed 9](thuc_nghiem/mo_phong/v4/test_v4_seed9_scale1.md), [dev v4 trước](thuc_nghiem/mo_phong/v4/dev_v4_seed1_scale1_before.md), [dev v4 sau](thuc_nghiem/mo_phong/v4/dev_v4_seed1_scale1.md), [dev v4 ngưỡng 3](thuc_nghiem/mo_phong/v4/dev_v4_seed1_scale1_open3.md).
 
 ### Đọc kết quả (trung thực)
 - Đạt mục đích: bắt trọn kẻ bùng hàng có lịch sử ngắn và tài khoản treo đơn, **không bắt nhầm khách quen nào** (luật thủ công bắt nhầm 30/40). Kẻ bùng hàng không còn đơn COD nào được xác nhận.
@@ -194,7 +194,7 @@ Chạy trên dev_v3 seed 1 (kiểm tra cách đo), rồi **test_v3 seed 8** (see
 | Đơn COD của nhóm bùng hàng được xác nhận | 15 | 9 |
 | Đơn COD khách mới giá trị cao bị giữ chờ duyệt | 0 | 2 (cái giá của fail-closed) |
 
-Dev_v3 seed 1 cho cùng thứ tự: Risk Engine F1 69,4% · FPR 5,5%; B1 F1 65,0% · FPR 12,5%; B0 accuracy 70,7%. Chi tiết: [test v3 seed 8](experiments/test_v3_seed8_scale1.md), [B0 test v3 seed 8](experiments/test_v3_seed8_scale1_no-control.md), [dev v3](experiments/dev_v3_seed1_scale1_baseline.md), [B0 dev v3](experiments/dev_v3_seed1_scale1_no-control.md).
+Dev_v3 seed 1 cho cùng thứ tự: Risk Engine F1 69,4% · FPR 5,5%; B1 F1 65,0% · FPR 12,5%; B0 accuracy 70,7%. Chi tiết: [test v3 seed 8](thuc_nghiem/mo_phong/v3/test_v3_seed8_scale1.md), [B0 test v3 seed 8](thuc_nghiem/mo_phong/v3/test_v3_seed8_scale1_no-control.md), [dev v3](thuc_nghiem/mo_phong/v3/dev_v3_seed1_scale1_baseline.md), [B0 dev v3](thuc_nghiem/mo_phong/v3/dev_v3_seed1_scale1_no-control.md).
 
 ### Đọc kết quả (trung thực)
 - **Accuracy dễ đánh lừa:** không làm gì (B0) vẫn được 63,4% vì đa số tài khoản là hợp lệ. Vì vậy báo cáo dùng precision, recall, F1, FPR làm chỉ số chính, accuracy chỉ để minh họa.
@@ -220,7 +220,7 @@ Dev_v3 seed 1 cho cùng thứ tự: Risk Engine F1 69,4% · FPR 5,5%; B1 F1 65,0
 | FPR hard negative toàn tập | 23,5% | 16,5% |
 | FPR tổng / precision / recall | 8,0% / 78,5% / 49,4% | 5,8% / 84,1% / 49,5% |
 
-Dấu vân tay `f270cd66dfcbe367…`. Hai seed là hai dân số khác nhau nên cột trái chỉ để tham khảo. Chi tiết: [test v3 seed 7](experiments/test_v3_seed7_scale1.md), [dev v3 sau ADR-013](experiments/dev_v3_seed1_scale1_adr013.md).
+Dấu vân tay `f270cd66dfcbe367…`. Hai seed là hai dân số khác nhau nên cột trái chỉ để tham khảo. Chi tiết: [test v3 seed 7](thuc_nghiem/mo_phong/v3/test_v3_seed7_scale1.md), [dev v3 sau ADR-013](thuc_nghiem/mo_phong/v3/dev_v3_seed1_scale1_adr013.md).
 
 ### Đọc kết quả (trung thực)
 - Đạt mục đích chính của ADR-013: người nhà không còn bị phạt nhầm, và nhiều kẻ né khóa bị khóa hơn.
@@ -246,7 +246,7 @@ Bộ dữ liệu mới `dev_v3` / `test_v3` = bộ v2 + 4 persona (định nghĩ
 | Né khóa, chỉ giữ SĐT (6, chưa biết) | 6/6 | 6/6 | 0/6 (đúng thiết kế) |
 | Người nhà dùng chung máy (8, hard negative) | **7/8 bị hạn chế** (gỡ mã, tắt COD) | — | 0/8 |
 
-Toàn bộ tập: precision 78,5%, recall 49,4% (đã biết 60,2%, chưa biết 16,7%), FPR khách thường 0%, FPR hard negative 23,5%. Không so trực tiếp với v2 vì dân số khác (thêm persona). Chi tiết: [test v3](experiments/test_v3_seed6_scale1.md), [dev v3](experiments/dev_v3_seed1_scale1.md).
+Toàn bộ tập: precision 78,5%, recall 49,4% (đã biết 60,2%, chưa biết 16,7%), FPR khách thường 0%, FPR hard negative 23,5%. Không so trực tiếp với v2 vì dân số khác (thêm persona). Chi tiết: [test v3](thuc_nghiem/mo_phong/v3/test_v3_seed6_scale1.md), [dev v3](thuc_nghiem/mo_phong/v3/dev_v3_seed1_scale1.md).
 
 ### Đọc kết quả (trung thực)
 - **Lợi ích bị chặn 100%:** không tài khoản né khóa nào dùng được mã người mới, kể cả biến thể chưa biết.
@@ -261,9 +261,9 @@ Toàn bộ tập: precision 78,5%, recall 49,4% (đã biết 60,2%, chưa biết
 Thay đổi: R08 (COD giá trị cao, ít lịch sử) không còn trừ vào điểm tin cậy tài khoản (`trust.exclude_rules`), vẫn tính vào điểm COD của đơn. Kiểm tra nhanh trên dev_v2 (không có tham số nào để tinh chỉnh: kết quả trùng v3), sau đó chạy **tập test_v2 seed 5 (seed chưa từng dùng)**, mỗi phiên bản một lần, cùng dân số:
 ```
 .venv/Scripts/python -m simulator --dataset test_v2 --seed 5 --confirm-test                      # v3.1
-.venv/Scripts/python -m simulator.trust_report --out ../docs/experiments/test_v2_seed5_trust_v3.1.json
+.venv/Scripts/python -m simulator.trust_report --out ../docs/thuc_nghiem/mo_phong/v2/test_v2_seed5_trust_v3.1.json
 .venv/Scripts/python -m simulator --dataset test_v2 --seed 5 --confirm-test --trust-all-rules    # v3
-.venv/Scripts/python -m simulator.trust_report --out ../docs/experiments/test_v2_seed5_trust_v3.json
+.venv/Scripts/python -m simulator.trust_report --out ../docs/thuc_nghiem/mo_phong/v2/test_v2_seed5_trust_v3.json
 ```
 
 | Chỉ số (test_v2 seed 5, 438 tài khoản) | v3 | v3.1 |
@@ -275,7 +275,7 @@ Thay đổi: R08 (COD giá trị cao, ít lịch sử) không còn trừ vào đ
 | — số tài khoản dưới 50 điểm (bị khóa mã) | 3/10 | **0/10** |
 | — đơn bị giữ chờ xác minh | 10/10 | 10/10 |
 
-Dấu vân tay: v3.1 `2fa09e9c88da841a…`, v3 `6879ec96daadcfce…`. Chi tiết: [v3.1](experiments/test_v2_seed5_scale1.md), [v3](experiments/test_v2_seed5_scale1_trust-all-rules.md), phân bố điểm [v3.1](experiments/test_v2_seed5_trust_v3.1.json) / [v3](experiments/test_v2_seed5_trust_v3.json).
+Dấu vân tay: v3.1 `2fa09e9c88da841a…`, v3 `6879ec96daadcfce…`. Chi tiết: [v3.1](thuc_nghiem/mo_phong/v2/test_v2_seed5_scale1.md), [v3](thuc_nghiem/mo_phong/v2/test_v2_seed5_scale1_trust-all-rules.md), phân bố điểm [v3.1](thuc_nghiem/mo_phong/v2/test_v2_seed5_trust_v3.1.json) / [v3](thuc_nghiem/mo_phong/v2/test_v2_seed5_trust_v3.json).
 
 ### Đọc kết quả (trung thực)
 - v3.1 sửa đúng chỗ đã phát hiện ở 3d: khách mới hợp lệ không còn "kém tin cậy hơn farm". Các nhóm khác không đổi điểm, khả năng phát hiện không đổi.
@@ -291,7 +291,7 @@ Script [`backend/scripts/load_test.py`](../backend/scripts/load_test.py): mỗi 
 | 10 | 167–177 / 268–342 / 332–780 | 17,9–18,9 / 32,6–35,5 / 76–96 | 28,3–29,6 |
 | 50 | 695–870 / 1.547–1.858 / 2.008–2.155 | 18,4–19,9 / 34,0–36,2 / 44–46 | 26,7–28,8 |
 
-(Khoảng giá trị = nhỏ nhất – lớn nhất của 3 lượt.) Mọi request đều thành công (1.800/1.800 mã 201). Dữ liệu: [load_test_20261103.json](experiments/load_test_20261103.json).
+(Khoảng giá trị = nhỏ nhất – lớn nhất của 3 lượt.) Mọi request đều thành công (1.800/1.800 mã 201). Dữ liệu: [load_test_20261103.json](thuc_nghiem/do_tai/load_test_20261103.json).
 
 ### Đọc kết quả (trung thực)
 - **O5 đạt ở phần Risk Engine:** p95 chấm điểm ≤ 36,2 ms ở cả 3 mức (ngưỡng 50 ms). p99 ở 10 người lên 76–96 ms: có đuôi chậm, chưa rõ nguyên nhân (cần đo thêm nếu muốn kết luận).
@@ -303,7 +303,7 @@ Script chỉ đọc [`backend/scripts/audit_check.py`](../backend/scripts/audit_
 
 | CSDL | Kết quả |
 |---|---|
-| Dữ liệu demo (657 quyết định, 118 khác ALLOW, 708 luật khớp, 8 case đóng, 3 lệnh khóa, 2 lần gỡ) | **8/8 mục đạt 100%** · [chi tiết](experiments/audit_check_main_20261103.json) |
+| Dữ liệu demo (657 quyết định, 118 khác ALLOW, 708 luật khớp, 8 case đóng, 3 lệnh khóa, 2 lần gỡ) | **8/8 mục đạt 100%** · [chi tiết](thuc_nghiem/audit/audit_check_main_20261103.json) |
 | CSDL đo tải (1.810 quyết định, đều ALLOW) | 8/8 đạt (chỉ mục "có ảnh chụp và phiên bản ma trận" có dữ liệu) |
 
 - Lần chạy đầu bắt được 5 quyết định không có phiên bản ma trận. Tra lại: đều là lần chặn vì tài khoản **đang bị khóa** (ADR-010, không chấm điểm, lý do khóa lưu trong ảnh chụp đặc trưng). Đúng thiết kế; script được sửa để nhận diện trường hợp này.
@@ -323,7 +323,7 @@ Lệnh so sánh trên cùng dân số (tập `test_v2`, seed 4 mới):
 | FPR khách thường / hard negative | 0% / 18,2% | 0% / 18,2% |
 | Request đặt hàng p95 | 41,2 ms | 42,8 ms |
 
-Trung vị điểm tin cậy thấp nhất của mỗi tài khoản, theo nhóm (v3): khách mới bình thường 100 · khách quen 100 · gia đình 70 · nhóm trọ 4G 80 · farm phân tán 70 · farm 50 · **khách mới mua COD giá trị cao 30** · bùng hàng COD 70 · farm chia nhiều điểm nhận 90. Số tài khoản bị kéo xuống < 30 mà chưa bị hạn chế (cảnh báo sớm thêm): **0**. Dữ liệu: [phân bố](experiments/test_v2_seed4_trust_distribution.json).
+Trung vị điểm tin cậy thấp nhất của mỗi tài khoản, theo nhóm (v3): khách mới bình thường 100 · khách quen 100 · gia đình 70 · nhóm trọ 4G 80 · farm phân tán 70 · farm 50 · **khách mới mua COD giá trị cao 30** · bùng hàng COD 70 · farm chia nhiều điểm nhận 90. Số tài khoản bị kéo xuống < 30 mà chưa bị hạn chế (cảnh báo sớm thêm): **0**. Dữ liệu: [phân bố](thuc_nghiem/mo_phong/v2/test_v2_seed4_trust_distribution.json).
 
 ### Đọc kết quả (trung thực)
 - Lớp Trust **không làm đổi** kết quả trên bộ mô phỏng: ngưỡng khóa mã (< 50) gần trùng ngưỡng gỡ voucher cũ, bậc "Xem xét" chỉ mở case chứ không hạn chế.
@@ -351,7 +351,7 @@ Lệnh:
 | — trong đó nhóm trọ 4G | 0% (0/41) | 14,6% (6/41) |
 | Độ trễ request đặt hàng p95 (toàn bộ API) | 44,7 ms | 44,5 ms |
 
-Chi tiết và KTC 95%: [test v2](experiments/test_v2_seed3_scale1.md), [test v1 trên cùng dân số](experiments/test_v2_seed3_scale1_without-ADDR_VOUCHER_RING.md), [dev v2](experiments/dev_v2_seed1_scale1.md).
+Chi tiết và KTC 95%: [test v2](thuc_nghiem/mo_phong/v2/test_v2_seed3_scale1.md), [test v1 trên cùng dân số](thuc_nghiem/mo_phong/v2/test_v2_seed3_scale1_without-ADDR_VOUCHER_RING.md), [dev v2](thuc_nghiem/mo_phong/v2/dev_v2_seed1_scale1.md).
 
 ### Đọc kết quả (trung thực)
 - R11 bắt được hơn 1/3 farm phân tán mà v1 bỏ lọt hoàn toàn; 4 tài khoản đầu của mỗi farm vẫn lọt (chưa đủ dấu vết cụm).
