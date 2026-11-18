@@ -107,7 +107,7 @@ Khoa chưa gửi mẫu riêng **[THIẾU]**, nên ánh xạ theo [BAO_CAO_DAN_Y]
 ---
 
 ## Phần 7. Prompt tạo ảnh infographic (theo mẫu PROMPT 3 của GVHD)
-> Mẫu PROMPT 3 do Luca gửi ngày 19/11; nội dung từng hàng lấy từ Phần 2, rút gọn để mỗi ô ≤ 25 từ, tối đa 5 gạch đầu dòng. Tên tác giả để "Luca": thay bằng họ tên đầy đủ khi dùng cho báo cáo. Số liệu chỉ dùng số đã đo (test_v5 seed 12; mức giảm 51% là test_v3 seed 8).
+> Mẫu PROMPT 3 do Luca gửi ngày 19/11; nội dung từng hàng lấy từ Phần 2, rút gọn để mỗi ô ≤ 25 từ, tối đa 5 gạch đầu dòng. Tên tác giả để "Luca": thay bằng họ tên đầy đủ khi dùng cho báo cáo. Số liệu chỉ dùng số đã đo (test_v5 seed 12; "giảm 51% mã bị gom" là so với không kiểm soát, test_v3 seed 8). Đếm theo tiếng: mọi ô ≤ 25.
 > Lưu ý: công cụ tạo ảnh hay viết sai dấu tiếng Việt khi ảnh nhiều chữ. Kiểm từng ô trước khi đưa vào báo cáo; nếu sai nhiều, dựng bảng bằng HTML / Word rồi chụp lại sẽ chắc chắn hơn.
 
 ```
@@ -132,19 +132,19 @@ NỘI DUNG TỪNG HÀNG:
 1 CONTEXT
 - Định nghĩa: Bức tranh môi trường, đối tượng, hiện trạng nơi vấn đề xuất hiện.
 - Trả lời câu hỏi: Chuyện gì đang xảy ra? Ai liên quan? Vì sao cần quan tâm?
-- Ví dụ áp dụng: • Sàn TMĐT dùng mã người mới và COD để hút khách • Hai chính sách này bị lợi dụng • Liên quan: khách, người bán, đội rủi ro
+- Ví dụ áp dụng: • Sàn TMĐT dùng mã người mới, COD để hút khách • Hai chính sách bị lợi dụng • Liên quan: khách, người bán, đội rủi ro
 - Khác biệt nổi bật: ✔ Lạm dụng chính sách, không phải gian lận thẻ ✔ Chỉ mô tả, chưa nêu giải pháp
 
 2 PAIN POINT
 - Định nghĩa: Bất cập cụ thể gây tốn kém, rủi ro, có hậu quả rõ.
 - Trả lời câu hỏi: Điều gì gây khó? Hậu quả ra sao?
-- Ví dụ áp dụng: • Farm tài khoản gom mã người mới • Bùng hàng COD, mất phí vận chuyển • Bị khóa thì lập tài khoản mới • Xử lý thủ công, khó truy vết • Chặn nhầm khách thật
+- Ví dụ áp dụng: • Farm tài khoản gom mã • Bùng hàng COD • Bị khóa thì lập tài khoản mới • Xử lý thủ công, khó truy vết • Chặn nhầm khách thật
 - Khác biệt nổi bật: ✔ Chặn nhầm khách cũng là một nỗi đau ✔ Xét cả né lệnh khóa
 
 3 OBJECTIVE
 - Định nghĩa: Trạng thái mong muốn, đo được, có phạm vi và thời hạn.
 - Trả lời câu hỏi: Cải thiện gì? Đến mức nào? Đo bằng gì?
-- Ví dụ áp dụng: • Bắt ≥ 80% lạm dụng đã biết • Chặn nhầm khách thường ≤ 2% • ≥ 90% kẻ né khóa bị khóa • Chấm điểm ≤ 50 ms • 100% quyết định có lý do
+- Ví dụ áp dụng: • Bắt ≥80% lạm dụng đã biết • Chặn nhầm khách thường ≤2% • ≥90% kẻ né khóa bị khóa • Chấm điểm ≤50 ms • Quyết định có lý do
 - Khác biệt nổi bật: ✔ Có mục tiêu cho phía khách thật ✔ Giữ nguyên chỉ tiêu đề cương
 
 4 CONSTRAINT
@@ -156,19 +156,19 @@ NỘI DUNG TỪNG HÀNG:
 5 METHOD
 - Định nghĩa: Cách thức, kiến trúc, quy trình để đạt mục tiêu.
 - Trả lời câu hỏi: Giải quyết bằng cách nào? Cơ chế hoạt động ra sao?
-- Ví dụ áp dụng: • Risk Engine tại 3 điểm kiểm soát • 18 luật có phiên bản • Điểm tin cậy tài khoản • Khóa theo bậc, truy vết tài khoản liên kết • Case, khiếu nại, nhật ký
+- Ví dụ áp dụng: • Chấm điểm ở 3 điểm kiểm soát • 18 luật có phiên bản • Điểm tin cậy • Khóa theo bậc, truy vết liên kết • Case, khiếu nại, nhật ký
 - Khác biệt nổi bật: ✔ Sửa luật không cần triển khai lại ✔ Chạy thử luật trước khi bật
 
 6 EVALUATION
 - Định nghĩa: Đo lường, kiểm chứng hiệu quả so với mục tiêu.
 - Trả lời câu hỏi: Hiệu quả bao nhiêu? So với yêu cầu ra sao?
-- Ví dụ áp dụng: • Mô phỏng tách tập phát triển và kiểm thử • Chặn nhầm khách thường 0% • Kẻ né khóa bị khóa 14/14 • F1 51,7%, luật thủ công 43,5%
+- Ví dụ áp dụng: • Mô phỏng tách tập phát triển, kiểm thử • Chặn nhầm khách thường 0% • Né khóa bị khóa 14/14 • F1 51,7%, luật thủ công 43,5%
 - Khác biệt nổi bật: ✔ So với 3 cách làm đơn giản ✔ Báo cáo cả chỉ tiêu chưa đạt
 
 7 IMPACT
 - Định nghĩa: Lợi ích cho người dùng, tổ chức và khả năng mở rộng.
 - Trả lời câu hỏi: Ai được lợi? Giá trị lâu dài là gì?
-- Ví dụ áp dụng: • Mã bị gom giảm 51% so với không kiểm soát • 0/40 khách quen bị chặn nhầm • Mọi quyết định truy vết được • Mở rộng sang chính sách mới
+- Ví dụ áp dụng: • Giảm 51% mã bị gom • 0/40 khách quen bị chặn nhầm • Quyết định truy vết được • Dễ thêm chính sách mới
 - Khác biệt nổi bật: ✔ Quay về giải quyết từng nỗi đau
 
 DẢI DƯỚI CÙNG, bên trái: khung "MỐI QUAN HỆ 7 BƯỚC" gồm 7 icon tròn nối bằng mũi tên 1→7, chia 3 nhóm: "Hiểu đúng vấn đề" (1–2), "Thiết kế giải pháp phù hợp" (3–5), "Chứng minh & tạo giá trị" (6–7).
