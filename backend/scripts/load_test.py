@@ -64,10 +64,20 @@ SPREAD = False  # --spread: mỗi người dùng ảo mua sản phẩm khác nha
 
 
 async def make_user(base: str, i: int, tag: str) -> tuple[httpx.AsyncClient, int]:
+    """Tạo tài khoản ảo (không tính vào thời gian đo). Đăng ký băm mật khẩu Argon2 nên tốn CPU; nếu quá giờ thì
+    thử lại, và nếu lần trước thực ra đã tạo được (409) thì đăng nhập."""
     c = httpx.AsyncClient(base_url=base, timeout=60, headers={"X-Device-Id": f"load-{tag}-{i}"})
-    r = await c.post("/api/auth/register", json={"email": f"load-{tag}-{i}@load.test", "password": "taitai123",
-                                                 "full_name": f"Tai {i}"})
-    r.raise_for_status()
+    email = f"load-{tag}-{i}@load.test"
+    for attempt in range(3):
+        try:
+            r = await c.post("/api/auth/register", json={"email": email, "password": "taitai123", "full_name": f"Tai {i}"})
+            if r.status_code == 409:
+                r = await c.post("/api/auth/login", json={"email": email, "password": "taitai123"})
+            r.raise_for_status()
+            break
+        except httpx.TimeoutException:
+            if attempt == 2:
+                raise
     if SPREAD:
         items = (await c.get("/api/products", params={"page_size": 48})).json()["items"]
         return c, items[i % len(items)]["id"]
@@ -104,13 +114,17 @@ async def worker(c: httpx.AsyncClient, product_id: int, jobs: asyncio.Queue, out
             jobs.get_nowait()
         except asyncio.QueueEmpty:
             return
-        await c.post("/api/cart/items", json={"product_id": product_id, "quantity": 1})
-        address = {**ADDRESS, "line": f"{product_id} Duong {id(c)}"} if SPREAD else ADDRESS
-        t0 = time.perf_counter()
-        r = await c.post("/api/orders/checkout", json={"address": address, "payment_method": "PREPAID"},
-                         headers={"Idempotency-Key": str(uuid.uuid4())})
-        out.append((time.perf_counter() - t0) * 1000)
-        statuses[r.status_code] = statuses.get(r.status_code, 0) + 1
+        try:
+            await c.post("/api/cart/items", json={"product_id": product_id, "quantity": 1})
+            address = {**ADDRESS, "line": f"{product_id} Duong {id(c)}"} if SPREAD else ADDRESS
+            t0 = time.perf_counter()
+            r = await c.post("/api/orders/checkout", json={"address": address, "payment_method": "PREPAID"},
+                             headers={"Idempotency-Key": str(uuid.uuid4())})
+            out.append((time.perf_counter() - t0) * 1000)
+            statuses[r.status_code] = statuses.get(r.status_code, 0) + 1
+        except httpx.HTTPError as exc:  # lỗi kết nối / quá thời gian chờ: ghi lại, không dừng cả lần đo
+            key = f"error:{type(exc).__name__}"
+            statuses[key] = statuses.get(key, 0) + 1
 
 
 def pct(xs: list[float], p: float) -> float:

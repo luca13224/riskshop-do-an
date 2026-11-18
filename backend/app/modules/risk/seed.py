@@ -198,6 +198,8 @@ def seed_rules(db: Session) -> int:
             db.add(DecisionPolicy(context=context, version=(active.version + 1) if active else 1,
                                   thresholds=thresholds))
     db.commit()
+    from app.modules.risk.service import invalidate_rule_cache  # nhập muộn: service không phụ thuộc seed
+    invalidate_rule_cache()
     return created
 
 

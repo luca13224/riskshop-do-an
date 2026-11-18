@@ -17,6 +17,7 @@ from app.core.errors import AppError
 from app.core.time import utcnow
 from app.modules.audit import service as audit
 from app.modules.auth.models import User
+from app.modules.risk import service as risk_service
 from app.modules.risk.models import RiskDecision, Rule, RuleHit, RuleVersion
 
 POINTS_RANGE = (-100, 100)
@@ -136,4 +137,5 @@ def create_version(db: Session, actor: User, code: str, params: dict, enabled: b
         after={"version": version.version, "params": params, "enabled": enabled}, note=change_note,
     )
     db.commit()
+    risk_service.invalidate_rule_cache()  # từ lần chấm sau dùng phiên bản mới (worker khác: tối đa vài giây)
     return next(r for r in list_rules(db) if r["code"] == code)

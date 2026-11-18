@@ -290,3 +290,24 @@ Mỗi quyết định quan trọng ghi theo mẫu bên dưới. Không xóa quy�
   - Độ trễ: tính cụm đo riêng p50 2,3 ms, p95 7,3 ms. p95 chấm điểm của cả lượt mô phỏng test_v5 là 51,0 ms (test_v4: 39,9 ms), vượt nhẹ mục tiêu O5 ≤ 50 ms; mô phỏng chạy tuần tự trên máy phát triển, không phải đo tải. Cần chạy lại load test E2 để kết luận O5.
   - Dấu vân tay bộ luật của seed 11 và seed 12 giống nhau vì thay đổi nằm ở code tính đặc trưng, không ở tham số luật; báo cáo ghi rõ seed 11 là bản trước khi sửa.
   - Chuẩn hóa địa chỉ đổi cách băm: địa chỉ lưu trước đó không khớp băm mới cho tới khi hết cửa sổ 30 ngày; CSDL demo được tạo lại bằng demo reset.
+
+## ADR-017: Lưu tạm luật và ngưỡng quyết định trong bộ nhớ, đo hiệu năng với nhiều worker
+- Ngày: 2026-11-19
+- Trạng thái: Accepted (Luca chọn bản sửa MVP ngày 2026-11-06, gồm cả đánh đổi "worker khác thấy luật mới chậm vài giây")
+- Bối cảnh: chẩn đoán O5 (TEST_PLAN 3o) cho thấy mỗi lượt chấm điểm chạy khoảng 22 câu SQL nối tiếp. Khi đông người, mỗi câu chậm 5–10 lần. Câu tốn nhất là tải danh sách luật (chạy 2 lần mỗi lượt) và tải ngưỡng quyết định, cộng lại khoảng 20% thời gian SQL. Luật và ngưỡng hiếm khi đổi.
+- Các phương án:
+  - (1) Lưu tạm trong bộ nhớ của từng tiến trình, hết hạn sau vài giây, xóa ngay khi luật đổi trong cùng tiến trình. Đơn giản; cái giá là worker khác thấy luật mới chậm tối đa thời hạn đó.
+  - (2) Lưu tạm và kiểm tra "phiên bản luật" bằng một câu SQL nhẹ mỗi lượt. Luôn mới ngay, nhưng vẫn tốn một vòng hỏi CSDL (mỗi vòng khi đông người tốn 3–4 ms).
+  - (3) Gộp các câu đếm đặc trưng thành ít vòng hỏi hơn (Recommended, làm sau).
+- Quyết định: (1), thời hạn `RULE_CACHE_SECONDS = 5` giây. Bản sao gọn (không giữ đối tượng ORM). Xóa cache khi: tạo phiên bản luật qua Console, chạy seed luật (gồm demo reset), simulator đổi luật trực tiếp trong CSDL, đầu mỗi test.
+- Lý do: bỏ được 3 trên 22 câu SQL mỗi lượt mà không đổi logic chấm điểm; dễ giải thích và dễ kiểm thử.
+- Kết quả đo (load test `--spread`, 4 worker, 3 lượt × 200 đơn mỗi mức, cùng máy, đo trước bằng worktree của commit cũ rồi đo sau, không chạy gì song song). p95 chấm điểm (ms):
+  - 1 người: 13,7–15,2 → **10,2–11,3**.
+  - 10 người: 24,8–44,9 → **16,7–31,5**.
+  - 50 người: 132–175 → **87–117**.
+  - p50 giảm khoảng 30% ở mọi mức.
+- Hệ quả / rủi ro:
+  - Chạy nhiều worker: sửa luật trên Console thì worker khác áp dụng chậm tối đa 5 giây. Quyết định trong khoảng đó vẫn ghi đúng phiên bản luật đã dùng (truy vết được).
+  - O5 đạt ở 1 và 10 người đồng thời thật, **chưa đạt ở 50 người**.
+  - Cấu hình MariaDB của XAMPP đang để `innodb_buffer_pool_size=16M` (rất nhỏ); đây là ứng viên tiếp theo, nằm ngoài repo và chưa đổi.
+  - Trên Windows, uvicorn nhiều worker đôi khi để một request treo quá 60 giây (đã gặp ở bước đăng ký tài khoản ảo, không tái hiện được khi thử riêng); load test giờ thử lại bước tạo tài khoản ảo, phần đó không tính vào thời gian đo.

@@ -14,8 +14,9 @@ Chạy trên CSDL riêng `riskshop_test` (xóa sạch trước mỗi test), qua 
 - Điểm tin cậy và túi voucher (`test_trust.py`); khóa quyền mua hàng tự động, gỡ khóa, khiếu nại gỡ khóa (`test_restrictions.py`).
 - Né lệnh khóa bằng tài khoản mới, gia đình chung máy, chung IP, khóa thủ công (`test_linked_ban.py`, `test_restrictions.py`).
 - Cụm tài khoản mới nối chuỗi (R18); gia đình và cụm chỉ một loại điểm chung không bị bắt; chuẩn hóa địa chỉ ngõ / ngách / tỉnh, không gộp "12/5" (`test_cluster_chain.py`, `test_order.py`).
+- Bộ nhớ đệm luật và ngưỡng: dùng bản cũ trong thời hạn, làm mới khi hết hạn hoặc khi bị xóa (`test_rule_cache.py`).
 - Chạy thử luật trên quyết định cũ: không đổi tham số thì không đổi gì và phát lại khớp 100%; giảm điểm thì đúng lượt bị nới; chỉ đọc; khách bị chặn (`test_backtest.py`).
-- Lần chạy gần nhất: **215 test qua** (2026-11-06).
+- Lần chạy gần nhất: **218 test qua** (2026-11-19).
 
 ## 2. Thực nghiệm mô phỏng (`backend/simulator`)
 ```
@@ -49,6 +50,22 @@ Chi tiết và KTC 95%: [dev](experiments/dev_seed1_scale1.md), [test](experimen
 - Bùng hàng COD chỉ bắt được ~50–67%: kẻ có lịch sử ngắn (dưới 3 đơn) chưa đủ dữ liệu cho luật tỉ lệ thất bại.
 - Quyết định 2026-10-30: giữ bộ luật v1, các điểm yếu trên trình bày là giới hạn và hướng phát triển (đồ thị liên kết tài khoản, ML).
 - Sau lần chạy test, không chỉnh luật dựa trên kết quả này. Nếu sửa luật, phải sinh tập test mới (seed khác) để đánh giá lại.
+
+## 3p. Sau ADR-017: cache luật + nhiều worker (2026-11-19, mục tiêu O5)
+Cùng máy, 4 worker uvicorn, `--spread` (mỗi người một sản phẩm, địa chỉ riêng: các lượt chấm điểm chạy song song thật), 3 lượt × 200 đơn mỗi mức. "Trước" chạy từ worktree của commit chưa có cache, "sau" là code hiện tại; chạy nối tiếp, không chạy gì khác song song.
+
+| Người dùng đồng thời | Chấm điểm p50 / p95 trước (ms) | **Chấm điểm p50 / p95 sau (ms)** | Request đặt hàng p95 trước → sau (ms) |
+|---|---|---|---|
+| 1 | 11,1–11,5 / 13,7–15,2 | **7,7–8,3 / 10,2–11,3** | 34,5–38,4 → 30,6–34,5 |
+| 10 | 15,1–18,8 / 24,8–44,9 | **11,1–11,6 / 16,7–31,5** | 92–143 → 76–127 |
+| 50 | 47,1–53,1 / 132–175 | **32,9–36,2 / 87–117** | 633–692 → 518–668 |
+
+Mọi request đều thành công (3.600 / 3.600 mã 201). Dữ liệu: [trước](experiments/load_test_20261119_spread_w4_before.json), [sau](experiments/load_test_20261119_spread_w4_after.json).
+
+### Đọc kết quả (trung thực)
+- Cache giảm thời gian chấm điểm khoảng 30% ở mọi mức. **O5 đạt ở 1 và 10 người đồng thời thật (p95 ≤ 31,5 ms ở cả 3 lượt), chưa đạt ở 50 người (p95 87–117 ms).**
+- Phần còn lại vẫn là 19 vòng hỏi CSDL nối tiếp mỗi lượt. Hướng tiếp: gộp các câu đếm đặc trưng (Recommended), tăng `innodb_buffer_pool_size` của MariaDB (đang 16 MB, cấu hình XAMPP ngoài repo).
+- Số đo chỉ áp dụng cho máy phát triển này, MariaDB cùng máy; không phải năng lực production.
 
 ## 3o. Vì sao chấm điểm chậm dưới tải (2026-11-06, chẩn đoán cho O5)
 Chi tiết số liệu: [load_diag_20261106.md](experiments/load_diag_20261106.md). Bản tóm tắt:

@@ -169,6 +169,7 @@ def _prepare(db: Session, disable_rules: tuple[str, ...] = (), no_trust: bool = 
                 pol.thresholds = {**pol.thresholds, "trust": trust}
     db.execute(text("UPDATE products SET stock = 100000"))  # mô phỏng không đo chuyện hết hàng
     db.commit()
+    risk_service.invalidate_rule_cache()  # vừa tắt luật / đổi ngưỡng trực tiếp trong CSDL
     return {p.sku: p for p in db.scalars(select(Product))}
 
 

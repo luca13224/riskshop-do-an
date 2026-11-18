@@ -139,14 +139,79 @@ def _active_policies(req: EvaluationRequest) -> list[str]:
     return policies
 
 
-def _load_rules(db: Session, context: str | None) -> list[tuple[Rule, RuleVersion]]:
-    """Luật đang bật. context=None: lấy mọi luật (dùng để tính điểm tin cậy tài khoản)."""
+# ---------- Bộ nhớ đệm luật và ngưỡng (O5, TEST_PLAN 3o) ----------
+# Mỗi lần chấm điểm trước đây tải danh sách luật 2 lần và ngưỡng 1 lần: khoảng 20% thời gian SQL khi đông người.
+# Luật hiếm khi đổi, nên giữ một BẢN SAO gọn trong bộ nhớ của tiến trình, hết hạn sau RULE_CACHE_SECONDS.
+# Trong cùng tiến trình, sửa luật / seed / demo reset xóa cache ngay. Chạy nhiều worker thì worker khác thấy luật mới
+# chậm tối đa RULE_CACHE_SECONDS (đánh đổi đã ghi trong ADR-017).
+RULE_CACHE_SECONDS = 5.0
+
+
+@dataclass(frozen=True)
+class CachedRule:
+    code: str
+    rule_type: str
+    strength: str
+    policies: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class CachedVersion:
+    id: int
+    params: dict
+    contexts: tuple[str, ...]
+    reason_template: str
+
+
+@dataclass(frozen=True)
+class CachedPolicy:
+    id: int
+    thresholds: dict
+
+
+@dataclass(frozen=True)
+class _RuleCache:
+    loaded_at: float
+    rules: tuple[tuple[CachedRule, CachedVersion], ...]
+    policies: dict[str, CachedPolicy]
+
+
+_rule_cache = _RuleCache(float("-inf"), (), {})
+
+
+def invalidate_rule_cache() -> None:
+    """Gọi sau mọi thay đổi luật / ngưỡng (phiên bản mới, seed, demo reset, simulator)."""
+    global _rule_cache
+    _rule_cache = _RuleCache(float("-inf"), (), {})
+
+
+def _rules_snapshot(db: Session) -> _RuleCache:
+    global _rule_cache
+    cache = _rule_cache  # đọc một lần: luồng khác có thể thay cache bất cứ lúc nào (thay cả object, không sửa tại chỗ)
+    if time.monotonic() - cache.loaded_at < RULE_CACHE_SECONDS:
+        return cache
     rows = db.execute(
         select(Rule, RuleVersion)
         .join(RuleVersion, RuleVersion.id == Rule.active_version_id)
         .where(RuleVersion.enabled.is_(True))
     ).all()
-    return [(r, v) for r, v in rows if context is None or context in v.contexts]
+    rules = tuple(
+        (CachedRule(r.code, r.rule_type, r.strength, tuple(r.policies)),
+         CachedVersion(v.id, v.params, tuple(v.contexts), v.reason_template))
+        for r, v in rows
+    )
+    policies: dict[str, CachedPolicy] = {}
+    for p in db.scalars(select(DecisionPolicy).where(DecisionPolicy.is_active.is_(True))
+                        .order_by(DecisionPolicy.version.desc())):
+        policies.setdefault(p.context, CachedPolicy(p.id, p.thresholds))
+    cache = _RuleCache(time.monotonic(), rules, policies)
+    _rule_cache = cache
+    return cache
+
+
+def _load_rules(db: Session, context: str | None) -> list[tuple[CachedRule, CachedVersion]]:
+    """Luật đang bật. context=None: lấy mọi luật (dùng để tính điểm tin cậy tài khoản)."""
+    return [(r, v) for r, v in _rules_snapshot(db).rules if context is None or context in v.contexts]
 
 
 # ---------- Điểm tin cậy tài khoản (Trust Score, lớp 1, bộ luật v3) ----------
@@ -182,12 +247,8 @@ def latest_trust(db: Session, user_id: int) -> int | None:
     return (snap or {}).get("trust_score")
 
 
-def _load_policy(db: Session, context: str) -> DecisionPolicy | None:
-    return db.scalar(
-        select(DecisionPolicy)
-        .where(DecisionPolicy.context == context, DecisionPolicy.is_active.is_(True))
-        .order_by(DecisionPolicy.version.desc())
-    )
+def _load_policy(db: Session, context: str) -> CachedPolicy | None:
+    return _rules_snapshot(db).policies.get(context)
 
 
 def decide(

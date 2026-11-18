@@ -37,6 +37,8 @@ def _migrate_test_db():
 
 @pytest.fixture(autouse=True)
 def _clean_tables():
+    from app.modules.risk.service import invalidate_rule_cache
+    invalidate_rule_cache()  # bảng bị xóa sạch mỗi test: cache luật của test trước không còn đúng
     with test_engine.begin() as conn:
         conn.execute(text("SET FOREIGN_KEY_CHECKS=0"))
         for table in Base.metadata.sorted_tables:
