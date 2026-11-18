@@ -21,7 +21,7 @@
 
 ## 2. Nguyên tắc
 - Backend là **một ứng dụng**, chia **module theo nghiệp vụ**. Module gọi nhau qua hàm công khai trong `service.py`, không truy cập trực tiếp bảng của module khác.
-- Module `risk` **không phụ thuộc** `order`: nhận một ngữ cảnh đánh giá, trả về `decision`, `actions`, `reason_codes`. Hợp đồng ban đầu lấy từ Risk mock của spike (`spike/risk-mock/main.py`).
+- Module `risk` **không phụ thuộc** `order`: nhận một ngữ cảnh đánh giá, trả về `decision`, `actions`, `reason_codes`. Hợp đồng ban đầu lấy từ Risk mock của spike (đã xóa khỏi repo, xem lịch sử ở commit `886b4a7`).
 - **Quyết định đồng bộ** tại hai điểm kiểm soát: áp voucher và checkout. **Phân tích bất đồng bộ** (cập nhật hồ sơ rủi ro, mở case) do worker xử lý và không đảo ngược quyết định đã trả.
 - Quyết định rủi ro được lưu **bất biến**, kèm snapshot đặc trưng và phiên bản luật; override tạo quyết định mới.
 - Attack Simulator gọi **đúng API** mà shop dùng.

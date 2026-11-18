@@ -37,3 +37,9 @@ desktop.ini
 
 # File tạm của Office
 ~$*
+
+# Skill bên ngoài cài từ skills-lock.json (không commit mã của người khác vào repo)
+.claude/skills/archify/
+
+# Bản báo cáo nộp trường có thông tin cá nhân: chỉ giữ trên máy
+docs/bao-cao/
