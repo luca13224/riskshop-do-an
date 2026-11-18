@@ -1,0 +1,12 @@
+# Kiểm tra code Python (ruff). Chạy: .venv/Scripts/python -m ruff check .
+# Chỉ bật nhóm lỗi thật (pyflakes: import / biến thừa, tên chưa định nghĩa) và lỗi cú pháp; không ép định dạng.
+line-length = 120
+target-version = "py311"
+extend-exclude = ["migrations"]
+
+[lint]
+select = ["F", "E9"]
+
+[lint.per-file-ignores]
+"app/models.py" = ["F401"]  # import để Alembic thấy đủ các bảng
+"tests/*" = ["F811"]  # pytest: import fixture rồi nhận lại làm tham số không phải định nghĩa trùng

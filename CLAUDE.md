@@ -55,4 +55,5 @@ Cố vấn dài hạn: kiến trúc sư phần mềm, kỹ sư full-stack, BA/SA
 
 ## Quy ước Git
 - Nhánh `main` luôn ở trạng thái chạy được. Commit nhỏ, thông điệp tiếng Việt rõ ràng.
+- Trước khi commit backend: `.venv/Scripts/python -m ruff check .` và `pytest`; frontend: `npx tsc -b` và `npx eslint src`.
 - Không bao giờ commit secret (`.env`, key). Không đưa thông tin cá nhân (SĐT, mã sinh viên) vào tài liệu công khai nếu không cần.

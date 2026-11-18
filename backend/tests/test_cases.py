@@ -2,7 +2,6 @@
 
 from datetime import timedelta
 
-import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 

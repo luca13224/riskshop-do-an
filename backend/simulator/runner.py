@@ -39,7 +39,7 @@ from app.modules.risk import service as risk_service
 from app.modules.risk.seed import seed_rules
 from app.modules.simulation.models import SimLabel, SimRun
 from simulator.baselines import evaluate_baselines
-from simulator.personas import Account, Group, build_population
+from simulator.personas import Account, build_population
 
 PASSWORD = "sim-matkhau-123"
 

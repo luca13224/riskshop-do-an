@@ -74,6 +74,7 @@ Mỗi module nghiệp vụ trong `app/modules/<tên>/` theo cùng một khuôn:
 | `scripts/audit_check.py` | Kiểm tra tính giải thích được và audit của quyết định (O6) |
 | `scripts/demo_attack.py` | Gửi tấn công mẫu cho buổi demo (cảnh 5c, 5e) |
 | `scripts/check_links.py` | Tìm link hỏng trong tài liệu sau khi đổi tên / chuyển chỗ file |
+| `ruff.toml` | Cấu hình ruff: tìm import / biến thừa, tên chưa định nghĩa (`.venv/Scripts/python -m ruff check .`) |
 
 ## 3. Frontend: `frontend/src/`
 | Thư mục / file | Vai trò |
