@@ -106,45 +106,76 @@ Khoa chưa gửi mẫu riêng **[THIẾU]**, nên ánh xạ theo [BAO_CAO_DAN_Y]
 
 ---
 
-## Phần 7. Prompt tạo ảnh infographic
-> Mẫu "PROMPT 3" không có trong tài liệu được gửi. GVHD từng nhắc phong cách poster kiểu MediHealth trong buổi họp 04/11; prompt dưới đây theo tinh thần đó và do Claude soạn **(Đề xuất)**. Mỗi ô ≤ 25 từ, tối đa 5 gạch đầu dòng.
+## Phần 7. Prompt tạo ảnh infographic (theo mẫu PROMPT 3 của GVHD)
+> Mẫu PROMPT 3 do Luca gửi ngày 19/11; nội dung từng hàng lấy từ Phần 2, rút gọn để mỗi ô ≤ 25 từ, tối đa 5 gạch đầu dòng. Tên tác giả để "Luca": thay bằng họ tên đầy đủ khi dùng cho báo cáo. Số liệu chỉ dùng số đã đo (test_v5 seed 12; mức giảm 51% là test_v3 seed 8).
+> Lưu ý: công cụ tạo ảnh hay viết sai dấu tiếng Việt khi ảnh nhiều chữ. Kiểm từng ô trước khi đưa vào báo cáo; nếu sai nhiều, dựng bảng bằng HTML / Word rồi chụp lại sẽ chắc chắn hơn.
 
 ```
-Tạo infographic dọc khổ A3 phong cách poster học thuật hiện đại: nền xanh navy, khối thẻ bo góc trắng, điểm nhấn cyan và cam, chữ tiếng Việt dễ đọc, 7 thẻ đánh số nối bằng mũi tên. Tiêu đề: "Kiểm soát rủi ro và ngăn ngừa lạm dụng chính sách trên sàn TMĐT".
-1 Ngữ cảnh:
-- Sàn dùng mã người mới và COD để hút khách
-- Hai chính sách bị lợi dụng
-- Liên quan: khách, người bán, đội rủi ro
-2 Vấn đề:
-- Farm tài khoản gom mã
-- Bùng hàng COD
-- Bị khóa thì lập tài khoản mới
-- Xử lý thủ công, khó truy vết
-- Chặn nhầm khách thật
-3 Mục tiêu:
-- Bắt ≥ 80% lạm dụng đã biết
-- Chặn nhầm khách thường ≤ 2%
-- 100% quyết định có lý do
-- ≥ 90% kẻ né khóa bị khóa
-4 Ràng buộc:
-- Không có dữ liệu thật
-- Một người, hai tháng
-- Quyết định tức thời tại thanh toán
-- Bảo vệ dữ liệu cá nhân
-5 Giải pháp:
-- 18 luật có phiên bản, sửa không cần triển khai lại
-- Điểm tin cậy tài khoản
-- Khóa theo bậc, truy vết tài khoản liên kết
-- Case, khiếu nại, nhật ký kiểm toán
-6 Đánh giá:
-- Mô phỏng tách tập phát triển và kiểm thử
-- Chặn nhầm khách thường 0%
-- Kẻ né khóa bị khóa 14/14
-- F1 cao hơn luật thủ công
-7 Giá trị:
-- Giảm 51% mã bị gom so với không kiểm soát
-- Khách quen không bị chặn nhầm
-- Mọi quyết định truy vết được
-- Mở rộng sang chính sách mới
-Mỗi thẻ có biểu tượng phẳng đơn giản, không logo thương hiệu thật, không ảnh người thật, không thêm số liệu ngoài danh sách trên.
+Tạo một ảnh infographic dọc tỉ lệ 2:3, phong cách flat vector, nền trắng, viền bo tròn, chữ tiếng Việt có dấu, rõ nét và đúng chính tả.
+
+TIÊU ĐỀ (chữ in hoa, xanh navy đậm): "PHÂN BIỆT 7 KHÁI NIỆM TRONG TƯ DUY LÀM ĐỒ ÁN"
+PHỤ ĐỀ: "Ví dụ minh họa: “Xây dựng hệ thống kiểm soát rủi ro và ngăn ngừa lạm dụng chính sách trên sàn thương mại điện tử”"
+Góc trên phải: ô "TÁC GIẢ" có icon chim cánh cụt và dòng "Luca".
+
+BẢNG CHÍNH: 7 hàng, 6 cột. Hàng tiêu đề nền navy, chữ trắng: BƯỚC | KHÁI NIỆM | ĐỊNH NGHĨA / Ý NGHĨA | TRẢ LỜI CÂU HỎI | VÍ DỤ ÁP DỤNG CHO ĐỀ TÀI | KHÁC BIỆT NỔI BẬT.
+Mỗi hàng là một thẻ màu nhạt, có số bước to bên trái và icon minh họa:
+1 CONTEXT (Ngữ cảnh) – xanh lá – icon quả địa cầu + bối cảnh
+2 PAIN POINT (Vấn đề) – đỏ – icon người đau đầu + tam giác cảnh báo
+3 OBJECTIVE (Mục tiêu) – xanh dương – icon bia bắn cung + checklist
+4 CONSTRAINT (Ràng buộc) – tím – icon ổ khóa + xích
+5 METHOD (Giải pháp) – cam – icon màn hình code + bánh răng
+6 EVALUATION (Đánh giá) – xanh ngọc – icon biểu đồ + kính lúp
+7 IMPACT (Giá trị tạo ra) – xanh navy – icon người + kim cương
+Cột "Khác biệt nổi bật" dùng dấu ✔ màu theo hàng.
+
+NỘI DUNG TỪNG HÀNG:
+1 CONTEXT
+- Định nghĩa: Bức tranh môi trường, đối tượng, hiện trạng nơi vấn đề xuất hiện.
+- Trả lời câu hỏi: Chuyện gì đang xảy ra? Ai liên quan? Vì sao cần quan tâm?
+- Ví dụ áp dụng: • Sàn TMĐT dùng mã người mới và COD để hút khách • Hai chính sách này bị lợi dụng • Liên quan: khách, người bán, đội rủi ro
+- Khác biệt nổi bật: ✔ Lạm dụng chính sách, không phải gian lận thẻ ✔ Chỉ mô tả, chưa nêu giải pháp
+
+2 PAIN POINT
+- Định nghĩa: Bất cập cụ thể gây tốn kém, rủi ro, có hậu quả rõ.
+- Trả lời câu hỏi: Điều gì gây khó? Hậu quả ra sao?
+- Ví dụ áp dụng: • Farm tài khoản gom mã người mới • Bùng hàng COD, mất phí vận chuyển • Bị khóa thì lập tài khoản mới • Xử lý thủ công, khó truy vết • Chặn nhầm khách thật
+- Khác biệt nổi bật: ✔ Chặn nhầm khách cũng là một nỗi đau ✔ Xét cả né lệnh khóa
+
+3 OBJECTIVE
+- Định nghĩa: Trạng thái mong muốn, đo được, có phạm vi và thời hạn.
+- Trả lời câu hỏi: Cải thiện gì? Đến mức nào? Đo bằng gì?
+- Ví dụ áp dụng: • Bắt ≥ 80% lạm dụng đã biết • Chặn nhầm khách thường ≤ 2% • ≥ 90% kẻ né khóa bị khóa • Chấm điểm ≤ 50 ms • 100% quyết định có lý do
+- Khác biệt nổi bật: ✔ Có mục tiêu cho phía khách thật ✔ Giữ nguyên chỉ tiêu đề cương
+
+4 CONSTRAINT
+- Định nghĩa: Giới hạn về dữ liệu, nguồn lực, kỹ thuật và pháp lý.
+- Trả lời câu hỏi: Thiếu gì? Không thể làm gì? Điều kiện bắt buộc?
+- Ví dụ áp dụng: • Không có dữ liệu gian lận thật • Một người, hai tháng • Quyết định tức thời khi thanh toán • Bảo vệ dữ liệu cá nhân
+- Khác biệt nổi bật: ✔ Giải thích vì sao chọn luật thay vì học máy
+
+5 METHOD
+- Định nghĩa: Cách thức, kiến trúc, quy trình để đạt mục tiêu.
+- Trả lời câu hỏi: Giải quyết bằng cách nào? Cơ chế hoạt động ra sao?
+- Ví dụ áp dụng: • Risk Engine tại 3 điểm kiểm soát • 18 luật có phiên bản • Điểm tin cậy tài khoản • Khóa theo bậc, truy vết tài khoản liên kết • Case, khiếu nại, nhật ký
+- Khác biệt nổi bật: ✔ Sửa luật không cần triển khai lại ✔ Chạy thử luật trước khi bật
+
+6 EVALUATION
+- Định nghĩa: Đo lường, kiểm chứng hiệu quả so với mục tiêu.
+- Trả lời câu hỏi: Hiệu quả bao nhiêu? So với yêu cầu ra sao?
+- Ví dụ áp dụng: • Mô phỏng tách tập phát triển và kiểm thử • Chặn nhầm khách thường 0% • Kẻ né khóa bị khóa 14/14 • F1 51,7%, luật thủ công 43,5%
+- Khác biệt nổi bật: ✔ So với 3 cách làm đơn giản ✔ Báo cáo cả chỉ tiêu chưa đạt
+
+7 IMPACT
+- Định nghĩa: Lợi ích cho người dùng, tổ chức và khả năng mở rộng.
+- Trả lời câu hỏi: Ai được lợi? Giá trị lâu dài là gì?
+- Ví dụ áp dụng: • Mã bị gom giảm 51% so với không kiểm soát • 0/40 khách quen bị chặn nhầm • Mọi quyết định truy vết được • Mở rộng sang chính sách mới
+- Khác biệt nổi bật: ✔ Quay về giải quyết từng nỗi đau
+
+DẢI DƯỚI CÙNG, bên trái: khung "MỐI QUAN HỆ 7 BƯỚC" gồm 7 icon tròn nối bằng mũi tên 1→7, chia 3 nhóm: "Hiểu đúng vấn đề" (1–2), "Thiết kế giải pháp phù hợp" (3–5), "Chứng minh & tạo giá trị" (6–7).
+Bên phải: khung "TÓM LẠI" gồm 3 ý ngắn:
+• Lạm dụng chính sách và chặn nhầm là hai mặt của một bài toán
+• Luật có phiên bản, giải thích được, hợp với ràng buộc
+• Chứng minh bằng số, nói rõ cả chỗ chưa đạt
+và câu chốt màu cam: "TƯ DUY ĐÚNG – GIẢI PHÁP ĐỦ – GIÁ TRỊ THẬT. Đó là một đồ án tốt!"
+Chân ảnh: "Tác giả: Luca".
 ```
